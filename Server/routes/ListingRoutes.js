@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router();
 const {
   createListing,
   getListings,
@@ -10,15 +11,220 @@ const {
 const protect = require("../middleware/userMiddleware.js");
 const authenticateUser = require("../middleware/authUser.js");
 
-const router = express.Router();
+/**
+ * @swagger
+ * tags:
+ *   name: Listings
+ *   description: CRUD operations for property listings
+ */
 
-// Public routes
+/**
+ * @swagger
+ * /listings:
+ *   get:
+ *     summary: Get all listings (public)
+ *     tags: [Listings]
+ *     responses:
+ *       200:
+ *         description: List of all listings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   pricePerNight:
+ *                     type: number
+ *                   maxGuests:
+ *                     type: number
+ *                   propertyType:
+ *                     type: string
+ *                   location:
+ *                     type: object
+ *                     properties:
+ *                       address:
+ *                         type: string
+ *                       city:
+ *                         type: string
+ *                       country:
+ *                         type: string
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ */
 router.get("/listings", getListings);
+
+/**
+ * @swagger
+ * /listings/{id}:
+ *   get:
+ *     summary: Get a listing by ID (public)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Listing details
+ *       404:
+ *         description: Listing not found
+ */
 router.get("/listings/:id", getListingById);
 
-// Protected routes (require login + role check)
+/**
+ * @swagger
+ * /listings:
+ *   post:
+ *     summary: Create a new listing (host/admin)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - pricePerNight
+ *               - maxGuests
+ *               - propertyType
+ *               - location
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Modern Apartment in Downtown
+ *               description:
+ *                 type: string
+ *                 example: A cozy apartment located in the heart of the city.
+ *               pricePerNight:
+ *                 type: number
+ *                 example: 120
+ *               maxGuests:
+ *                 type: number
+ *                 example: 3
+ *               propertyType:
+ *                 type: string
+ *                 example: apartment
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   address:
+ *                     type: string
+ *                     example: 123 Main Street
+ *                   city:
+ *                     type: string
+ *                     example: Cairo
+ *                   country:
+ *                     type: string
+ *                     example: Egypt
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: https://example.com/image1.jpg
+ *     responses:
+ *       201:
+ *         description: Listing created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/listings", protect, authenticateUser(["host", "admin"]), createListing);
+
+/**
+ * @swagger
+ * /listings/{id}:
+ *   put:
+ *     summary: Update a listing by ID (host/admin)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               pricePerNight:
+ *                 type: number
+ *               maxGuests:
+ *                 type: number
+ *               propertyType:
+ *                 type: string
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   address:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *                   country:
+ *                     type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Listing updated successfully
+ *       404:
+ *         description: Listing not found
+ *       401:
+ *         description: Unauthorized
+ */
 router.put("/listings/:id", protect, authenticateUser(["host", "admin"]), updateListing);
+
+/**
+ * @swagger
+ * /listings/{id}:
+ *   delete:
+ *     summary: Delete a listing by ID (host/admin)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Listing deleted successfully
+ *       404:
+ *         description: Listing not found
+ *       401:
+ *         description: Unauthorized
+ */
 router.delete("/listings/:id", protect, authenticateUser(["host", "admin"]), deleteListing);
 
 module.exports = router;
