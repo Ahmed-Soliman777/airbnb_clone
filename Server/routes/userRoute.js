@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controller/userController.js');
+const userController = require("../controllers/userController.js");
 const auth = require('../middleware/userMiddleware.js');
 const role = require('../middleware/authUser.js');
+// const 
 
 /**
  * @swagger
@@ -87,7 +88,7 @@ router.post('/login', userController.login);
  *       403:
  *         description: Access denied
  */
-router.get('/', auth, role(['admin']), userController.getAllUsers);
+router.get('/users', auth, role(['admin']), userController.getAllUsers);
 
 /**
  * @swagger
@@ -123,7 +124,7 @@ router.get('/', auth, role(['admin']), userController.getAllUsers);
  *       404:
  *         description: User not found
  */
-router.put('/:id', auth, userController.updateUser);
+router.put('/user/:id', auth, userController.updateUser);
 
 /**
  * @swagger
@@ -146,6 +147,6 @@ router.put('/:id', auth, userController.updateUser);
  *       404:
  *         description: User not found
  */
-router.delete('/:id', auth, userController.deleteUser);
+router.delete('/user/:id', auth, userController.deleteUser);
 
 module.exports = router;
