@@ -1,74 +1,61 @@
-const mongoose = require('mongoose');
 const transactionModel = require('../../models/Payment/Payment.model');
 const { reservationModel } = require('../../models/Service/Service.model');
 const stripe = require('stripe')(process.env.STRIP_SECRET_KEY);
 
-// HANDLE USER TRANSACTION
+// CREATE A TRANSACTION PROFILE FOR A USER (if not exists)
 async function handleCreateTransactions(req, res) {
     try {
-        // GET REGISTERD USER TOKEN
         const userToken = req.headers['token'];
-
-        // IF USER IS NOT REGISTERED HE DOES NOT HAVE RIGHTS TO NAVIGATE TO PAYMENT PAGE
         if (!userToken) {
             return res.status(401).json({ message: "ACCESS DENIED" });
         }
 
-        // DESTRUCTING DATA FROM INPUT DATA
-        const { Name, Email, City, PassportID, PhoneNumber } = req.body;
-
-        // VALIDATE REQUIRED FIELDS
-        if (!Name || !Email || !City || !PassportID || !PhoneNumber) {
-            return res.status(400).json({ message: "Missing required fields" });
+        const { userId } = req.body;
+        if (!userId) {
+            return res.status(400).json({ message: "Missing userId" });
         }
 
-        // CREATE A NEW USER TRANSACTION
-        const transaction = await transactionModel.create({
-            Name,
-            Email,
-            City,
-            PassportID,
-            PhoneNumber
-        });
+        // Check if transaction profile already exists for this user
+        let transactionProfile = await transactionModel.findOne({ User: userId });
+        if (!transactionProfile) {
+            transactionProfile = await transactionModel.create({ User: userId, transactions: [] });
+        }
 
-        res.status(201).json(transaction);
+        res.status(201).json(transactionProfile);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 }
 
-// HANDLE USER TRANSACTION 
+// GET ALL TRANSACTION PROFILES (with reservations)
 async function handleGetTransactions(req, res) {
     try {
-        // GET REGISTERD USER TOKEN
         const userToken = req.headers['token'];
-        // IF USER IS NOT REGISTERED HE DOES NOT HAVE RIGHTS TO NAVIGATE TO PAYMENT PAGE
         if (!userToken) {
             return res.status(401).json({ message: "ACCESS DENIED" });
         }
 
-        // FETCH / GET ALL USER TRANSACTIONS AND POPULATE THE DATA FROM SERVICE MODEL USING TRANSACTIONS OBJECT ID
-        const transactions = await transactionModel.find().populate("transactions");
+        const transactions = await transactionModel.find()
+            .populate("User", "name email")       // populate user info
+            .populate("transactions");            // populate reservations
+
         res.status(200).json(transactions);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 }
-// HANDLE PAYMENT FUNCNTION USING STRIPE
+
+// HANDLE STRIPE PAYMENT + RESERVATION CREATION
 async function handlePayment(req, res) {
-
-    // ---------------------------- DESCLAIMER ----------------//
-
-    // DO NOT FETCH CHECKOUT SESSION AT POSTMAN BECAUSE IT RETURNES A CLIENT SIDE SESSION
-
-
     try {
-        // DESTRUCTING DATA FROM INPUT DATA
         const { serviceName, roomType, checkIn, checkOut, guests, price, userId } = req.body;
 
-        // CREATE A NEW SESSION FROM STRIPE API
+        if (!userId) {
+            return res.status(400).json({ message: "Missing userId" });
+        }
+
+        // 1. Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
-            // LINE ITEMS PROPERTY USED FOR SHOWING DATA
             line_items: [{
                 price_data: {
                     currency: 'usd',
@@ -77,17 +64,13 @@ async function handlePayment(req, res) {
                 },
                 quantity: 1,
             }],
-            //  TELLS STRIPE WHAT CHECKOUT SESSION YOU ARE CREATING
             mode: 'payment',
-            // TELLS STRIPE WHERE THE TRANSACTION FROM
             shipping_address_collection: { allowed_countries: ['US', 'CA', 'EG'] },
-            // SUCCESS PAYMENT
             success_url: `${process.env.BASE_URL}/complete`,
-            // PAYMENT CANCELED
             cancel_url: `${process.env.BASE_URL}/cancel`,
         });
 
-        // DESTRUCTING DATA FROM SERVICE MODEL
+        // 2. Create Reservation entry
         const reservation = await reservationModel.create({
             serviceName,
             roomType,
@@ -96,29 +79,34 @@ async function handlePayment(req, res) {
             guests,
             price,
             paymentStatus: 'pending',
-            stripeSessionId: session.id
+            stripeSessionId: session.id,
         });
-        // SEARCH FOR USER DATA TRANSACTION 
-        const user = await transactionModel.findById(userId);
-        // ADD NEW TRANSACTION OBJECT TO TRANSACTIONS ARRAY REFRENCED FROM SERVICE MODEL
-        user.transactions.push(reservation._id);
-        // FOR EDITING A MODEL PROPERTY USED INSTEAD OF [----findByIdAndUpdate()----]
-        await user.save();
 
+        // 3. Attach reservation to user’s transaction profile
+        let userTransaction = await transactionModel.findOne({ User: userId });
+        if (!userTransaction) {
+            userTransaction = await transactionModel.create({
+                User: userId,
+                transactions: [reservation._id]
+            });
+        } else {
+            userTransaction.transactions.push(reservation._id);
+            await userTransaction.save();
+        }
 
-        // res.json({ id: session.id });
-        // console.log(session);
-
-
-        // REDERICTS TO PAYMENT SESSION AS SOON AS CLICK AT PAY BUTTON
-        res.redirect(session.url);
-        // POSTMAN RESPONSE GENERATED BY CHATGPT
-        res.status(200).json({ checkoutUrl: session.url, reservationId: reservation._id });
+        // 4. Return session URL and reservation id
+        res.status(200).json({
+            checkoutUrl: session.url,
+            reservationId: reservation._id
+        });
 
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 }
 
-// EXPORT ALL FUNCTIONS
-module.exports = { handleCreateTransactions, handleGetTransactions, handlePayment };
+module.exports = {
+    handleCreateTransactions,
+    handleGetTransactions,
+    handlePayment
+};
