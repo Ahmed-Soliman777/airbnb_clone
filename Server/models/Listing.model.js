@@ -51,12 +51,12 @@ const listingSchema = new mongoose.Schema(
         caption: String,
       },
     ],
-    amenities: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Amenity",
-      },
-    ],
+    // amenities: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Amenity",
+    //   },
+    // ],
     host: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

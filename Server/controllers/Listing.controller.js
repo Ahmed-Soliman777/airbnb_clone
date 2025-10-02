@@ -1,10 +1,9 @@
-import Listing from "../models/listing.js";
+const Listing = require("../models/Listing.model");
 
 // Create new listing
-export const createListing = async (req, res) => {
+const createListing = async (req, res) => {
   try {
     const hostId = req.user.id;
-
     const { title, pricePerNight, maxGuests, propertyType } = req.body;
 
     // Validation
@@ -25,12 +24,12 @@ export const createListing = async (req, res) => {
 };
 
 // Get all listings
-export const getListings = async (req, res) => {
+const getListings = async (req, res) => {
   try {
     const listings = await Listing.find()
-      .populate("host", "name email") // يجيب بيانات من جدول المستخدم
-      .populate("amenities", "name") // يجيب أسماء الـ amenities
-      .populate("reviews"); // يجيب المراجعات
+      .populate("host", "name email") // join user info
+      .populate("amenities", "name")  // join amenities
+      .populate("reviews");           // join reviews
 
     res.status(200).json(listings);
   } catch (error) {
@@ -39,7 +38,7 @@ export const getListings = async (req, res) => {
 };
 
 // Get single listing by ID
-export const getListingById = async (req, res) => {
+const getListingById = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -59,7 +58,7 @@ export const getListingById = async (req, res) => {
 };
 
 // Update listing
-export const updateListing = async (req, res) => {
+const updateListing = async (req, res) => {
   try {
     const { id } = req.params;
     const hostId = req.user.id;
@@ -70,9 +69,7 @@ export const updateListing = async (req, res) => {
     }
 
     if (listing.host.toString() !== hostId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to update this listing" });
+      return res.status(403).json({ message: "Not authorized to update this listing" });
     }
 
     const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
@@ -87,29 +84,32 @@ export const updateListing = async (req, res) => {
 };
 
 // Delete listing
-export const deleteListing = async (req, res) => {
+const deleteListing = async (req, res) => {
   try {
     const { id } = req.params;
-    const hostId = req.user.id; // Authenticated user (host)
+    const hostId = req.user.id;
 
-    // Check if listing exists
     const listing = await Listing.findById(id);
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Check if the authenticated user is the owner
     if (listing.host.toString() !== hostId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this listing" });
+      return res.status(403).json({ message: "Not authorized to delete this listing" });
     }
 
-    // Delete listing
     await Listing.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Listing deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+module.exports = {
+  createListing,
+  getListings,
+  getListingById,
+  updateListing,
+  deleteListing,
 };
