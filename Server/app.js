@@ -3,15 +3,17 @@ const express = require("express");
 const app = express();
 const port = 3000;
 const mongoose = require("mongoose");
-const PaymentRoutes = require("./routes/PaymentRoutes");
 const userRoute = require("./routes/userRoute");
+const listingRoute = require("./routes/ListingRoutes");
 const bookingRoute = require("./routes/booking.routes");
+const PaymentRoutes = require("./routes/PaymentRoutes");
 
 // console.log(process.env.BASE_URL);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/g2",userRoute);
+app.use("/api/g2",listingRoute);
 app.use("/api/g2",bookingRoute);
 app.use("/api/g2/",PaymentRoutes);
 app.set("view engine", "ejs");
