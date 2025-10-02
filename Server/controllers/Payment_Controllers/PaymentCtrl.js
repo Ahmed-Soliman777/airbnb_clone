@@ -5,7 +5,7 @@ const stripe = require('stripe')(process.env.STRIP_SECRET_KEY);
 // CREATE A TRANSACTION PROFILE FOR A USER (if not exists)
 async function handleCreateTransactions(req, res) {
     try {
-        const userToken = req.headers['token'];
+        const userToken = req.headers['authorization'];
         if (!userToken) {
             return res.status(401).json({ message: "ACCESS DENIED" });
         }
@@ -30,7 +30,7 @@ async function handleCreateTransactions(req, res) {
 // GET ALL TRANSACTION PROFILES (with reservations)
 async function handleGetTransactions(req, res) {
     try {
-        const userToken = req.headers['token'];
+        const userToken = req.headers['authorization'];
         if (!userToken) {
             return res.status(401).json({ message: "ACCESS DENIED" });
         }

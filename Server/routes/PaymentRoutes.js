@@ -9,13 +9,13 @@ const paymentCtrl = require('../controllers/Payment_Controllers/PaymentCtrl')
 // -----PAYMENT REQUIRES    
 
 // ----- PAYMENT ROUTES
-route.post('/api/g2/transactions', token, paymentCtrl.handleCreateTransactions)
-route.get('/api/g2/transactions', token, paymentAuthentication(['host', 'admin']), paymentCtrl.handleGetTransactions)
-route.post('/api/g2/checkout', token, paymentCtrl.handlePayment);
-route.get('/api/g2/complete', (req, res) => {
+route.post('/transactions', token, paymentCtrl.handleCreateTransactions)
+route.get('/transactions', token, paymentAuthentication(['host', 'admin']), paymentCtrl.handleGetTransactions)
+route.post('/checkout', token, paymentCtrl.handlePayment);
+route.get('/complete', (req, res) => {
     res.send('Payment is completed');
 });
-route.get('/api/g2/cancel', (req, res) => {
+route.get('/cancel', (req, res) => {
     res.send('Payment is cancelled');
 });
 // ----- PAYMENT ROUTES

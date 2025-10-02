@@ -28,7 +28,7 @@ const getListings = async (req, res) => {
   try {
     const listings = await Listing.find()
       .populate("host", "name email") // join user info
-      .populate("amenities", "name")  // join amenities
+      // .populate("amenities", "name")  // join amenities
       .populate("reviews");           // join reviews
 
     res.status(200).json(listings);

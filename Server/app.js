@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/g2",userRoute);
 app.use("/api/g2",listingRoute);
 app.use("/api/g2",bookingRoute);
-app.use("/api/g2/",PaymentRoutes);
+app.use("/api/g2",PaymentRoutes);
 app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {

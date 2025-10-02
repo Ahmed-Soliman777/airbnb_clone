@@ -17,7 +17,7 @@ const authorization = require("../middleware/authUser");
 
 // create a new booking
 router.post(
-  "/",
+  "/booking",
   authMiddleware,
   authorization("guest", "admin"),
   createBooking
@@ -25,7 +25,7 @@ router.post(
 
 // get booking by Id
 router.get(
-  "/:id",
+  "/booking/:id",
   authMiddleware,
   authorization("guest", "host", "admin"),
   getBookingById
@@ -33,7 +33,7 @@ router.get(
 
 // get Bookings For User
 router.get(
-  "/user/:userId",
+  "/booking/user/:userId",
   authMiddleware,
   authorization("guest", "admin"),
   getBookingsForUser
@@ -41,7 +41,7 @@ router.get(
 
 // get Bookings For Listing
 router.get(
-  "/listing/:listingId",
+  "/booking/listing/:listingId",
   authMiddleware,
   authorization("host", "admin"),
   getBookingsForListing
@@ -49,7 +49,7 @@ router.get(
 
 //update booking
 router.patch(
-  "/:id/status",
+  "/booking/update/:id",
   authMiddleware,
   authorization("host", "admin"),
   updateBookingStatus
@@ -57,7 +57,7 @@ router.patch(
 
 // delete booking
 router.delete(
-  "/:id",
+  "/booking/:id",
   authMiddleware,
   authorization("guest", "host", "admin"),
   deleteBooking
