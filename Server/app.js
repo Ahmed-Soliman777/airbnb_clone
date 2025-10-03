@@ -7,6 +7,7 @@ const swaggerUi = require("swagger-ui-express");
 // Routes
 const userRoute = require("./routes/userRoute");
 const listingRoute = require("./routes/ListingRoutes");
+const reviewRoute = require("./routes/reviewRoutes");
 const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/PaymentRoutes");
 
@@ -53,6 +54,7 @@ app.use("/api/g2", userRoute);
 app.use("/api/g2", listingRoute);
 app.use("/api/g2", bookingRoute);
 app.use("/api/g2", paymentRoute);
+app.use("/api/g2", reviewRoute);
 
 // Root route
 app.get("/", (req, res) => {
