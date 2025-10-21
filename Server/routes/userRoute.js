@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = require("../controllers/userController.js");
+const userController = require('../controller/userController.js');
 const auth = require('../middleware/userMiddleware.js');
 const role = require('../middleware/authUser.js');
 
@@ -13,9 +13,9 @@ const role = require('../middleware/authUser.js');
 
 /**
  * @swagger
- * /register:
+ * /users/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user and send verification code to email
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -30,29 +30,56 @@ const role = require('../middleware/authUser.js');
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe
+ *                 example: Aml Sayed
  *               email:
  *                 type: string
- *                 example: johndoe@example.com
+ *                 example: aml@example.com
  *               password:
  *                 type: string
- *                 example: myStrongPassword123
- *               role:
- *                 type: string
- *                 description: User role
- *                 enum: [guest, host, admin]
- *                 example: guest
+ *                 example: password123
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User registered successfully, check email for verification code
  *       400:
- *         description: Bad request or validation error
+ *         description: Bad request / Email already registered
  */
 router.post('/register', userController.register);
 
 /**
  * @swagger
- * /login:
+ * /users/verify-email:
+ *   post:
+ *     summary: Verify user's email with the code sent to their email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: aml@example.com
+ *               code:
+ *                 type: string
+ *                 example: "a1b2c3"
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid verification code or bad request
+ *       404:
+ *         description: User not found
+ */
+router.post('/verify-email', userController.verifyEmail);
+
+/**
+ * @swagger
+ * /users/login:
  *   post:
  *     summary: Login a user
  *     tags: [Users]
@@ -68,21 +95,11 @@ router.post('/register', userController.register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: johndoe@example.com
  *               password:
  *                 type: string
- *                 example: myStrongPassword123
  *     responses:
  *       200:
  *         description: Login successful, returns JWT token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: JWT token for authentication
  *       400:
  *         description: Invalid credentials
  */
@@ -98,30 +115,15 @@ router.post('/login', userController.login);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of all users
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
- *                   role:
- *                     type: string
+ *         description: List of users
  *       403:
  *         description: Access denied
  */
-router.get('/users', auth, role(['admin']), userController.getAllUsers);
+router.get('/', auth, role(['admin']), userController.getAllUsers);
 
 /**
  * @swagger
- * /user/{id}:
+ * /users/{id}:
  *   put:
  *     summary: Update user by ID
  *     tags: [Users]
@@ -130,10 +132,10 @@ router.get('/users', auth, role(['admin']), userController.getAllUsers);
  *     parameters:
  *       - in: path
  *         name: id
- *         required: true
- *         description: User ID
  *         schema:
  *           type: string
+ *         required: true
+ *         description: The user ID
  *     requestBody:
  *       required: true
  *       content:
@@ -143,22 +145,17 @@ router.get('/users', auth, role(['admin']), userController.getAllUsers);
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe Updated
  *               email:
  *                 type: string
- *                 example: johnupdated@example.com
  *               phone:
  *                 type: string
- *                 example: "+201234567890"
  *     responses:
  *       200:
  *         description: User updated successfully
  *       404:
  *         description: User not found
- *       401:
- *         description: Unauthorized
  */
-router.put('/user/:id', auth, userController.updateUser);
+router.put('/:id', auth, userController.updateUser);
 
 /**
  * @swagger
@@ -171,18 +168,34 @@ router.put('/user/:id', auth, userController.updateUser);
  *     parameters:
  *       - in: path
  *         name: id
- *         required: true
- *         description: User ID
  *         schema:
  *           type: string
+ *         required: true
+ *         description: The user ID
  *     responses:
  *       200:
  *         description: User deleted successfully
  *       404:
  *         description: User not found
+ */
+router.delete('/:id', auth, userController.deleteUser);
+/**
+ * @swagger
+ * /users/become-host:
+ *   post:
+ *     summary: Change user role from guest to host
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User role updated to host successfully
+ *       400:
+ *         description: Only guests can become hosts
  *       401:
  *         description: Unauthorized
  */
-router.delete('/user/:id', auth, userController.deleteUser);
+router.post('/become-host', auth, userController.becomeHost);
+
 
 module.exports = router;
