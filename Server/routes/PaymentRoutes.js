@@ -1,6 +1,6 @@
 const express = require('express');
 const route = express();
-const paymentCtrl = require('../controllers/Payment_Controllers/PaymentCtrl');
+const paymentCtrl = require('../controllers/PaymentCtrl.js');
 const token = require('../middleware/userMiddleware');
 const paymentAuthentication = require('../middleware/authUser');
 
