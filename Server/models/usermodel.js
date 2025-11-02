@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
 
   role: { type: String, enum: ['guest', 'host', 'admin'], default: 'guest' },
 
-  passwordHash: { type: String ,required: true}, 
+  password: { type: String ,required: true}, 
   salt: { type: String }, 
 
   listings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }],
@@ -44,11 +44,11 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
   try {
-    if (!this.isModified('passwordHash') || !this.passwordHash) return next();
+    if (!this.isModified('password') || !this.password) return next();
 
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     this.salt = salt;
-    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    this.password = await bcrypt.hash(this.password, salt);
 
     next();
   } catch (err) {
@@ -57,8 +57,8 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (plainPassword) {
-  if (!this.passwordHash) return false;
-  return bcrypt.compare(plainPassword, this.passwordHash);
+  if (!this.password) return false;
+  return bcrypt.compare(plainPassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
