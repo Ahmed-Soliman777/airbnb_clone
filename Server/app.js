@@ -50,11 +50,11 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
-app.use("/api/g2", userRoute);
-app.use("/api/g2", listingRoute);
-app.use("/api/g2", bookingRoute);
-app.use("/api/g2", paymentRoute);
-app.use("/api/g2", reviewRoute);
+app.use("/api", userRoute);
+app.use("/api", listingRoute);
+app.use("/api", bookingRoute);
+app.use("/api", paymentRoute);
+app.use("/api", reviewRoute);
 
 // Root route
 app.get("/", (req, res) => {
