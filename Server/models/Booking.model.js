@@ -44,6 +44,7 @@ const bookingSchema = new mongoose.Schema(
       default: "pending",
       required: true,
     },
+    stripeSessionId: String
   },
   {
     timestamps: true,
