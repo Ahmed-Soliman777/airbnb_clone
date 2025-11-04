@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const cookieParser = require('cookie-parser');
 
 // Routes
 const userRoute = require("./routes/userRoute");
@@ -16,6 +17,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
