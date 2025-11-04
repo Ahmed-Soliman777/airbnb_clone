@@ -185,4 +185,6 @@ router.put('/user/:id', auth, userController.updateUser);
  */
 router.delete('/user/:id', auth, userController.deleteUser);
 
+router.post('/logout', userController.logout) // add logout route
+
 module.exports = router;
