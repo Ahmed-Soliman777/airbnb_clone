@@ -4,18 +4,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body; 
+    const { name, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    const user = new User({ 
-      name, 
-      email, 
+    const user = new User({
+      name,
+      email,
       password: password,
-      role: role || 'guest' 
+      role: role || 'guest'
     });
 
     await user.save();
@@ -37,6 +37,15 @@ exports.login = async (req, res) => {
     if (!valid) return res.status(400).json({ message: 'Invalid password' });
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
+
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: "production",
+      sameSite: "strict"
+    })
+
+
     res.json({ token });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -52,6 +61,13 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// add logout controller for user
+exports.logout = async (req, res) => {
+  res.clearCookie("token")
+  res.status(200).json({ message: "User logged out successfully!" })
+  
+}
 
 
 exports.updateUser = async (req, res) => {
@@ -70,7 +86,7 @@ exports.updateUser = async (req, res) => {
         user.email = email;
       }
     } else {
-      user.email = user.email; 
+      user.email = user.email;
     }
 
     user.name = name || user.name;
