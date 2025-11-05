@@ -33,11 +33,6 @@ const userSchema = new mongoose.Schema({
 
   password: { type: String ,required: true}, 
   salt: { type: String }, 
-
-  listings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }],
-  bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Booking' }],
-  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
-  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }]
 }, {
   timestamps: true
 });
