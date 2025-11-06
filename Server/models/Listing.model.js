@@ -1,5 +1,4 @@
-// import mongoose from "mongoose";
-const mongoose = require('mongoose')
+import mongoose from "mongoose";
 
 const listingSchema = new mongoose.Schema(
   {
@@ -52,13 +51,13 @@ const listingSchema = new mongoose.Schema(
         caption: String,
       },
     ],
-    // amenities: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Amenity",
-    //   },
-    // ],
-    host: {
+    amenities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Amenities",
+      },
+    ],
+    hostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -71,8 +70,14 @@ const listingSchema = new mongoose.Schema(
     ],
     availability: [
       {
-        startDate: Date,
-        endDate: Date,
+        startDate: {
+          type: Date,
+          required: true,
+        },
+        endDate: {
+          type: Date,
+          required: true,
+        },
       },
     ],
     ratingAvg: {
@@ -83,5 +88,4 @@ const listingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Listing", listingSchema);
-
+export const Listing = mongoose.model("Listing", listingSchema);
