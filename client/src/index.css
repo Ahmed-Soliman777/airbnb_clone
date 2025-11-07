@@ -42,6 +42,21 @@
 }
 
 :root {
+  /*** airbnb styles ***/
+
+  --color-primary: #ff385c;
+  --color-primary-hover: #e61e4d;
+
+  --color-black: #222222;
+  --color-dark-gray: #484848;
+  --color-gray: #717171;
+  --color-light-gray: #ebebeb;
+
+  --transition-fast: 0.15s ease;
+  --transition-medium: 0.3s ease;
+
+  /*** shadcn styles ***/
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
