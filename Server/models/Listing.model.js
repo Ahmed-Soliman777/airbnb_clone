@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Amenities = require("./amenities.model");
-const User = require("./usermodel.js");
-const Review = require("./reviewModel.js");
+const User = require("./User.model.js");
+const Review = require("./Review.model.js");
 
 /// Listing Schema
 const listingSchema = new mongoose.Schema(
@@ -92,4 +92,5 @@ const listingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Listing", listingSchema);
+module.exports =
+  mongoose.models.Listing || mongoose.model("Listing", listingSchema);

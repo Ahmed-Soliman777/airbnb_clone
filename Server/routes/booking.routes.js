@@ -8,7 +8,7 @@ const {
   getBookingsForListing,
   updateBookingStatus,
   deleteBooking,
-} = require("../controllers/BookingCtrl.js");
+} = require("../controllers/booking.controller.js");
 
 const authMiddleware = require("../middleware/userMiddleware");
 const authorization = require("../middleware/authUser");

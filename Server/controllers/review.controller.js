@@ -1,4 +1,4 @@
-const Review = require('../models/reviewModel')
+const Review = require("../models/Review.model");
 
 const createReview = async (req, res) => {
   try {
@@ -28,4 +28,4 @@ const deleteReview = async (req, res) => {
   }
 };
 
-module.exports = { createReview, getReviews, deleteReview }
+module.exports = { createReview, getReviews, deleteReview };

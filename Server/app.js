@@ -3,21 +3,21 @@ const express = require("express");
 const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 
 // Routes
-const userRoute = require("./routes/userRoute");
-const listingRoute = require("./routes/ListingRoutes");
-const reviewRoute = require("./routes/reviewRoutes");
+const userRoute = require("./routes/user.routes");
+const listingRoute = require("./routes/listing.routes");
+const reviewRoute = require("./routes/review.routes");
 const bookingRoute = require("./routes/booking.routes");
-const paymentRoute = require("./routes/PaymentRoutes");
+const paymentRoute = require("./routes/payment.routes");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 

@@ -16,4 +16,5 @@ const amenitiesSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Amenities", amenitiesSchema);
+module.exports =
+  mongoose.models.Amenities || mongoose.model("Amenities", amenitiesSchema);

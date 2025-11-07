@@ -6,7 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
-} = require("../controllers/Listing.controller.js");
+} = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
 const authenticateUser = require("../middleware/authUser.js");

@@ -3,7 +3,7 @@ const {
   createReview,
   getReviews,
   deleteReview,
-} = require("../controllers/reviewController");
+} = require("../controllers/review.controller");
 
 const router = express.Router();
 
