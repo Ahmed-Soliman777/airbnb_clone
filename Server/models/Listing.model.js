@@ -1,5 +1,9 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+const Amenities = require("./amenities.model");
+const User = require("./usermodel.js");
+const Review = require("./reviewModel.js");
 
+/// Listing Schema
 const listingSchema = new mongoose.Schema(
   {
     title: {
@@ -88,4 +92,4 @@ const listingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Listing = mongoose.model("Listing", listingSchema);
+module.exports = mongoose.model("Listing", listingSchema);

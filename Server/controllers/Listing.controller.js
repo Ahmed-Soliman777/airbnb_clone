@@ -1,5 +1,4 @@
 const Listing = require("../models/Listing.model");
-
 // Create new listing
 const createListing = async (req, res) => {
   try {
