@@ -1,5 +1,5 @@
 const Booking = require("../models/Booking.model.js");
-const User = require("../models/users.model.js");
+const User = require("../models/usermodel.js");
 const Listing = require("../models/Listing.model.js");
 
 // create booking

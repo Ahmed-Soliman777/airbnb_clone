@@ -68,12 +68,14 @@ const updateListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
+    //check if he is the host of the listing not guest [authentication]
     if (listing.host.toString() !== hostId) {
       return res
         .status(403)
         .json({ message: "Not authorized to update this listing" });
     }
 
+    // Update the listing
     const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,

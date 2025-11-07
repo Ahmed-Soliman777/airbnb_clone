@@ -1,5 +1,5 @@
 const transactionModel = require("../models/Payment.model");
-const { reservationModel } = require("../models/Service.model");
+const { reservationModel } = require("../models/Booking.model");
 const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
 
 // CREATE A TRANSACTION PROFILE FOR A USER (if not exists)
