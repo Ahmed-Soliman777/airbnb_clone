@@ -6,7 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
-} = require("../controllers/Listing.controller.js");
+} = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
 const authenticateUser = require("../middleware/authUser.js");
@@ -145,7 +145,12 @@ router.get("/listings/:id", getListingById);
  *       401:
  *         description: Unauthorized
  */
-router.post("/listings", protect, authenticateUser(["host", "admin"]), createListing);
+router.post(
+  "/listings",
+  protect,
+  authenticateUser(["host", "admin"]),
+  createListing
+);
 
 /**
  * @swagger
@@ -200,7 +205,72 @@ router.post("/listings", protect, authenticateUser(["host", "admin"]), createLis
  *       401:
  *         description: Unauthorized
  */
-router.put("/listings/:id", protect, authenticateUser(["host", "admin"]), updateListing);
+router.put(
+  "/listings/:id",
+  protect,
+  authenticateUser(["host", "admin"]),
+  updateListing
+);
+
+/**
+ * @swagger
+ * /listings/{id}:
+ *   patch:
+ *     summary: Update a listing by ID (host/admin)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               pricePerNight:
+ *                 type: number
+ *               maxGuests:
+ *                 type: number
+ *               propertyType:
+ *                 type: string
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   address:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *                   country:
+ *                     type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Listing updated successfully
+ *       404:
+ *         description: Listing not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.patch(
+  "/listings/:id",
+  protect,
+  authenticateUser(["host", "admin"]),
+  updateListing
+);
 
 /**
  * @swagger
@@ -225,6 +295,11 @@ router.put("/listings/:id", protect, authenticateUser(["host", "admin"]), update
  *       401:
  *         description: Unauthorized
  */
-router.delete("/listings/:id", protect, authenticateUser(["host", "admin"]), deleteListing);
+router.delete(
+  "/listings/:id",
+  protect,
+  authenticateUser(["host", "admin"]),
+  deleteListing
+);
 
 module.exports = router;

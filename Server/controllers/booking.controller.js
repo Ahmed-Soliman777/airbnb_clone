@@ -1,19 +1,13 @@
 const Booking = require("../models/Booking.model.js");
-const User = require("../models/usermodel.js");
+const User = require("../models/User.model.js");
 const Listing = require("../models/Listing.model.js");
 
 // create booking
 const createBooking = async (req, res) => {
-  
   try {
     const user = req.user._id;
-    const {
-      listing,
-      checkInDate,
-      checkOutDate,
-      guestsCount,
-      totalPrice,
-    } = req.body;
+    const { listing, checkInDate, checkOutDate, guestsCount, totalPrice } =
+      req.body;
 
     // Check if a listing exists
     const existingListing = await Listing.findById(listing);

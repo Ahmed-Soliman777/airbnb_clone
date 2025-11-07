@@ -1,5 +1,5 @@
-const User = require('../models/usermodel');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User.Model.js");
+const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
@@ -8,43 +8,41 @@ exports.register = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(400).json({ message: "Email already registered" });
     }
 
     const user = new User({
       name,
       email,
       password: password,
-      role: role || 'guest'
+      role: role || "guest",
     });
 
     await user.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'User not found' });
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     const valid = await user.comparePassword(password);
-    if (!valid) return res.status(400).json({ message: 'Invalid password' });
+    if (!valid) return res.status(400).json({ message: "Invalid password" });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
-
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: "production",
-      sameSite: "strict"
-    })
-
+      sameSite: "strict",
+    });
 
     res.json({ token });
   } catch (err) {
@@ -55,7 +53,7 @@ exports.login = async (req, res) => {
 // (admin فقط)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('name email role _id');
+    const users = await User.find().select("name email role _id");
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -64,24 +62,22 @@ exports.getAllUsers = async (req, res) => {
 
 // add logout controller for user
 exports.logout = async (req, res) => {
-  res.clearCookie("token")
-  res.status(200).json({ message: "User logged out successfully!" })
-  
-}
-
+  res.clearCookie("token");
+  res.status(200).json({ message: "User logged out successfully!" });
+};
 
 exports.updateUser = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
 
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     if (email) {
       if (email !== user.email) {
         const emailExists = await User.findOne({ email });
         if (emailExists) {
-          return res.status(400).json({ message: 'Email already in use' });
+          return res.status(400).json({ message: "Email already in use" });
         }
         user.email = email;
       }
@@ -100,19 +96,18 @@ exports.updateUser = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: 'User updated successfully', user });
+    res.json({ message: "User updated successfully", user });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-
 // delete
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ message: 'User deleted successfully' });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User deleted successfully" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

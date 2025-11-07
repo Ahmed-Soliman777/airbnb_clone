@@ -1,5 +1,4 @@
 const Listing = require("../models/Listing.model");
-
 // Create new listing
 const createListing = async (req, res) => {
   try {
@@ -26,10 +25,10 @@ const createListing = async (req, res) => {
 // Get all listings
 const getListings = async (req, res) => {
   try {
-    const listings = await Listing.find()
-      .populate("host", "name email") // join user info
-      // .populate("amenities", "name")  // join amenities
-      .populate("reviews");           // join reviews
+    const listings = await Listing.find({})
+      .populate("hostId", "firstName lastName _id") // join user info
+      .populate("amenities", "name") // join amenities
+      .populate("reviews", "rating comment"); // join reviews
 
     res.status(200).json(listings);
   } catch (error) {
@@ -68,10 +67,14 @@ const updateListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
+    //check if he is the host of the listing not guest [authentication]
     if (listing.host.toString() !== hostId) {
-      return res.status(403).json({ message: "Not authorized to update this listing" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this listing" });
     }
 
+    // Update the listing
     const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
@@ -95,12 +98,23 @@ const deleteListing = async (req, res) => {
     }
 
     if (listing.host.toString() !== hostId) {
-      return res.status(403).json({ message: "Not authorized to delete this listing" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this listing" });
     }
 
     await Listing.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Listing deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Search listings
+const searchListings = async (req, res) => {
+  try {
+    const { query } = req.query;
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -112,4 +126,5 @@ module.exports = {
   getListingById,
   updateListing,
   deleteListing,
+  searchListings,
 };

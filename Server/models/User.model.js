@@ -1,0 +1,62 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
+const SALT_ROUNDS = 10;
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+      minlength: [3, "Name must be at least 3 characters long"],
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+    },
+    phone: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      match: [
+        /^(010|011|012|015)[0-9]{8}$/,
+        "Please enter a valid Egyptian phone number",
+      ],
+    },
+
+    role: { type: String, enum: ["guest", "host", "admin"], default: "guest" },
+
+    password: { type: String, required: true },
+    salt: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+userSchema.pre("save", async function (next) {
+  try {
+    if (!this.isModified("password") || !this.password) return next();
+
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
+    this.salt = salt;
+    this.password = await bcrypt.hash(this.password, salt);
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+userSchema.methods.comparePassword = async function (plainPassword) {
+  if (!this.password) return false;
+  return bcrypt.compare(plainPassword, this.password);
+};
+
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);

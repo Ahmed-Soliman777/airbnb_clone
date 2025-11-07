@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const route = express();
-const paymentCtrl = require('../controllers/PaymentCtrl.js');
-const token = require('../middleware/userMiddleware');
-const paymentAuthentication = require('../middleware/authUser');
+const paymentCtrl = require("../controllers/payment.controller.js");
+const token = require("../middleware/userMiddleware.js");
+const paymentAuthentication = require("../middleware/authUser.js");
 
 /**
  * @swagger
@@ -40,7 +40,11 @@ const paymentAuthentication = require('../middleware/authUser');
  *       401:
  *         description: Access denied
  */
+<<<<<<< HEAD:Server/routes/PaymentRoutes.js
 route.post('/transactions/:id', token, paymentCtrl.handleCreateTransactions);
+=======
+route.post("/transactions", token, paymentCtrl.handleCreateTransactions);
+>>>>>>> 7de61d2ebbaafd039e6afdecfddcf375fcefdecd:Server/routes/payment.routes.js
 
 /**
  * @swagger
@@ -56,7 +60,12 @@ route.post('/transactions/:id', token, paymentCtrl.handleCreateTransactions);
  *       401:
  *         description: Access denied
  */
-route.get('/transactions', token, paymentAuthentication(['host', 'admin']), paymentCtrl.handleGetTransactions);
+route.get(
+  "/transactions",
+  token,
+  paymentAuthentication(["host", "admin"]),
+  paymentCtrl.handleGetTransactions
+);
 
 /**
  * @swagger
@@ -106,7 +115,7 @@ route.get('/transactions', token, paymentAuthentication(['host', 'admin']), paym
  *       401:
  *         description: Access denied
  */
-route.post('/checkout', token, paymentCtrl.handlePayment);
+route.post("/checkout", token, paymentCtrl.handlePayment);
 
 /**
  * @swagger
@@ -118,8 +127,8 @@ route.post('/checkout', token, paymentCtrl.handlePayment);
  *       200:
  *         description: Payment is completed
  */
-route.get('/complete', (req, res) => {
-    res.send('Payment is completed');
+route.get("/complete", (req, res) => {
+  res.send("Payment is completed");
 });
 
 /**
@@ -132,8 +141,8 @@ route.get('/complete', (req, res) => {
  *       200:
  *         description: Payment is cancelled
  */
-route.get('/cancel', (req, res) => {
-    res.send('Payment is cancelled');
+route.get("/cancel", (req, res) => {
+  res.send("Payment is cancelled");
 });
 
 module.exports = route;
