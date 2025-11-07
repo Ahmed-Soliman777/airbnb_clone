@@ -1,22 +1,21 @@
-import "./App.css";
-import BookingExperiences from "./components/Booking/BookingExperiences";
-
-/* here we import the Button component from the ui folder 
-after installing from shadcn => npx shadcn@latest add button*/
-/* هنا بنستورد مكون الزرار من فولدر ui 
-بعد ما نزلنا من shadcn عن طريق الامر => npx shadcn@latest add button */
-import { Button } from "./components/ui/button";
+import './App.css'
+import Layout from './'
+import { createBrowserRouter, RouterProvider } from 'react-router'
 
 function App() {
+
+  const routes = createBrowserRouter([
+    {
+      path: '/', element: <Layout /> /*,children=[ 
+      {path:'/', element: <HomePage />} // add pages to children نحط الصفحة زي الصفحة الرئيسية في 
+    ]*/}
+  ])
+
   return (
     <>
-      <div className="flex justify-center items-center h-screen">
-        {/* we use Button component from shadcn after importing it */}
-        <Button>Shadcn Button</Button>
-        <BookingExperiences /> // for testing the booking experiences component
-      </div>
+      <RouterProvider router={routes} />
     </>
-  );
+  )
 }
 
-export default App;
+export default App
