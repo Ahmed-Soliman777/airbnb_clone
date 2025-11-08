@@ -1,0 +1,9 @@
+form > :not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 0px;
+  width: 1px;
+  height: 55px;
+  background: #dcdcdc;
+}
