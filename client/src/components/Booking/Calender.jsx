@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-  DialogFooter,
   DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { CalendarDays } from "lucide-react";
 import { format } from "date-fns";
+import { CalendarDays } from "lucide-react";
+import { useState } from "react";
 
 function CalendarModal() {
   const [date, setDate] = useState(null);

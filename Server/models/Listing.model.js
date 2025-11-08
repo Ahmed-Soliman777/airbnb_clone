@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Amenities = require("./amenities.model");
+const Amenities = require("./Amenities.model.js");
 const User = require("./User.model.js");
 const Review = require("./Review.model.js");
 

@@ -113,11 +113,69 @@ const deleteListing = async (req, res) => {
 
 // Search listings
 const searchListings = async (req, res) => {
-  try {
-    const { query } = req.query;
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  // Extract query parameters and validate them if they are valid
+  const {
+    address,
+    startDate = null,
+    endDate = null,
+    maxGuests,
+    pricePerNight,
+    maxPrice,
+    propertyType,
+    maxBedrooms,
+    maxBathrooms,
+    sortBy,
+  } = req.query;
+
+  // Validate data types and ranges
+  if (maxGuests && isNaN(parseInt(maxGuests))) {
+    return res.status(400).json({ message: "Invalid guests parameter" });
   }
+
+  if (pricePerNight && isNaN(parseInt(pricePerNight))) {
+    return res.status(400).json({ message: "Invalid pricePerNight parameter" });
+  }
+
+  if (maxPrice && isNaN(parseInt(maxPrice))) {
+    return res.status(400).json({ message: "Invalid maxPrice parameter" });
+  }
+
+  if (maxBedrooms && isNaN(parseInt(maxBedrooms))) {
+    return res.status(400).json({ message: "Invalid maxBedrooms parameter" });
+  }
+
+  if (
+    pricePerNight &&
+    maxPrice &&
+    parseInt(pricePerNight) > parseInt(maxPrice)
+  ) {
+    return res
+      .status(400)
+      .json({
+        message: "pricePerNight must be less than or equal to maxPrice",
+      });
+  }
+
+  // Build MongoDB Query Object
+  const query = {};
+  if (address) query.address = address;
+  if (startDate && endDate) {
+    query.available_dates = {
+      $gte: new Date(startDate),
+      $lte: new Date(endDate),
+    };
+  }
+  if (pricePerNight) query.price = { $gte: parseInt(pricePerNight) };
+  if (maxPrice) query.price = { ...query.price, $lte: parseInt(maxPrice) };
+  if (propertyType) query.propertyType = propertyType;
+  if (maxBedrooms) query.bedrooms = { $gte: parseInt(maxBedrooms) };
+
+  let sortOptions = {};
+  if (sortBy === "price_asc") sortOptions.price = 1;
+  else if (sortBy === "price_desc") sortOptions.price = -1;
+
+  const listings = await Listing.find(query).sort(sortOptions).exec();
+  res.status(200).json({ items: listings });
 };
 
 module.exports = {
