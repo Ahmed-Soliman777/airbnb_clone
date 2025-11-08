@@ -40,7 +40,11 @@ const paymentAuthentication = require("../middleware/authUser.js");
  *       401:
  *         description: Access denied
  */
+<<<<<<< HEAD:Server/routes/PaymentRoutes.js
+route.post('/transactions/:id', token, paymentCtrl.handleCreateTransactions);
+=======
 route.post("/transactions", token, paymentCtrl.handleCreateTransactions);
+>>>>>>> 7de61d2ebbaafd039e6afdecfddcf375fcefdecd:Server/routes/payment.routes.js
 
 /**
  * @swagger
