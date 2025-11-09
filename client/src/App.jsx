@@ -2,6 +2,7 @@ import "./App.css";
 import Layout from "./layout/Layout";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import Listing from "@/components/Listing/Listing";
+import ListingCarousel from "@/components/Listing/ListingCarousel";
 
 function App() {
   const routes = createBrowserRouter([
@@ -12,6 +13,10 @@ function App() {
         {
           path: "listing",
           element: <Listing />,
+        },
+        {
+          path: "homes",
+          element: <ListingCarousel />,
         },
       ],
     },
