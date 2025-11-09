@@ -7,6 +7,7 @@ import { Link, NavLink, useLocation } from 'react-router'
 
 import './Navbar.css'
 import { Globe, Menu } from 'lucide-react'
+import SearchBar from '../SearchBar/SearchBar'
 
 export default function Navbar() {
 
@@ -88,6 +89,7 @@ export default function Navbar() {
                     <span className="cursor_pointer bg-[#d4d4d490] rounded-full p-2 cursor-pointer hover:bg-[#d4d4d4d2] transition-(--transition-fast)"><Menu size={20} /></span>
                 </div>
             </div>
+            <SearchBar />
         </nav>
     )
 }
