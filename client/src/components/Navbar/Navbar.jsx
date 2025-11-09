@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Logo from "../../assets/Airbnb-Logo.wine.svg"
 import HomesIcon from "../../assets/home_icon.avif"
 import ExperiencesIcon from "../../assets/experience_icon.avif"
@@ -8,11 +8,24 @@ import { Link, NavLink, useLocation } from 'react-router'
 import './Navbar.css'
 import { Globe, Menu } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
+import MenuList from '../Menu/MenuList'
 
 export default function Navbar() {
 
     const location = useLocation();
 
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     // Determine which link is active
     const getUnderlinePosition = () => {
@@ -86,7 +99,18 @@ export default function Navbar() {
                 <div className="flex items-center gap-5">
                     <span className="cursor_pointer font-semibold hover:bg-[#d4d4d4c1] rounded-lg py-1 px-2 cursor-pointer">Become a host</span>
                     <span className="cursor_pointer bg-[#d4d4d490] rounded-full p-2 cursor-pointer hover:bg-[#d4d4d4d2] transition-(--transition-fast)"><Globe size={20} /></span>
-                    <span className="cursor_pointer bg-[#d4d4d490] rounded-full p-2 cursor-pointer hover:bg-[#d4d4d4d2] transition-(--transition-fast)"><Menu size={20} /></span>
+                    <span
+                        className="relative cursor-pointer bg-[#d4d4d490] rounded-full p-2 hover:bg-[#d4d4d4d2] transition-(--transition-fast)"
+                        onClick={() => setIsMenuOpen(prev => !prev)}
+                        ref={menuRef}
+                    >
+                        <Menu size={20} />
+                    </span>
+                    {isMenuOpen && (
+                        <div className="absolute top-17 right-10 mt-2">
+                            <MenuList />
+                        </div>
+                    )}
                 </div>
             </div>
             <SearchBar />
