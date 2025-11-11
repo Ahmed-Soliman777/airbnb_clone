@@ -41,6 +41,21 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/*** airbnb font ***/
+@font-face {
+  font-family: "airbnb_font";
+  src: url("./assets/font/AirbnbCereal_W_Bk.otf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "airbnb_font_bold";
+  src: url("./assets/font/AirbnbCereal_W_Bd.otf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
 :root {
   /*** airbnb styles ***/
 
