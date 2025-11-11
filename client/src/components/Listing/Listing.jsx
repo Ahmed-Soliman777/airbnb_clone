@@ -1,33 +1,17 @@
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import { useState } from "react";
 
-import {
-  Grip,
-  Heart,
-  Info,
-  MapPin,
-  Share,
-  Star,
-  Users,
-  Wifi,
-  Coffee,
-  Image as ImageIcon,
-  Truck,
-  WashingMachine,
-  Sun,
-  FolderPlus,
-  Droplet,
-  Camera,
-} from "lucide-react";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
-  DialogTrigger,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { Grip, Heart, Info, MapPin, Share, Users } from "lucide-react";
+import Amenity, { amenities } from "../Amenities/Amenity";
 
 const bedrooms = [
   {
@@ -43,43 +27,6 @@ const bedrooms = [
     img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80",
   },
 ];
-
-const amenities = [
-  { id: "garden", label: "Garden view", icon: Sun },
-  { id: "mountain", label: "Mountain view", icon: ImageIcon },
-  { id: "kitchen", label: "Kitchen", icon: FolderPlus },
-  { id: "wifi", label: "Wifi", icon: Wifi },
-  { id: "parking", label: "Free parking on premises – 2 spaces", icon: Truck },
-  { id: "washer", label: "Free washer – In building", icon: WashingMachine },
-  { id: "dryer", label: "Free dryer – In building", icon: Droplet },
-  {
-    id: "private_garden",
-    label: "Private back garden – Fully fenced",
-    icon: Sun,
-  },
-  { id: "luggage", label: "Luggage drop-off allowed", icon: Truck },
-  {
-    id: "security",
-    label: "Exterior security cameras on property",
-    icon: Camera,
-  },
-  { id: "coffee", label: "Free tea and coffee", icon: Coffee },
-  // ... you can add more items to reach 48; for demo we include some
-];
-
-// helper to render icon component
-function AmenityItem({ icon: Icon, label }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="mt-1">
-        <Icon size={18} />
-      </div>
-      <div className="text-sm">
-        <div className="font-medium text-gray-800">{label}</div>
-      </div>
-    </div>
-  );
-}
 
 const AirbnbGallery = () => {
   const [open, setOpen] = useState(false);
@@ -452,7 +399,7 @@ const AirbnbGallery = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3">
                 {amenities.slice(0, 6).map((a) => (
-                  <AmenityItem key={a.id} icon={a.icon} label={a.label} />
+                  <Amenity key={a.id} icon={a.icon} label={a.label} />
                 ))}
               </div>
             </div>
@@ -461,7 +408,7 @@ const AirbnbGallery = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3">
                 {amenities.slice(6, 12).map((a) => (
-                  <AmenityItem key={a.id} icon={a.icon} label={a.label} />
+                  <Amenity key={a.id} icon={a.icon} label={a.label} />
                 ))}
               </div>
             </div>
