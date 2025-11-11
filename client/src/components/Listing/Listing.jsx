@@ -1,7 +1,88 @@
 import { Button } from "@/components/ui/button";
-import { Grip, Heart, Info, MapPin, Share, Star, Users } from "lucide-react";
+import React, { useState } from "react";
+
+import {
+  Grip,
+  Heart,
+  Info,
+  MapPin,
+  Share,
+  Star,
+  Users,
+  Wifi,
+  Coffee,
+  Image as ImageIcon,
+  Truck,
+  WashingMachine,
+  Sun,
+  FolderPlus,
+  Droplet,
+  Camera,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+
+const bedrooms = [
+  {
+    id: 1,
+    title: "Bedroom 1",
+    subtitle: "1 bunk bed",
+    img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80",
+  },
+  {
+    id: 2,
+    title: "Bedroom 2",
+    subtitle: "1 bunk bed",
+    img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80",
+  },
+];
+
+const amenities = [
+  { id: "garden", label: "Garden view", icon: Sun },
+  { id: "mountain", label: "Mountain view", icon: ImageIcon },
+  { id: "kitchen", label: "Kitchen", icon: FolderPlus },
+  { id: "wifi", label: "Wifi", icon: Wifi },
+  { id: "parking", label: "Free parking on premises – 2 spaces", icon: Truck },
+  { id: "washer", label: "Free washer – In building", icon: WashingMachine },
+  { id: "dryer", label: "Free dryer – In building", icon: Droplet },
+  {
+    id: "private_garden",
+    label: "Private back garden – Fully fenced",
+    icon: Sun,
+  },
+  { id: "luggage", label: "Luggage drop-off allowed", icon: Truck },
+  {
+    id: "security",
+    label: "Exterior security cameras on property",
+    icon: Camera,
+  },
+  { id: "coffee", label: "Free tea and coffee", icon: Coffee },
+  // ... you can add more items to reach 48; for demo we include some
+];
+
+// helper to render icon component
+function AmenityItem({ icon: Icon, label }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-1">
+        <Icon size={18} />
+      </div>
+      <div className="text-sm">
+        <div className="font-medium text-gray-800">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 const AirbnbGallery = () => {
+  const [open, setOpen] = useState(false);
   return (
     <>
       <div className="max-w-6xl mx-auto mt-8 px-4">
@@ -331,6 +412,110 @@ const AirbnbGallery = () => {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        {/* Where you'll sleep */}
+        <section>
+          <h3 className="text-xl font-semibold mb-4">Where you'll sleep</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {bedrooms.map((b) => (
+              <Card key={b.id} className="shadow-sm rounded-lg overflow-hidden">
+                <div className="flex gap-4 p-4 items-start">
+                  <div className="w-40 h-28 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+                    {/* If you have a shadcn Image component, use it; otherwise plain img */}
+                    <img
+                      src={b.img}
+                      alt={b.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{b.title}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{b.subtitle}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <hr />
+
+        {/* What this place offers */}
+        <section>
+          <h3 className="text-xl font-semibold mb-6">What this place offers</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Left column (amenities list) */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                {amenities.slice(0, 6).map((a) => (
+                  <AmenityItem key={a.id} icon={a.icon} label={a.label} />
+                ))}
+              </div>
+            </div>
+
+            {/* Right column (more amenities) */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                {amenities.slice(6, 12).map((a) => (
+                  <AmenityItem key={a.id} icon={a.icon} label={a.label} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="rounded-md px-4 py-2">
+                  Show all {48} amenities
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>All amenities</DialogTitle>
+                </DialogHeader>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[60vh] overflow-auto pr-2">
+                  {/* For demo: repeat the amenities array (or use a full list of 48) */}
+                  {Array.from({ length: 48 }).map((_, i) => {
+                    const a = amenities[i % amenities.length];
+                    const IconComp = a.icon;
+                    return (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="mt-1">
+                          <IconComp size={18} />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-800">
+                            {a.label}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <DialogClose asChild>
+                    <Button>Close</Button>
+                  </DialogClose>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </section>
+
+        <hr />
+
+        {/* Select checkout date */}
+        <section>
+          <h3 className="text-xl font-semibold mb-6">What this place offers</h3>
+        </section>
       </div>
     </>
   );
