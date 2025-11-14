@@ -10,10 +10,39 @@ const createListing = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Initialize an empty array to hold validated amenities
+    let validAmenities = [];
+
+    // Check if the 'amenities' field exists in the request body and is not empty
+    if (amenities && amenities.length > 0) {
+      // Fetch all Amenity documents from the database whose IDs match the ones sent by the frontend
+      // This ensures that only existing amenities are linked to the listing
+      validAmenities = await Amenity.find({
+        _id: { $in: amenities }, // $in operator matches any ID in the amenities array
+      });
+    }
+
+    // Create a new Listing instance
     const newListing = new Listing({
-      ...req.body,
+      title,
+      pricePerNight,
+      maxGuests,
+      propertyType,
       host: hostId,
+      amenities: validAmenities.map((a) => a._id),
+      // We only store the ObjectIDs of the valid amenities
+      // This keeps the listing linked to existing amenities without duplicating data
     });
+
+    // Upload images to Cloudinary and get their URLs
+    const image1 = await uploadOnCloudinary(req.files["image"][0].path);
+
+    newListing.images.push({
+      url: image1.secure_url,
+      caption: req.body.image.caption,
+    });
+
+    // Save the new listing to the database
 
     await newListing.save();
     res.status(201).json(newListing);
@@ -149,11 +178,9 @@ const searchListings = async (req, res) => {
     maxPrice &&
     parseInt(pricePerNight) > parseInt(maxPrice)
   ) {
-    return res
-      .status(400)
-      .json({
-        message: "pricePerNight must be less than or equal to maxPrice",
-      });
+    return res.status(400).json({
+      message: "pricePerNight must be less than or equal to maxPrice",
+    });
   }
 
   // Build MongoDB Query Object

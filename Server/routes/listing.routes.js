@@ -10,6 +10,7 @@ const {
 
 const protect = require("../middleware/userMiddleware.js");
 const authenticateUser = require("../middleware/authUser.js");
+const { default: upload } = require("../middleware/multer.js");
 
 /**
  * @swagger
@@ -149,7 +150,8 @@ router.post(
   "/listings",
   protect,
   authenticateUser(["host", "admin"]),
-  createListing
+  createListing,
+  upload.fields([{ name: "image", maxCount: 1 }])
 );
 
 /**
