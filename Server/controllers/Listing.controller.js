@@ -1,24 +1,65 @@
 const Listing = require("../models/Listing.model");
+const Amenities = require("../models/Amenities.model");
 // Create new listing
 const createListing = async (req, res) => {
   try {
     const hostId = req.user.id;
-    const { title, pricePerNight, maxGuests, propertyType } = req.body;
 
-    // Validation
+    // Extract fields from request body
+    const {
+      title,
+      pricePerNight,
+      maxGuests,
+      propertyType,
+      amenities,
+      caption,
+      images,
+      description,
+    } = req.body;
+
+    // Basic validation
     if (!title || !pricePerNight || !maxGuests || !propertyType) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Validate amenities
+    let validAmenities = [];
+    if (Array.isArray(amenities) && amenities.length > 0) {
+      validAmenities = await Amenities.find({
+        _id: { $in: amenities },
+      });
+    }
+
+    // Create listing
     const newListing = new Listing({
-      ...req.body,
-      host: hostId,
+      title,
+      pricePerNight,
+      maxGuests,
+      propertyType,
+      hostId,
+      description,
+      amenities: validAmenities.map((a) => a._id),
     });
 
+    // Handle images
+    const uploadedImages = [];
+
+    for (const file of req.files) {
+      const result = await uploadOnCloudinary(file.path);
+      uploadedImages.push({
+        url: result.secure_url,
+        caption: req.body.caption || "Listing photo",
+      });
+    }
+
+    newListing.images = uploadedImages;
+
+    // Save
     await newListing.save();
-    res.status(201).json(newListing);
+
+    return res.status(201).json(newListing);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -42,7 +83,7 @@ const getListingById = async (req, res) => {
     const { id } = req.params;
 
     const listing = await Listing.findById(id)
-      .populate("host", "name email")
+      .populate("hostId", "name email")
       .populate("amenities", "name")
       .populate("reviews");
 
@@ -60,7 +101,6 @@ const getListingById = async (req, res) => {
 const updateListing = async (req, res) => {
   try {
     const { id } = req.params;
-    const hostId = req.user.id;
 
     const listing = await Listing.findById(id);
     if (!listing) {
@@ -68,7 +108,7 @@ const updateListing = async (req, res) => {
     }
 
     //check if he is the host of the listing not guest [authentication]
-    if (listing.host.toString() !== hostId) {
+    if (listing.hostId.toString() !== req.user.id) {
       return res
         .status(403)
         .json({ message: "Not authorized to update this listing" });
@@ -149,11 +189,9 @@ const searchListings = async (req, res) => {
     maxPrice &&
     parseInt(pricePerNight) > parseInt(maxPrice)
   ) {
-    return res
-      .status(400)
-      .json({
-        message: "pricePerNight must be less than or equal to maxPrice",
-      });
+    return res.status(400).json({
+      message: "pricePerNight must be less than or equal to maxPrice",
+    });
   }
 
   // Build MongoDB Query Object

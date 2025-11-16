@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#amenity extractor test file
+client/src/components/Amenities/test.jsx

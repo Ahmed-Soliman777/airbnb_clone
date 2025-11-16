@@ -1,4 +1,5 @@
 require("dotenv").config();
+const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -11,6 +12,7 @@ const listingRoute = require("./routes/listing.routes");
 const reviewRoute = require("./routes/review.routes");
 const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/payment.routes");
+const amenityRoute = require("./routes/amenity.routes");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -51,9 +53,13 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+//CORS configuration
+app.use(cors());
+
 // Routes
 app.use("/api", userRoute);
 app.use("/api", listingRoute);
+app.use("/api/amenity", amenityRoute);
 app.use("/api", bookingRoute);
 app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
