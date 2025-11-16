@@ -1,7 +1,11 @@
+//this component is used to extract amenities from the given HTML structure
+//Just for testing purpose Not include in the main project
+//Plz Don't delete this file
+
 import React, { useEffect, useRef, useState } from "react";
 
 const AmenityExtractor = () => {
-  const containerRef = useRef(null); // نعمل reference للـ container
+  const containerRef = useRef(null);
   const [amenities, setAmenities] = useState([]);
 
   useEffect(() => {
