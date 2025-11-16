@@ -6,6 +6,7 @@ import ListingDetails from "./Pages/ListingDetails";
 import Home from "./Pages/Home";
 import store from "./store/store";
 import { Provider } from "react-redux";
+import NotFound from "./Pages/NotFound";
 
 function App() {
   const routes = createBrowserRouter([
@@ -13,16 +14,12 @@ function App() {
       path: "/",
       element: <Layout />,
       children: [
-        {
-          path: "room/:id",
-          element: <ListingDetails />,
-        },
-        {
-          path: "homes",
-          element: <Home />,
-        },
+        { index: true, element: <Home /> },
+        { path: "homes", element: <Home /> },
+        { path: "room/:id", element: <ListingDetails /> },
       ],
     },
+    { path: "*", element: <NotFound /> },
   ]);
 
   return (

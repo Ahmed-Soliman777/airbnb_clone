@@ -75,8 +75,16 @@ const listingSlice = createSlice({
         state.error = action.error.message;
       })
       // ------------- 2. Get a single listing by ID --------------
+      .addCase(GetListingById.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(GetListingById.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.listing = action.payload;
+      })
+      .addCase(GetListingById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       })
 
       // ------------- 3. Create a new listing --------------

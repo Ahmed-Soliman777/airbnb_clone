@@ -1,4 +1,5 @@
 import Amenity from "@/components/Amenities/Amenity";
+import AmenityExtractor from "@/components/Amenities/test";
 import ListingCarousel from "@/components/Listing/ListingCarousel";
 import React from "react";
 
@@ -13,6 +14,8 @@ const Home = () => {
         <ListingCarousel />
       </section>
       {/* <Amenity /> */}
+
+      {/* <AmenityExtractor /> */}
     </div>
   );
 };

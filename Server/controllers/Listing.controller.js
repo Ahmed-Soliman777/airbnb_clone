@@ -1,53 +1,65 @@
 const Listing = require("../models/Listing.model");
+const Amenities = require("../models/Amenities.model");
 // Create new listing
 const createListing = async (req, res) => {
   try {
     const hostId = req.user.id;
-    const { title, pricePerNight, maxGuests, propertyType } = req.body;
 
-    // Validation
+    // Extract fields from request body
+    const {
+      title,
+      pricePerNight,
+      maxGuests,
+      propertyType,
+      amenities,
+      caption,
+      images,
+      description,
+    } = req.body;
+
+    // Basic validation
     if (!title || !pricePerNight || !maxGuests || !propertyType) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Initialize an empty array to hold validated amenities
+    // Validate amenities
     let validAmenities = [];
-
-    // Check if the 'amenities' field exists in the request body and is not empty
-    if (amenities && amenities.length > 0) {
-      // Fetch all Amenity documents from the database whose IDs match the ones sent by the frontend
-      // This ensures that only existing amenities are linked to the listing
-      validAmenities = await Amenity.find({
-        _id: { $in: amenities }, // $in operator matches any ID in the amenities array
+    if (Array.isArray(amenities) && amenities.length > 0) {
+      validAmenities = await Amenities.find({
+        _id: { $in: amenities },
       });
     }
 
-    // Create a new Listing instance
+    // Create listing
     const newListing = new Listing({
       title,
       pricePerNight,
       maxGuests,
       propertyType,
-      host: hostId,
+      hostId,
+      description,
       amenities: validAmenities.map((a) => a._id),
-      // We only store the ObjectIDs of the valid amenities
-      // This keeps the listing linked to existing amenities without duplicating data
     });
 
-    // Upload images to Cloudinary and get their URLs
-    const image1 = await uploadOnCloudinary(req.files["image"][0].path);
+    // Handle images
+    const uploadedImages = [];
 
-    newListing.images.push({
-      url: image1.secure_url,
-      caption: req.body.image.caption,
-    });
+    for (const file of req.files) {
+      const result = await uploadOnCloudinary(file.path);
+      uploadedImages.push({
+        url: result.secure_url,
+        caption: req.body.caption || "Listing photo",
+      });
+    }
 
-    // Save the new listing to the database
+    newListing.images = uploadedImages;
 
+    // Save
     await newListing.save();
-    res.status(201).json(newListing);
+
+    return res.status(201).json(newListing);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -71,7 +83,7 @@ const getListingById = async (req, res) => {
     const { id } = req.params;
 
     const listing = await Listing.findById(id)
-      .populate("host", "name email")
+      .populate("hostId", "name email")
       .populate("amenities", "name")
       .populate("reviews");
 
@@ -89,7 +101,6 @@ const getListingById = async (req, res) => {
 const updateListing = async (req, res) => {
   try {
     const { id } = req.params;
-    const hostId = req.user.id;
 
     const listing = await Listing.findById(id);
     if (!listing) {
@@ -97,7 +108,7 @@ const updateListing = async (req, res) => {
     }
 
     //check if he is the host of the listing not guest [authentication]
-    if (listing.host.toString() !== hostId) {
+    if (listing.hostId.toString() !== req.user.id) {
       return res
         .status(403)
         .json({ message: "Not authorized to update this listing" });

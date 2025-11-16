@@ -151,7 +151,7 @@ router.post(
   protect,
   authenticateUser(["host", "admin"]),
   createListing,
-  upload.fields([{ name: "image", maxCount: 1 }])
+  upload.array("images", 10)
 );
 
 /**
