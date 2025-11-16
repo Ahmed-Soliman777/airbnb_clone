@@ -62,7 +62,7 @@ const homes = [
     price: "€98 for 2 nights",
     rating: "★ 4.99",
     image:
-      "https://images.unsplash.com/photo-1665249934445-1de680641f50?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1600607687489-06a9a96b6c28?auto=format&fit=crop&w=800&q=80", // جديد وشغال
   },
   {
     id: 7,
@@ -71,7 +71,7 @@ const homes = [
     price: "€77 for 2 nights",
     rating: "★ 4.96",
     image:
-      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1595526114035-0b9c2f7a8f29?auto=format&fit=crop&w=800&q=80", // جديد وشغال
   },
   {
     id: 8,
@@ -80,20 +80,14 @@ const homes = [
     price: "€250 for 2 nights",
     rating: "★ 5.0",
     image:
-      "https://images.unsplash.com/photo-1702014862053-946a122b920d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1600585154526-990dced4df89?auto=format&fit=crop&w=800&q=80", // جديد وشغال
   },
 ];
 
 export default function PopularHomesCarousel() {
   return (
-    <section className="w-10/12 py-10 relative mx-auto">
-      {/*--------------- Header for title ------------------- */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Popular homes in Cairo</h2>
-      </div>
-
+    <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
-
       <Carousel
         opts={{
           align: "start",
@@ -101,9 +95,9 @@ export default function PopularHomesCarousel() {
         className="w-full relative"
       >
         {/* ----------------Arrows---------------- */}
-        <div className="absolute -top-9 right-0 flex gap-2">
-          <CarouselPrevious className="relative static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm bg-gray-100 hover:scale-110 transition-transform duration-300 disabled:cursor-not-allowed" />
-          <CarouselNext className="relative static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-100" />
+        <div className="absolute -top-13 right-0 flex gap-2">
+          <CarouselPrevious className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm bg-gray-100 hover:scale-110 transition-transform duration-300 disabled:cursor-not-allowed" />
+          <CarouselNext className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-100" />
         </div>
 
         <CarouselContent className="-ml-2 md:-ml-4 gap-0">
@@ -111,23 +105,25 @@ export default function PopularHomesCarousel() {
           {homes.map((home) => (
             <CarouselItem
               key={home.id}
-              className=" basis-1/4 max-w-1/4 lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
+              className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
             >
               {/*---------------- Start of Cards ---------------- */}
               <Card className="overflow-hidden border-0 shadow-none gap-3">
-                <div className="relative">
+                <div className="relative w-36 h-36 lg:w-full lg:aspect-square">
                   <img
                     src={home.image}
                     alt={home.title}
-                    className="h-36 w-full object-cover rounded-2xl"
+                    className="w-full h-full object-cover rounded-2xl"
                   />
+
                   <button className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300">
                     <Heart
                       size={25}
-                      className="stroke-gray-100  "
+                      className="stroke-gray-100"
                       fill="rgba(0,0,0,0.45)"
                     />
                   </button>
+
                   <div className="absolute top-2 left-2 bg-white text-xs font-medium px-2 py-1 rounded-full">
                     Guest favourite
                   </div>

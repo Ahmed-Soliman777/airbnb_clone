@@ -1,8 +1,11 @@
+import ListingCarousel from "@/components/Listing/ListingCarousel";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import "./App.css";
 import Layout from "./layout/Layout";
-import { createBrowserRouter, RouterProvider } from "react-router";
-import Listing from "@/components/Listing/Listing";
-import ListingCarousel from "@/components/Listing/ListingCarousel";
+import ListingDetails from "./Pages/ListingDetails";
+import Home from "./Pages/Home";
+import store from "./store/store";
+import { Provider } from "react-redux";
 
 function App() {
   const routes = createBrowserRouter([
@@ -11,12 +14,12 @@ function App() {
       element: <Layout />,
       children: [
         {
-          path: "listing",
-          element: <Listing />,
+          path: "room/:id",
+          element: <ListingDetails />,
         },
         {
           path: "homes",
-          element: <ListingCarousel />,
+          element: <Home />,
         },
       ],
     },
@@ -24,7 +27,9 @@ function App() {
 
   return (
     <>
-      <RouterProvider router={routes} />
+      <Provider store={store}>
+        <RouterProvider router={routes} />
+      </Provider>
     </>
   );
 }
