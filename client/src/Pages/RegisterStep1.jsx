@@ -24,7 +24,7 @@ const RegisterStep1 = () => {
 
   const onSubmit = (data) => {
     localStorage.setItem("registerEmail", data.email);
-    navigate("/lregister");
+    navigate("/register");
   };
 
   return (
