@@ -31,7 +31,7 @@ const RegisterStep1 = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <div className="bg-white w-full max-w-lg p-8 rounded-2xl border border-[#717171]">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-         Log in or sign up
+         Login or sign up
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -41,7 +41,7 @@ const RegisterStep1 = () => {
               type="email"
               {...register("email")}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter your email"
+              placeholder="Enter your Email"
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
