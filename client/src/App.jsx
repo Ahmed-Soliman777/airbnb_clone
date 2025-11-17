@@ -7,6 +7,10 @@ import Home from "./Pages/Home";
 import store from "./store/store";
 import { Provider } from "react-redux";
 import NotFound from "./Pages/NotFound";
+import Login from "./Pages/Login";
+import ForgetPassword from "./Pages/ForgetPassword";
+import RegisterStep1 from "./Pages/RegisterStep1";
+import RegisterStep2 from "./Pages/RegisterStep2";
 
 function App() {
   const routes = createBrowserRouter([
@@ -17,6 +21,12 @@ function App() {
         { index: true, element: <Home /> },
         { path: "homes", element: <Home /> },
         { path: "room/:id", element: <ListingDetails /> },
+        { path: "signup", element: <RegisterStep1 /> },
+        { path: "register", element: <RegisterStep2 /> },
+        { path: "login", element: <Login /> },
+        { path: "forget-password", element: <ForgetPassword /> },
+
+        
       ],
     },
     { path: "*", element: <NotFound /> },
