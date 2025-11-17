@@ -1,7 +1,7 @@
 import React from 'react'
 import './GlobalModal.css'
 import { useSelector, useDispatch } from 'react-redux'
-import { englishLanguage, arabicLanguage } from '@/redux/slices/languageSlice'
+import { englishLanguage, arabicLanguage } from '@/store/Slices/languageSlice'
 
 export default function GlobalModal() {
 
