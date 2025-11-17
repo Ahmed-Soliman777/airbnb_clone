@@ -65,7 +65,7 @@ export default function Navbar() {
                 </Link>
                 {/* ----------navbar list container---------- */}
                 {/* <div className="hidden lg:flex justify-between relative flex-1 max-w-md mx-4 i"> */}
-                <div className="hidden lg:flex justify-around relative flex-1 max-w-2xl mx-auto">
+                <div className="hidden lg:flex justify-around relative flex-1 max-w-2xl xl:ms-58 lg:ms-30 md:ms-32 mx-4 i">
                     {/* Animated underline */}
                     <div
                         className={`absolute bottom-0 h-0.5 bg-black w-1/3 transition-all duration-300 ease-in-out ${getUnderlinePosition()}`}
@@ -91,7 +91,7 @@ export default function Navbar() {
                             } hover:scale-105 hover:text-black transition-(--transition-medium)`
                         }
                     >
-                        <div className="relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white">New</div>
+                        <div className="relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white">{t("navbar.new")}</div>
                         <div className="w-12 md:w-16 lg:w-18">
                             <img src={ExperiencesIcon} alt="experiences_icon" className="w-full" />
                         </div>
@@ -105,7 +105,7 @@ export default function Navbar() {
                             } hover:scale-105 hover:text-black transition-(--transition-medium)`
                         }
                     >
-                        <div className="relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white">New</div>
+                        <div className="relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white">{t("navbar.new")}</div>
                         <div className="w-12 md:w-16 lg:w-18">
                             <img src={ServicesIcon} alt="services_icon" className="w-full" />
                         </div>
