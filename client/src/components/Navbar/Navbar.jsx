@@ -118,12 +118,11 @@ export default function Navbar() {
                     <span
                         className="relative cursor-pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 hover:bg-[#d4d4d4d2] transition-(--transition-fast)"
                         onClick={() => setIsMenuOpen(prev => !prev)}
-                        ref={menuRef}
                     >
                         <Menu size={18} className="sm:w-5 sm:h-5" />
                     </span>
                     {isMenuOpen && (
-                        <div className="absolute top-14 sm:top-16 md:top-17 right-4 sm:right-6 md:right-10 mt-2 z-50">
+                        <div className="absolute top-14 sm:top-16 md:top-17 right-4 sm:right-6 md:right-10 mt-2 z-50" ref={menuRef}>
                             <MenuList />
                         </div>
                     )}
