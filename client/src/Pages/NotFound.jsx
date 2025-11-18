@@ -1,14 +1,15 @@
 import React from "react";
+import Logo from "../assets/Airbnb-Logo.wine.svg"
 
 const NotFound = () => {
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* Logo */}
-      <div className="p-6">
+      <div className="w-32 md:w-40 lg:w-48">
         <img
-          src="/client/src/assets/apple-touch-icon.png"
+          src={Logo}
           alt="Airbnb Logo"
-          className="h-8"
+          
         />
       </div>
 
