@@ -8,8 +8,10 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export default function PopularHomesCarousel({ listings = [] }) {
+  const navigate = useNavigate();
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
@@ -33,7 +35,10 @@ export default function PopularHomesCarousel({ listings = [] }) {
               className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
             >
               {/*---------------- Start of Cards ---------------- */}
-              <Card className="overflow-hidden border-0 shadow-none gap-3">
+              <Card
+                className="overflow-hidden border-0 shadow-none gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => navigate(`/room/${listing._id || listing.id}`)}
+              >
                 <div className="relative w-36 h-36 lg:w-full lg:aspect-square">
                   <img
                     src={
@@ -44,7 +49,13 @@ export default function PopularHomesCarousel({ listings = [] }) {
                     alt={listing.title || listing.name}
                     className="w-full h-full object-cover rounded-2xl"
                   />
-                  <button className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300">
+                  <button
+                    className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Add favorite logic here
+                    }}
+                  >
                     <Heart
                       size={25}
                       className="stroke-gray-100"
