@@ -12,6 +12,7 @@ import SearchBar from '../SearchBar/SearchBar'
 import MenuList from '../Menu/MenuList'
 import { useSelector } from 'react-redux'
 import i18n from '@/utils/i18n'
+import GlobalModal from '../GlobalModal/GlobalModal'
 
 export default function Navbar() {
 
@@ -36,6 +37,19 @@ export default function Navbar() {
         function handleClickOutside(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setIsMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const [isTranslateOpen, setIsTranslateOpen] = useState(false);
+    const translateRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (translateRef.current && !translateRef.current.contains(event.target)) {
+                setIsTranslateOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -113,8 +127,13 @@ export default function Navbar() {
                     </NavLink>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 ml-auto">
-                    <span className="hidden md:inline-block cursor_pointer font-semibold hover:bg-[#d4d4d4c1] rounded-lg py-1 px-2 cursor-pointer text-sm lg:text-base">Become a host</span>
-                    <span className="cursor_pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 cursor-pointer hover:bg-[#d4d4d4d2] transition-(--transition-fast)"><Globe size={18} className="sm:w-5 sm:h-5" /></span>
+                    <span className="hidden md:inline-block cursor_pointer font-semibold hover:bg-[#d4d4d4c1] rounded-lg py-1 px-2 cursor-pointer text-sm lg:text-base">{t("navbar.host")}</span>
+                    <span
+                        className="cursor_pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 cursor-pointer hover:bg-[#d4d4d4d2] transition-(--transition-fast)"
+                        onClick={() => setIsTranslateOpen(prev => !prev)}>
+
+                        <Globe size={18} className="sm:w-5 sm:h-5" />
+                    </span>
                     <span
                         className="relative cursor-pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 hover:bg-[#d4d4d4d2] transition-(--transition-fast)"
                         onClick={() => setIsMenuOpen(prev => !prev)}
@@ -131,6 +150,7 @@ export default function Navbar() {
             <div className="mt-2 sm:mt-3 md:mt-4">
                 <SearchBar />
             </div>
+            {isTranslateOpen && <GlobalModal />}
         </nav>
     )
 }
