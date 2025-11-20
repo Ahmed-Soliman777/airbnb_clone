@@ -7,6 +7,7 @@ import './SearchBar.css'
 import GuestCount from '../GuestCount/GuestCount'
 import SearchCity from '../SearchCity/SearchCity'
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 
 export default function SearchBar() {
 
@@ -108,6 +109,32 @@ export default function SearchBar() {
         })
     }
 
+    const navigate = useNavigate();
+
+    const handleSearch = () => {
+        const city = whereInput?.trim() || "";
+
+        const checkIn = dateRange?.from
+            ? new Date(dateRange.from).toISOString()
+            : "";
+
+        const checkOut = dateRange?.to
+            ? new Date(dateRange.to).toISOString()
+            : "";
+
+        const guests = guestSummary?.trim() || "";
+
+        const queryParams = new URLSearchParams({
+            city,
+            checkIn,
+            checkOut,
+            guests,
+        }).toString();
+
+        navigate(`/search?${queryParams}`);
+    };
+
+
     return (
 
         // search bar container
@@ -197,14 +224,7 @@ export default function SearchBar() {
 
                 <button className="p-2 sm:p-2.5 rounded-lg sm:rounded-full bg-(--color-primary) hover:bg-(--color-primary-hover) cursor-pointer transition-colors w-[95%] sm:w-auto sm:shrink-0 flex items-center justify-center gap-2 sm:gap-0 mx-auto lg:me-3 md:me-2"
                     type='button'
-                    onClick={() => {
-                        console.log({
-                            location: document.querySelector('input[placeholder="Search destinations"]').value,
-                            checkIn: dateRange.from,
-                            checkOut: dateRange.to,
-                            guests: guestSummary,
-                        });
-                    }}
+                    onClick={handleSearch}
                 >
                     <SearchIcon color={'white'} size={20} />
                     <span className='sm:hidden text-white text-sm font-medium'>Search</span>
