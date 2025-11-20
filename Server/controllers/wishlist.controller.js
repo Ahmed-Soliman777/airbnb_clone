@@ -63,7 +63,8 @@ const getWishlist = async (req, res) => {
     const wishlistItems = await WishList.find({ user: userId })
       .populate({
         path: "listing",
-        select: "title pricePerNight images",
+        select:
+          "title description propertyType address pricePerNight cleaningFee maxGuests bedrooms bathrooms images amenities ratingAvg",
       })
       .sort({ createdAt: -1 });
 
