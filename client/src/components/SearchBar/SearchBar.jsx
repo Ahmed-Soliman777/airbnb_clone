@@ -22,7 +22,9 @@ export default function SearchBar() {
     }, [lang]);
 
     // add calendarRef if mouse is clicked outside the calendar
-    const calendarRef = useRef(null)
+    // const calendarRef = useRef(null)
+    const checkInRef = useRef(null)
+    const checkOutRef = useRef(null)
 
     const guestRef = useRef(null);
 
@@ -31,7 +33,9 @@ export default function SearchBar() {
     const [whereInput, setWhereInput] = useState("");
 
     // add state for caledar
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    // const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    const [isCheckinOpen, setIsCheckinOpen] = useState(false)
+    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
     const [isGuestOpen, setIsGuestOpen] = useState(false);
 
@@ -49,21 +53,32 @@ export default function SearchBar() {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
-                calendarRef.current &&
-                !calendarRef.current.contains(event.target)
+                checkInRef.current &&
+                !checkInRef.current.contains(event.target)
             ) {
-                setIsCalendarOpen(false)
+                setIsCheckinOpen(false)
+            }
+            if (
+                checkOutRef.current &&
+                !checkOutRef.current.contains(event.target)
+            ) {
+                setIsCheckoutOpen(false)
             }
         }
 
-        if (isCalendarOpen) {
+        if (isCheckinOpen) {
+            document.addEventListener('mousedown', handleClickOutside)
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+        if (isCheckoutOpen) {
             document.addEventListener('mousedown', handleClickOutside)
         } else {
             document.removeEventListener('mousedown', handleClickOutside)
         }
 
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isCalendarOpen])
+    }, [isCheckinOpen, isCheckoutOpen])
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -134,6 +149,33 @@ export default function SearchBar() {
         navigate(`/search?${queryParams}`);
     };
 
+    // Calendar handler
+    const handleDateSelect = (selectedRange) => {
+        if (!selectedRange) return;
+
+        if (isCheckinOpen) {
+            setDateRange(prev => ({
+                ...prev,
+                from: selectedRange.from,
+                to: prev.to && selectedRange.from > prev.to ? null : prev.to
+            }));
+
+            setIsCheckinOpen(false);
+            setIsCheckoutOpen(true);
+        }
+
+        if (isCheckoutOpen) {
+            setDateRange(prev => ({
+                ...prev,
+                to: selectedRange.to
+            }));
+
+            if (selectedRange.to) {
+                setIsCheckoutOpen(false);
+            }
+        }
+    };
+
 
     return (
 
@@ -148,42 +190,43 @@ export default function SearchBar() {
                 {/* Search destination input container */}
 
                 <div
-                    className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 relative cursor-pointer w-full sm:flex-1 min-w-0"
+                    className="relative w-full sm:flex-1 min-w-0"
                     ref={cityRef}
                 >
                     <div
-                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer w-full sm:flex-1 min-w-0"
+                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                        onClick={() => setIsCityOpen(true)}
                     >
                         <label className="text-xs sm:text-sm font-medium">{t("searchBar.where")}</label>
                         <input
                             type="text"
-                            placeholder={t("searchBar.search_destination")}
                             className="outline-0 text-sm bg-transparent truncate"
+                            placeholder={t("searchBar.search_destination")}
                             value={whereInput}
                             onChange={(e) => {
-                                setWhereInput(e.target.value); // update input
-                                setIsCityOpen(true); // open dropdown when typing
+                                setWhereInput(e.target.value);
+                                setIsCityOpen(true);
                             }}
-                            onClick={() => setIsCityOpen(true)} // keep click toggle
                         />
                     </div>
 
                     {isCityOpen && (
-                        <div className="absolute top-full mt-2 sm:top-17 left-0 sm:left-auto z-50 w-full sm:w-auto">
+                        <div className="absolute top-full mt-2 z-50 w-full">
                             <SearchCity
-                                whereInput={whereInput} // pass input for filtering
+                                whereInput={whereInput}
                                 onSelectCity={(city) => {
-                                    setWhereInput(city); // select city
-                                    setIsCityOpen(false); // close dropdown
+                                    setWhereInput(city);
+                                    setIsCityOpen(false);
                                 }}
                             />
                         </div>
                     )}
                 </div>
 
+
                 {/* check in date input container */}
 
-                <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
+                {/* <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
                     <label className='pointer-events-none text-xs sm:text-sm font-medium'>{t("searchBar.checkin")}</label>
                     <input type="text" placeholder={t("searchBar.add_dates")} readOnly className='pointer-events-none text-sm bg-transparent truncate' value={formatDate(dateRange.from)} />
                     {isCalendarOpen && <div className="absolute top-full mt-2 sm:top-17 left-0 sm:left-auto z-50" ref={calendarRef}>  <Calendar
@@ -194,31 +237,99 @@ export default function SearchBar() {
                         numberOfMonths={2}
                         className="rounded-lg border shadow-sm"
                     /></div>}
+                </div> */}
+                <div className="relative w-full sm:flex-1 min-w-0">
+                    <div
+                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                        onClick={() => {
+                            setIsCheckinOpen(true);
+                            setIsCheckoutOpen(false);
+                        }}
+
+                    >
+                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkin")}</label>
+                        <input
+                            readOnly
+                            className="text-sm bg-transparent truncate"
+                            placeholder={t("searchBar.add_dates")}
+                            value={formatDate(dateRange.from)}
+                        />
+                    </div>
+
+                    {isCheckinOpen && (
+                        <div ref={checkInRef} className="absolute top-full mt-2 z-50">
+                            <Calendar
+                                mode="range"
+                                selected={dateRange}
+                                onSelect={handleDateSelect}
+                                numberOfMonths={2}
+                                className="rounded-lg border shadow-sm bg-white"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* check out date input container */}
 
-                <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
+                {/* <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
                     <label className='pointer-events-none text-xs sm:text-sm font-medium'>{t("searchBar.checkout")}</label>
                     <input type="text" placeholder={t("searchBar.add_dates")} readOnly className='pointer-events-none text-sm bg-transparent truncate' value={formatDate(dateRange.to)} />
+                </div> */}
+                <div className="relative w-full sm:flex-1 min-w-0">
+                    <div
+                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                        onClick={() => {
+                            setIsCheckoutOpen(true);
+                            setIsCheckinOpen(false);
+                        }}
+
+                    >
+                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkout")}</label>
+                        <input
+                            readOnly
+                            className="text-sm bg-transparent truncate"
+                            placeholder={t("searchBar.add_dates")}
+                            value={formatDate(dateRange.to)}
+                        />
+                    </div>
+
+                    {isCheckoutOpen && (
+                        <div ref={checkOutRef} className="absolute top-full mt-2 z-50">
+                            <Calendar
+                                mode="range"
+                                selected={dateRange}
+                                onSelect={handleDateSelect}
+                                numberOfMonths={2}
+                                className="rounded-lg border shadow-sm bg-white"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* add guests input container */}
 
-                <div className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 relative cursor-pointer w-full sm:flex-1 min-w-0" ref={guestRef} >
-                    <div onClick={() => setIsGuestOpen(prev => !prev)}>
-                        <label className='pointer-events-none text-xs sm:text-sm font-medium'>{t("searchBar.who")}</label>
-                        <input type="text" placeholder={t("searchBar.guests")} readOnly className='pointer-events-none text-sm bg-transparent truncate' value={guestSummary} />
-
-                        {/* GuestCount component */}
-
+                <div className="relative w-full sm:flex-1 min-w-0" ref={guestRef}>
+                    <div
+                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                        onClick={() => setIsGuestOpen(true)}
+                    >
+                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.who")}</label>
+                        <input
+                            type="text"
+                            readOnly
+                            className="text-sm bg-transparent truncate"
+                            placeholder={t("searchBar.guests")}
+                            value={guestSummary}
+                        />
                     </div>
+
                     {isGuestOpen && (
-                        <div className="absolute top-full mt-2 sm:top-17 left-0 sm:left-auto z-50 w-full sm:w-auto">
+                        <div className="absolute top-full mt-2 z-50">
                             <GuestCount setGuestSummary={setGuestSummary} />
                         </div>
                     )}
                 </div>
+
 
                 {/* search btn */}
 
