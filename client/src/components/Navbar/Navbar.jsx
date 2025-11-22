@@ -244,8 +244,8 @@ export default function Navbar({ toggleTranslateModal }) {
             {/* Search bar */}
             {isServicePage && (
                 <div className={`
-                    mt-2 sm:mt-3 md:mt-4 overflow-hidden
-                    transition-all duration-500 ease-in-out
+                    mt-2 sm:mt-3 md:mt-4 
+                    transition-all duration-500 ease-in-out z-999
                     ${scrolled ? 'max-h-0 opacity-0 mt-0 transform -translate-y-4' : 'max-h-96 opacity-100 transform translate-y-0'}
                 `}>
                     <SearchBar />
