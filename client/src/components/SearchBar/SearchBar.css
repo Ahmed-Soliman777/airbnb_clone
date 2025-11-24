@@ -4,6 +4,6 @@ form > :not(:first-child)::before {
   left: -2px;
   top: 0px;
   width: 1px;
-  height: 55px;
+  height: 50px;
   background: #dcdcdc;
 }
