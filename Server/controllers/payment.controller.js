@@ -1,6 +1,8 @@
 const transactionModel = require("../models/Payment.model");
-const { reservationModel } = require("../models/Booking.model");
+const Booking = require("../models/Booking.model");
 const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
+
+const jwt = require("jsonwebtoken");
 
 // CREATE A TRANSACTION PROFILE FOR A USER (if not exists)
 async function handleCreateTransactions(req, res) {
@@ -51,61 +53,70 @@ async function handleGetTransactions(req, res) {
 
 // HANDLE STRIPE PAYMENT + RESERVATION CREATION
 async function handlePayment(req, res) {
+
+  
+  
+  const token = req.cookies?.token;
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized: No token" });
+  }
+  
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const userId = decoded.userId;
+  console.log("Decoded token:", decoded);
+  console.log("User ID:", userId);
+  
   try {
-    const { serviceName, roomType, checkIn, checkOut, guests, price, userId } =
+    const { listing, checkInDate, checkOutDate, guestsCount, totalPrice } =
       req.body;
 
-    if (!userId) {
-      return res.status(400).json({ message: "Missing userId" });
-    }
-
-    // 1. Create Stripe Checkout Session
+    //  Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: {
             currency: "usd",
-            product_data: { name: `${serviceName} - ${roomType}` },
-            unit_amount: price * 100,
+            product_data: { name: "Booking Reservation" },
+            unit_amount: totalPrice * 100,
           },
           quantity: 1,
         },
       ],
       mode: "payment",
-      shipping_address_collection: { allowed_countries: ["US", "CA", "EG"] },
-      success_url: `${process.env.BASE_URL}/complete`,
-      cancel_url: `${process.env.BASE_URL}/cancel`,
+      success_url: `${process.env.BASE_URL}/api/complete`,
+      cancel_url: `${process.env.BASE_URL}/api/cancel`,
     });
 
-    // 2. Create Reservation entry
-    const reservation = await reservationModel.create({
-      serviceName,
-      roomType,
-      checkIn,
-      checkOut,
-      guests,
-      price,
-      paymentStatus: "pending",
+    // Create Booking entry (correct field names)
+    const booking = await Booking.create({
+      user: userId,
+      listing,
+      checkInDate,
+      checkOutDate,
+      guestsCount,
+      totalPrice,
+      status: "pending",
       stripeSessionId: session.id,
     });
 
-    // 3. Attach reservation to user’s transaction profile
+    //Save booking reference in transactions
     let userTransaction = await transactionModel.findOne({ User: userId });
     if (!userTransaction) {
       userTransaction = await transactionModel.create({
         User: userId,
-        transactions: [reservation._id],
+        transactions: [booking._id],
       });
     } else {
-      userTransaction.transactions.push(reservation._id);
+      userTransaction.transactions.push(booking._id);
       await userTransaction.save();
     }
 
-    // 4. Return session URL and reservation id
+    // Send Stripe Checkout link back to frontend
     res.status(200).json({
       checkoutUrl: session.url,
-      reservationId: reservation._id,
+      bookingId: booking._id,
     });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
