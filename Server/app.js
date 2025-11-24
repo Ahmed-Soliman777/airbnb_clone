@@ -54,7 +54,12 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 //CORS configuration
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend origin
+    credentials: true,               // allow cookies
+  })
+);
 
 // Routes
 app.use("/api", userRoute);
@@ -65,7 +70,7 @@ app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
 
 // Root route
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.render("index.ejs");
 });
 
