@@ -4,13 +4,13 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createListing } from "@/store/Slices/listingSlice";
-import BasicDetailsStep from "./Steps/BasicDetailsStep";
-import LocationStep from "./Steps/LocationStep";
-import PricingStep from "./Steps/PricingStep";
-import PropertyDetailsStep from "./Steps/PropertyDetailsStep";
-import ImagesStep from "./Steps/ImagesStep";
-import AmenitiesStep from "./Steps/AmenitiesStep";
-import AvailabilityStep from "./Steps/AvailabilityStep";
+import BasicDetailsStep from "./Steps/HomeSteps/BasicDetailsStep";
+import LocationStep from "./Steps/HomeSteps/LocationStep";
+import PricingStep from "./Steps/HomeSteps/PricingStep";
+import PropertyDetailsStep from "./Steps/HomeSteps/PropertyDetailsStep";
+import ImagesStep from "./Steps/HomeSteps/ImagesStep";
+import AmenitiesStep from "./Steps/HomeSteps/AmenitiesStep";
+import AvailabilityStep from "./Steps/HomeSteps/AvailabilityStep";
 import StepIndicator from "./StepIndicator";
 
 const steps = [
