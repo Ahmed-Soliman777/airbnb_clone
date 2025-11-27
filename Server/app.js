@@ -13,7 +13,9 @@ const reviewRoute = require("./routes/review.routes");
 const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/payment.routes");
 const amenityRoute = require("./routes/amenity.routes");
-const wishlistRoute = require("./routes/wishlist.routes");
+const wishlistRoute = require("./routes/wishlist.routes"); 
+const experienceRoutes = require('./routes/experience.routes');
+const serviceRoutes = require('./routes/service.routes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -70,6 +72,8 @@ app.use("/api", bookingRoute);
 app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
 app.use("/api/wishlist", wishlistRoute);
+app.use('/api/experiences', experienceRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Root route
 app.get("/api", (req, res) => {
