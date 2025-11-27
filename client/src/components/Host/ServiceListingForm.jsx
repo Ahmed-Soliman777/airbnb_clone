@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createService } from "@/store/Slices/serviceSlice";
 import { toast } from "sonner";
-import StepIndicator from "./StepIndicator";
-import ServiceDetailsStep from "./Steps/ServiceSteps/ServiceDetailsStep";
-import ServiceImagesStep from "./Steps/ServiceSteps/ServiceImagesStep";
-import ServiceRequirementsStep from "./Steps/ServiceSteps/ServiceRequirementsStep";
-import ServiceAvailabilityStep from "./Steps/ServiceSteps/ServiceAvailabilityStep";
-import ServicePricingStep from "./Steps/ServiceSteps/ServicePricingStep";
-import ServiceLocationStep from "./Steps/ServiceSteps/ServiceLocationStep";
 import ServiceBasicDetailsStep from "./Steps/ServiceSteps/ServiceBasicDetailsStep";
+import ServiceLocationStep from "./Steps/ServiceSteps/ServiceLocationStep";
+import ServicePricingStep from "./Steps/ServiceSteps/ServicePricingStep";
+import ServiceAvailabilityStep from "./Steps/ServiceSteps/ServiceAvailabilityStep";
+import ServiceRequirementsStep from "./Steps/ServiceSteps/ServiceRequirementsStep";
+import ServiceImagesStep from "./Steps/ServiceSteps/ServiceImagesStep";
+import ServiceDetailsStep from "./Steps/ServiceSteps/ServiceDetailsStep";
+import StepIndicator from "./StepIndicator";
 
 const steps = [
   "Basic Details",
@@ -22,6 +24,8 @@ const steps = [
 ];
 
 const ServiceListingForm = ({ onBack }) => {
+  const dispatch = useDispatch();
+  const { status } = useSelector((state) => state.service);
   const [currentStep, setCurrentStep] = useState(0);
   const [listingData, setListingData] = useState({
     title: "",
@@ -62,25 +66,29 @@ const ServiceListingForm = ({ onBack }) => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Service listing data:", listingData);
-    toast.success("Service listing created successfully!");
-    onBack();
+  const handleSubmit = async () => {
+    try {
+      await dispatch(createService(listingData)).unwrap();
+      toast.success("Service listing created successfully!");
+      onBack();
+    } catch (error) {
+      toast.error(error || "Failed to create service listing");
+    }
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ServiceBasicDetailsStep 
-            data={listingData} 
+          <ServiceBasicDetailsStep
+            data={listingData}
             onUpdate={updateListingData}
           />
         );
       case 1:
         return (
-          <ServiceLocationStep 
-            data={listingData} 
+          <ServiceLocationStep
+            data={listingData}
             onUpdate={updateListingData}
           />
         );
@@ -145,14 +153,17 @@ const ServiceListingForm = ({ onBack }) => {
           >
             Previous
           </Button>
-          <Button 
-            onClick={handleNext} 
+          <Button
+            onClick={handleNext}
             size="lg"
             className="min-w-[120px]"
+            disabled={status === "loading"}
           >
-            {currentStep === steps.length - 1 
-              ? "Submit Listing" 
-              : "Next"}
+            {status === "loading"
+              ? "Submitting..."
+              : currentStep === steps.length - 1
+                ? "Submit Listing"
+                : "Next"}
           </Button>
         </div>
       </div>

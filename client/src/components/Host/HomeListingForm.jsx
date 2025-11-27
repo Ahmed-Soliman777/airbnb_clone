@@ -45,6 +45,9 @@ const HomeListingForm = ({ onBack }) => {
     availability: [],
   });
 
+  console.log(listingData);
+  
+
   const updateListingData = (data) => {
     setListingData((prev) => ({ ...prev, ...data }));
   };
