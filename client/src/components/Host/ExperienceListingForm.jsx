@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createExperience } from "@/store/Slices/experienceSlice";
 import { toast } from "sonner";
 import ExperienceBasicDetailsStep from "./Steps/ExperienceSteps/ExperienceBasicDetailsStep";
 import ExperienceLocationStep from "./Steps/ExperienceSteps/ExperienceLocationStep";
@@ -22,6 +24,8 @@ const steps = [
 ];
 
 const ExperienceListingForm = ({ onBack }) => {
+    const dispatch = useDispatch();
+    const { status } = useSelector((state) => state.experience);
     const [currentStep, setCurrentStep] = useState(0);
     const [listingData, setListingData] = useState({
         title: "",
@@ -60,10 +64,14 @@ const ExperienceListingForm = ({ onBack }) => {
         }
     };
 
-    const handleSubmit = () => {
-        console.log("Experience listing data:", listingData);
-        toast.success("Experience listing created successfully!");
-        onBack();
+    const handleSubmit = async () => {
+        try {
+            await dispatch(createExperience(listingData)).unwrap();
+            toast.success("Experience listing created successfully!");
+            onBack();
+        } catch (error) {
+            toast.error(error || "Failed to create experience listing");
+        }
     };
 
     const renderStep = () => {
@@ -147,10 +155,13 @@ const ExperienceListingForm = ({ onBack }) => {
                         onClick={handleNext}
                         size="lg"
                         className="min-w-[120px]"
+                        disabled={status === "loading"}
                     >
-                        {currentStep === steps.length - 1
-                            ? "Submit Listing"
-                            : "Next"}
+                        {status === "loading"
+                            ? "Submitting..."
+                            : currentStep === steps.length - 1
+                                ? "Submit Listing"
+                                : "Next"}
                     </Button>
                 </div>
             </div>
