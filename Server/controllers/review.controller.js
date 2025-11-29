@@ -12,7 +12,9 @@ const createReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
   try {
-    const reviews = await Review.find({ listingId: req.params.listingId });
+    const reviews = await Review.find({ listingId: req.params.listingId })
+      .populate("author", "firstName lastName avatar createdAt")
+      .sort({ createdAt: -1 });
     res.json(reviews);
   } catch (err) {
     res.status(500).json({ error: err.message });
