@@ -25,7 +25,7 @@ export default function Navbar({ toggleTranslateModal }) {
     const [scrollDirection, setScrollDirection] = useState('up');
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    const isServicePage = ['/', '/experience', '/services'].includes(location.pathname);
+    const isServicePage = ['/', '/experiences', '/services'].includes(location.pathname);
 
     useEffect(() => {
         i18n.changeLanguage(lang);
@@ -55,15 +55,20 @@ export default function Navbar({ toggleTranslateModal }) {
     }, [lastScrollY]);
 
     const getUnderlinePosition = () => {
-        switch (location.pathname) {
-            case "/":
-                return "left-0";
-            case "/experience":
-                return "left-1/3";
-            case "/services":
-                return "left-2/3";
-            default:
-                return "left-0";
+        if (direction === "rtl") {
+            switch (location.pathname) {
+                case "/": return "right-0";
+                case "/experiences": return "right-1/3";
+                case "/services": return "right-2/3";
+                default: return "right-0";
+            }
+        } else {
+            switch (location.pathname) {
+                case "/": return "left-0";
+                case "/experiences": return "left-1/3";
+                case "/services": return "left-2/3";
+                default: return "left-0";
+            }
         }
     };
 
@@ -127,7 +132,7 @@ export default function Navbar({ toggleTranslateModal }) {
 
                         {/* Experiences */}
                         <NavLink
-                            to="/experience"
+                            to="/experiences"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 
