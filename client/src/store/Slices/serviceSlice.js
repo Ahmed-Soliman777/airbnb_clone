@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "/api/services";
+const API_URL = "http://localhost:3000/api/services";
 
 // ============= Async thunk actions for services =================
 export const getAllServices = createAsyncThunk(
@@ -110,7 +110,7 @@ const serviceSlice = createSlice({
       })
       .addCase(getAllServices.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.services = action.payload;
+        state.services = action.payload.data;
       })
       .addCase(getAllServices.rejected, (state, action) => {
         state.status = "failed";
@@ -122,7 +122,7 @@ const serviceSlice = createSlice({
       })
       .addCase(getServiceById.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.service = action.payload;
+        state.service = action.payload.data;
       })
       .addCase(getServiceById.rejected, (state, action) => {
         state.status = "failed";
@@ -134,7 +134,7 @@ const serviceSlice = createSlice({
       })
       .addCase(createService.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.services.push(action.payload);
+        state.services.push(action.payload.data);
       })
       .addCase(createService.rejected, (state, action) => {
         state.status = "failed";
@@ -143,9 +143,9 @@ const serviceSlice = createSlice({
       // Update service
       .addCase(updateService.fulfilled, (state, action) => {
         const index = state.services.findIndex(
-          (svc) => svc._id === action.payload._id
+          (svc) => svc._id === action.payload.data._id
         );
-        if (index !== -1) state.services[index] = action.payload;
+        if (index !== -1) state.services[index] = action.payload.data;
       })
       // Delete service
       .addCase(deleteService.fulfilled, (state, action) => {
@@ -155,7 +155,7 @@ const serviceSlice = createSlice({
       })
       // Get host services
       .addCase(getHostServices.fulfilled, (state, action) => {
-        state.hostServices = action.payload;
+        state.hostServices = action.payload.data;
       });
   },
 });
