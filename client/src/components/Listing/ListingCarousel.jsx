@@ -19,9 +19,14 @@ export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const wishlistItems = useSelector((state) => state.wishlist.items);
+  const user = useSelector((state) => state.auth.user);
+
   useEffect(() => {
-    dispatch(fetchWishlist());
-  }, [dispatch]);
+    // Only fetch wishlist if user is logged in
+    if (user) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, user]);
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
