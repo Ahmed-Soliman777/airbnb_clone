@@ -1,8 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Grip, Heart, Share } from "lucide-react";
+import { useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
 
 const ListingGallery = ({ title, images = [] }) => {
-  const urls = images.map((img) => (typeof img === "string" ? img : img?.url)).filter(Boolean);
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const isFav = wishlistItems.includes(id);
+  const urls = images
+    .map((img) => (typeof img === "string" ? img : img?.url))
+    .filter(Boolean);
   const [img1, img2, img3, img4, img5] = [
     urls[0] || "https://placehold.co/1200x800?text=Photo+1",
     urls[1] || "https://placehold.co/600x400?text=Photo+2",
@@ -29,8 +39,9 @@ const ListingGallery = ({ title, images = [] }) => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+            onClick={() => dispatch(toggleWishlistItem(id))}
           >
-            <Heart size={18} />
+            <Heart size={18} fill={isFav ? "red" : "none"} />
             <div className="underline">Save</div>
           </Button>
         </div>

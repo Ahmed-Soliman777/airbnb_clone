@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Carousel,
   CarouselContent,
@@ -9,9 +8,20 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import {
+  fetchWishlist,
+  toggleWishlistItem,
+} from "@/store/Slices/wishlistSlice";
 
 export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+  useEffect(() => {
+    dispatch(fetchWishlist());
+  }, [dispatch]);
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
@@ -29,64 +39,69 @@ export default function PopularHomesCarousel({ listings = [] }) {
 
         <CarouselContent className="-ml-2 md:-ml-4 gap-0">
           {/*---------------- Start of Carousel Item ---------------- */}
-          {listings.map((listing) => (
-            <CarouselItem
-              key={listing._id || listing.id}
-              className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
-            >
-              {/*---------------- Start of Cards ---------------- */}
-              <Card
-                className="overflow-hidden border-0 shadow-none gap-3 cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => navigate(`/room/${listing._id || listing.id}`)}
+          {listings.map((listing) => {
+            const listingId = listing._id || listing.id;
+            const isFav = wishlistItems.includes(listingId);
+            return (
+              <CarouselItem
+                key={listing._id || listing.id}
+                className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
               >
-                <div className="relative w-36 h-36 lg:w-full lg:aspect-square">
-                  <img
-                    src={
-                      listing.images?.[0]?.url ||
-                      listing.image ||
-                      "https://via.placeholder.com/400"
-                    }
-                    alt={listing.title || listing.name}
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                  <button
-                    className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Add favorite logic here
-                    }}
-                  >
-                    <Heart
-                      size={25}
-                      className="stroke-gray-100"
-                      fill="rgba(0,0,0,0.45)"
+                {/*---------------- Start of Cards ---------------- */}
+                <Card
+                  className="overflow-hidden border-0 shadow-none gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => navigate(`/room/${listing._id || listing.id}`)}
+                >
+                  <div className="relative w-36 h-36 lg:w-full lg:aspect-square">
+                    <img
+                      src={
+                        listing.images?.[0]?.url ||
+                        listing.image ||
+                        "https://via.placeholder.com/400"
+                      }
+                      alt={listing.title || listing.name}
+                      className="w-full h-full object-cover rounded-2xl"
                     />
-                  </button>
-                  <div className="absolute top-2 left-2 bg-white text-xs font-medium px-2 py-1 rounded-full">
-                    Guest favourite
+                    <button
+                      className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Add favorite logic here
+                        dispatch(toggleWishlistItem(listingId));
+                      }}
+                    >
+                      <Heart
+                        size={25}
+                        className="stroke-gray-100"
+                        fill={isFav ? "red" : "rgba(0,0,0,0.45)"}
+                      />
+                    </button>
+                    <div className="absolute top-2 left-2 bg-white text-xs font-medium px-2 py-1 rounded-full">
+                      Guest favourite
+                    </div>
                   </div>
-                </div>
 
-                <CardContent className="px-1">
-                  <h3 className="font-medium text-[0.8rem]">
-                    {listing.title || listing.name}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    {listing.location || listing.city}
-                  </p>
-                  <p className="text-[0.8rem] mt-1">
-                    ${listing.price || listing.pricePerNight} per night
-                    {listing.rating && (
-                      <span className="text-gray-500 ml-2">
-                        ★ {listing.rating}
-                      </span>
-                    )}
-                  </p>
-                </CardContent>
-              </Card>
-              {/*---------------- End of Cards ---------------- */}
-            </CarouselItem>
-          ))}
+                  <CardContent className="px-1">
+                    <h3 className="font-medium text-[0.8rem]">
+                      {listing.title || listing.name}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {listing.location || listing.city}
+                    </p>
+                    <p className="text-[0.8rem] mt-1">
+                      ${listing.price || listing.pricePerNight} per night
+                      {listing.rating && (
+                        <span className="text-gray-500 ml-2">
+                          ★ {listing.rating}
+                        </span>
+                      )}
+                    </p>
+                  </CardContent>
+                </Card>
+                {/*---------------- End of Cards ---------------- */}
+              </CarouselItem>
+            );
+          })}
           {/*---------------- End of Carousel Item ---------------- */}
         </CarouselContent>
       </Carousel>
