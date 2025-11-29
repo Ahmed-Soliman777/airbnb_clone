@@ -7,6 +7,7 @@ import wishlistReducer from "./Slices/wishlistSlice";
 import paymentReducer from "./Slices/paymentSlice";
 import experienceReducer from "./Slices/experienceSlice";
 import serviceReducer from "./Slices/serviceSlice";
+import reviewReducer from "./Slices/reviewSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     payment: paymentReducer,
     experience: experienceReducer,
     service: serviceReducer,
+    review: reviewReducer,
   },
 });
 
