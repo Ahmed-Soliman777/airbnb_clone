@@ -32,7 +32,7 @@ export default function Navbar() {
         switch (location.pathname) {
             case "/":
                 return "left-0";
-            case "/expierences":
+            case "/experience":
                 return "left-1/3";
             case "/services":
                 return "left-2/3";
