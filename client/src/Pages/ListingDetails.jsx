@@ -2,10 +2,11 @@ import BookingHome from "@/components/BookingHome/BookingHome";
 import Amenity from "@/components/Listing/Amenity";
 import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
 import ListingGallery from "@/components/Listing/ListingGallery";
-import ListingRate from "@/components/Listing/ListingRate";
-import ListingReviews from "@/components/Listing/ListingReviews";
+import AverageRating from "@/components/Listing/AverageRating";
+import ReviewsList from "@/components/Listing/ReviewsList";
 import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
+import { getReviewsByListing } from "@/store/Slices/reviewSlice";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,9 +19,13 @@ const ListingDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { listing, status, error } = useSelector((state) => state.listing);
+  const { reviews } = useSelector((state) => state.review);
 
   useEffect(() => {
-    if (id) dispatch(GetListingById(id));
+    if (id) {
+      dispatch(GetListingById(id));
+      dispatch(getReviewsByListing(id));
+    }
   }, [id, dispatch]);
 
   // Show loading state
@@ -255,9 +260,9 @@ const ListingDetails = () => {
         </div>
 
         {/*================= Rating and Reviews Sections ================= */}
-        <div>
-          <ListingRate />
-          <ListingReviews />
+        <div className="max-w-5xl">
+          <AverageRating reviews={reviews} />
+          <ReviewsList reviews={reviews} />
         </div>
         {/*================= Location Section ================= */}
         <div className="listing-location"> location details here</div>
