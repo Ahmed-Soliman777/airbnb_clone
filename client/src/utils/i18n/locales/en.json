@@ -1,0 +1,18 @@
+{
+  "navbar": {
+    "homes": "Homes",
+    "experiences": "Experiences",
+    "services": "Services",
+    "host": "Become a host",
+    "new": "New"
+  },
+  "searchBar": {
+    "where": "Where",
+    "search_destination": "search destination",
+    "checkin": "Check in",
+    "checkout": "Check out",
+    "add_dates": "Add dates",
+    "who": "Who",
+    "guests": "Add guests"
+  }
+}

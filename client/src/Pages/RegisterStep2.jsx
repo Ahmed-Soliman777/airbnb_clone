@@ -9,14 +9,14 @@ import VerifyEmail from "../components/User/VerifyEmail";
 
 const registerSchema = z
   .object({
-    firstName: z.string().min(4, "First name must be at least 4 characters"),
-    lastName: z.string().min(4, "Last name must be at least 4 characters"),
+    firstName: z.string().min(3, "First name must be at least 3 characters"),
+    lastName: z.string().min(3, "Last name must be at least 3 characters"),
     dob: z.string().min(1, "Date of birth is required"),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "must contain at least one uppercase letter")
-      .regex(/\d/, "must contain at least one number")
+      .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+      .regex(/\d/, "Must contain at least one number")
       .regex(/[@$!%*?&]/, "Must contain at least one special character"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
@@ -34,7 +34,7 @@ const RegisterStep2 = () => {
   const savedEmail = localStorage.getItem("registerEmail");
 
   useEffect(() => {
-    if (!savedEmail) navigate("/register");
+    if (!savedEmail) navigate("/fregister");
   }, [savedEmail, navigate]);
 
   const {
@@ -46,22 +46,23 @@ const RegisterStep2 = () => {
   });
 
   const onSubmit = (data) => {
-    const fullData = {
-      email: savedEmail,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      dob: data.dob,
-      password: data.password,
-    };
-
-    dispatch(registerUser(fullData))
-      .unwrap()
-      .then(() => {
-        localStorage.removeItem("registerEmail");
-        setShowVerify(true);
-      })
-      .catch(() => {});
+  const fullData = {
+    email: savedEmail,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    dob: data.dob,
+    password: data.password,
   };
+
+  dispatch(registerUser(fullData))
+    .unwrap()
+    .then(() => {
+     
+      setShowVerify(true);
+
+    })
+    .catch(() => {});
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">

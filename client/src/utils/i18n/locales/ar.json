@@ -1,0 +1,18 @@
+{
+  "navbar": {
+    "homes": "المساكن",
+    "experiences": "تجارب",
+    "services": "الخدمات",
+    "host": "استضف على Airbnb",
+    "new": "جديد"
+  },
+  "searchBar": {
+    "where": "أين",
+    "search_destination": "أبحث عن وجهات",
+    "checkin": "وصول",
+    "checkout": "مغادرة",
+    "add_dates": "أضف تاريخاً",
+    "who": "النزلاء",
+    "guests": "أضف نزلاء"
+  }
+}

@@ -16,7 +16,9 @@ export const registerUser = createAsyncThunk(
       if (!res.ok) throw new Error(data.message || "Registration failed");
       return data;
     } catch (err) {
+      console.log(err)
       return rejectWithValue(err.message);
+     
     }
   }
 );
@@ -29,14 +31,15 @@ export const loginUser = createAsyncThunk(
       const res = await fetch(`${BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", 
         body: JSON.stringify(credentials),
       });
+
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      // token
-      document.cookie = `authToken=${data.token}; path=/; max-age=${60 * 60 * 24}; samesite=strict`;
-      return data;
+      return data; 
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -51,16 +54,21 @@ export const verifyEmail = createAsyncThunk(
       const res = await fetch(`${BASE_URL}/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", 
         body: JSON.stringify({ email, code }),
       });
+
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.message || "Verification failed");
-      return data;
+
+      return data; 
     } catch (err) {
       return rejectWithValue(err.message);
     }
   }
 );
+
 
 // forget Password
 export const forgetPassword = createAsyncThunk(
@@ -88,6 +96,8 @@ export const resendVerification = createAsyncThunk(
       const res = await fetch(`${BASE_URL}/resend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+         credentials: "include", 
+
         body: JSON.stringify(data),
       });
       const result = await res.json();
@@ -99,18 +109,12 @@ export const resendVerification = createAsyncThunk(
   }
 );
 
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
-};
+
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
-    token: getCookie("authToken") || null,
+   
     loading: false,
     error: null,
     successMessage: null,
@@ -118,8 +122,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
-      state.token = null;
-       document.cookie = "authToken=; path=/; max-age=0";
+      
     },
     clearMessages: (state) => {
       state.error = null;
@@ -150,7 +153,6 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
         state.user = action.payload.user;
         state.successMessage = "Login successful!";
       })
@@ -164,8 +166,10 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyEmail.fulfilled, (state) => {
+      .addCase(verifyEmail.fulfilled, (state,action) => {
         state.loading = false;
+        state.user = action.payload.user;
+
         state.successMessage = "Email verified successfully!";
       })
       .addCase(verifyEmail.rejected, (state, action) => {
