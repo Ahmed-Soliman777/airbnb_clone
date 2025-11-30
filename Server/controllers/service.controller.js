@@ -9,10 +9,7 @@ const createService = async (req, res) => {
       title,
       description,
       serviceCategory,
-      serviceArea,
-      city,
-      country,
-      coordinates,
+      location,
       hourlyRate,
       packages,
       availability,
@@ -26,12 +23,7 @@ const createService = async (req, res) => {
       title,
       description,
       serviceCategory,
-      location: {
-        serviceArea,
-        city,
-        country,
-        coordinates
-      },
+      location,
       hourlyRate,
       packages,
       availability,
@@ -54,15 +46,16 @@ const createService = async (req, res) => {
   }
 };
 
+
 // @desc    Get all services
 // @route   GET /api/services
 // @access  Public
 const getServices = async (req, res) => {
   try {
     const { city, country, serviceCategory, page = 1, limit = 10 } = req.query;
-    
+
     const query = { status: 'active' };
-    
+
     if (city) query['location.city'] = new RegExp(city, 'i');
     if (country) query['location.country'] = new RegExp(country, 'i');
     if (serviceCategory) query.serviceCategory = serviceCategory;

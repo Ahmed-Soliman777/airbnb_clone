@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { addExperienceImage, removeExperienceImage } from "@/store/Slices/experienceFormSlice";
 
 export default function ExperienceImagesStep({ data, onUpdate }) {
+  const dispatch = useDispatch();
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e) => {
@@ -16,22 +19,44 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
     }
   };
 
+  const processFiles = (files) => {
+    const fileArray = Array.from(files);
+    const imageUrls = [];
+
+    fileArray.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imageUrls.push(e.target.result);
+          if (imageUrls.length === fileArray.filter(f => f.type.startsWith("image/")).length) {
+            onUpdate({ images: [...(data.images || []), ...imageUrls] });
+            dispatch(addExperienceImage(imageUrls));
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    // Handle file upload logic here
-    console.log("Files dropped:", e.dataTransfer.files);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
   };
 
   const handleFileSelect = (e) => {
-    // Handle file selection logic here
-    console.log("Files selected:", e.target.files);
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+    }
   };
 
   const removeImage = (index) => {
     const updatedImages = data.images.filter((_, i) => i !== index);
     onUpdate({ images: updatedImages });
+    dispatch(removeExperienceImage(index));
   };
 
   return (
@@ -50,17 +75,16 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
 
       <div className="max-w-xl mx-auto">
         <Label className="mb-3 block">Experience Photos</Label>
-        
+
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragActive
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
               ? "border-primary bg-accent"
               : "border-border hover:border-primary/50"
-          }`}
+            }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">
@@ -75,9 +99,9 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
             accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
-            id="file-upload"
+            id="experience-file-upload"
           />
-          <label htmlFor="file-upload">
+          <label htmlFor="experience-file-upload">
             <Button type="button" variant="outline" asChild>
               <span>Choose Files</span>
             </Button>
