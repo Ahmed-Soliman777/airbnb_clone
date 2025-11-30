@@ -20,8 +20,8 @@ const placeholderBedroomImg =
 const ListingDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { listing, status, error } = useSelector((state) => state.listing);
-  const { reviews } = useSelector((state) => state.review);
+  const { listing, status } = useSelector((state) => state.listing);
+  const { reviews, statistics } = useSelector((state) => state.review);
 
   useEffect(() => {
     if (id) {
@@ -263,7 +263,7 @@ const ListingDetails = () => {
 
         {/*================= Rating and Reviews Sections ================= */}
         <div className="max-w-5xl">
-          <AverageRating reviews={reviews} />
+          <AverageRating reviews={reviews} statistics={statistics} />
           <ReviewsList reviews={reviews} />
         </div>
         {/*================= Location Section ================= */}

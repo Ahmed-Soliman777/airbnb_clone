@@ -8,10 +8,12 @@ import {
   Tag,
 } from "lucide-react";
 
-export default function AverageRating({ reviews }) {
-  const totalReviews = reviews.length;
-  const averageRating =
-    totalReviews > 0
+export default function AverageRating({ reviews, statistics }) {
+  // Use statistics if provided, otherwise calculate from reviews
+  const totalReviews = statistics?.totalReviews ?? reviews.length;
+  const averageRating = statistics?.avgRating 
+    ? statistics.avgRating.toFixed(2)
+    : totalReviews > 0
       ? (
           reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
         ).toFixed(2)

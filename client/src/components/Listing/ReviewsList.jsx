@@ -51,6 +51,7 @@ export default function ReviewsList({ reviews }) {
           <div key={review._id} className="flex gap-4">
             <img
               src={
+                review.author?.profilePhoto ||
                 review.author?.avatar ||
                 `https://ui-avatars.com/api/?name=${review.author?.firstName}+${review.author?.lastName}&background=random`
               }

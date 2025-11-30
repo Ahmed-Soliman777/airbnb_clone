@@ -8,7 +8,7 @@ const API_URL = "/api/review";
 export const getReviewsByListing = createAsyncThunk(
   "review/getReviewsByListing",
   async (listingId) => {
-    const response = await axios.get(`${API_URL}/${listingId}`);
+    const response = await axios.get(`/api/listings/${listingId}/reviews`);
     return response.data;
   }
 );
@@ -52,12 +52,20 @@ const reviewSlice = createSlice({
   name: "review",
   initialState: {
     reviews: [],
+    statistics: {
+      totalReviews: 0,
+      avgRating: 0,
+    },
     status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
   reducers: {
     clearReviews: (state) => {
       state.reviews = [];
+      state.statistics = {
+        totalReviews: 0,
+        avgRating: 0,
+      };
       state.status = "idle";
       state.error = null;
     },
@@ -70,7 +78,11 @@ const reviewSlice = createSlice({
       })
       .addCase(getReviewsByListing.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.reviews = action.payload;
+        state.reviews = action.payload.reviews || [];
+        state.statistics = action.payload.statistics || {
+          totalReviews: 0,
+          avgRating: 0,
+        };
       })
       .addCase(getReviewsByListing.rejected, (state, action) => {
         state.status = "failed";
