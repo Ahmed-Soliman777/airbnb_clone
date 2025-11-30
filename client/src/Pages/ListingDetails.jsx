@@ -5,6 +5,7 @@ import ListingGallery from "@/components/Listing/ListingGallery";
 import AverageRating from "@/components/Listing/AverageRating";
 import ReviewsList from "@/components/Listing/ReviewsList";
 import ListingLocation from "@/components/Listing/ListingLocation";
+import ListingHost from "@/components/Listing/ListingHost";
 import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
@@ -271,7 +272,7 @@ const ListingDetails = () => {
         </div>
         {/*================= Host Section ================= */}
         <div className="max-w-5xl">
-          <ListingHost />
+          <ListingHost listing={listing} />
         </div>
       </div>
     </>
