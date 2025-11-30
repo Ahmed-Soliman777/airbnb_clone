@@ -6,6 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
+  getListingReviews,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -83,6 +84,63 @@ router.get("/listings", getListings);
  *         description: Listing not found
  */
 router.get("/listings/:id", getListingById);
+
+/**
+ * @swagger
+ * /listings/{id}/reviews:
+ *   get:
+ *     summary: Get all reviews for a listing (public)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of reviews with statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 reviews:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       comment:
+ *                         type: string
+ *                       author:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           firstName:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           profilePhoto:
+ *                             type: string
+ *                       createdAt:
+ *                         type: string
+ *                 statistics:
+ *                   type: object
+ *                   properties:
+ *                     totalReviews:
+ *                       type: number
+ *                     avgRating:
+ *                       type: number
+ *       404:
+ *         description: Listing not found
+ */
+router.get("/listings/:id/reviews", getListingReviews);
 
 /**
  * @swagger

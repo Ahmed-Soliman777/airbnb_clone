@@ -325,6 +325,45 @@ const searchListings = async (req, res) => {
   });
 };
 
+// Get listing reviews
+const getListingReviews = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if listing exists
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Get all reviews for the listing
+    const Review = require("../models/Review.model");
+    const reviews = await Review.find({ listingId: id })
+      .populate("author", "firstName lastName profilePhoto")
+      .sort({ createdAt: -1 });
+
+    // Calculate review statistics
+    const totalReviews = reviews.length;
+    const avgRating =
+      totalReviews > 0
+        ? (
+            reviews.reduce((sum, review) => sum + review.rating, 0) /
+            totalReviews
+          ).toFixed(2)
+        : 0;
+
+    res.status(200).json({
+      reviews,
+      statistics: {
+        totalReviews,
+        avgRating: parseFloat(avgRating),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createListing,
   getListings,
@@ -332,4 +371,5 @@ module.exports = {
   updateListing,
   deleteListing,
   searchListings,
+  getListingReviews,
 };
