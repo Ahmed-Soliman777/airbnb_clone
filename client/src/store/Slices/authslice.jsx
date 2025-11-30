@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const BASE_URL = "https://localhost3000/api";
+const BASE_URL = "http://localhost:3000/api";
 
 //  Register
 export const registerUser = createAsyncThunk(
-  "auth/register",
+  "/register",
   async (userData, { rejectWithValue }) => {
     try {
       const res = await fetch(`${BASE_URL}/register`, {
@@ -48,7 +48,7 @@ export const loginUser = createAsyncThunk(
 
 //  Verify email
 export const verifyEmail = createAsyncThunk(
-  "auth/verifyEmail",
+  "/verifyEmail",
   async ({ email, code }, { rejectWithValue }) => {
     try {
       const res = await fetch(`${BASE_URL}/verify-email`, {
@@ -90,13 +90,12 @@ export const forgetPassword = createAsyncThunk(
 );
 //resend verify email
 export const resendVerification = createAsyncThunk(
-  "auth/resendVerification",
+  "/resendVerification",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/resend`, {
+      const res = await fetch(`${BASE_URL}/resend-code`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-         credentials: "include", 
+        headers: { "Content-Type": "application/json" }, 
 
         body: JSON.stringify(data),
       });
