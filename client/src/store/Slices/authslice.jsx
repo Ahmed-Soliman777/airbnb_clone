@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 //  Register
 export const registerUser = createAsyncThunk(
-  "auth/register",
+  "/register",
   async (userData, { rejectWithValue }) => {
     try {
       const res = await fetch(`/api/register`, {
@@ -45,7 +45,7 @@ export const loginUser = createAsyncThunk(
 
 //  Verify email
 export const verifyEmail = createAsyncThunk(
-  "auth/verifyEmail",
+  "/verifyEmail",
   async ({ email, code }, { rejectWithValue }) => {
     try {
       const res = await fetch(`/api/verify-email`, {
@@ -86,7 +86,7 @@ export const forgetPassword = createAsyncThunk(
 );
 //resend verify email
 export const resendVerification = createAsyncThunk(
-  "auth/resendVerification",
+  "/resendVerification",
   async (data, { rejectWithValue }) => {
     try {
       const res = await fetch(`/api/resend`, {

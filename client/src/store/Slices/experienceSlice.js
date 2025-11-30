@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "/api/experiences";
+const API_URL = "http://localhost:3000/api/experiences";
 
 // ============= Async thunk actions for experiences =================
 export const getAllExperiences = createAsyncThunk(
@@ -110,7 +110,7 @@ const experienceSlice = createSlice({
       })
       .addCase(getAllExperiences.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.experiences = action.payload;
+        state.experiences = action.payload.data;
       })
       .addCase(getAllExperiences.rejected, (state, action) => {
         state.status = "failed";
@@ -122,7 +122,7 @@ const experienceSlice = createSlice({
       })
       .addCase(getExperienceById.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.experience = action.payload;
+        state.experience = action.payload.data;
       })
       .addCase(getExperienceById.rejected, (state, action) => {
         state.status = "failed";
@@ -134,7 +134,7 @@ const experienceSlice = createSlice({
       })
       .addCase(createExperience.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.experiences.push(action.payload);
+        state.experiences.push(action.payload.data);
       })
       .addCase(createExperience.rejected, (state, action) => {
         state.status = "failed";
@@ -143,9 +143,9 @@ const experienceSlice = createSlice({
       // Update experience
       .addCase(updateExperience.fulfilled, (state, action) => {
         const index = state.experiences.findIndex(
-          (exp) => exp._id === action.payload._id
+          (exp) => exp._id === action.payload.data._id
         );
-        if (index !== -1) state.experiences[index] = action.payload;
+        if (index !== -1) state.experiences[index] = action.payload.data;
       })
       // Delete experience
       .addCase(deleteExperience.fulfilled, (state, action) => {
@@ -155,7 +155,7 @@ const experienceSlice = createSlice({
       })
       // Get host experiences
       .addCase(getHostExperiences.fulfilled, (state, action) => {
-        state.hostExperiences = action.payload;
+        state.hostExperiences = action.payload.data;
       });
   },
 });

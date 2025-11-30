@@ -196,6 +196,33 @@ router.delete('/:id', auth, userController.deleteUser);
  *         description: Unauthorized
  */
 router.post('/become-host', auth, userController.becomeHost);
+/**
+ * @swagger
+ * /users/resend-code:
+ *   post:
+ *     summary: Resend verification code to user's email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: aml@example.com
+ *     responses:
+ *       200:
+ *         description: Verification code resent successfully
+ *       400:
+ *         description: Bad request / No verification code found
+ *       404:
+ *         description: User not found
+ */
+router.post('/resend-code', userController.resendVerificationCode);
 
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Experience = require('../models/Experience.model');
+const { uploadOnCloudinary } = require('../config/cloudinary');
 
 // @desc    Create new experience listing
 // @route   POST /api/experiences
@@ -9,10 +10,7 @@ const createExperience = async (req, res) => {
             title,
             description,
             experienceType,
-            street,
-            city,
-            country,
-            coordinates,
+            location,
             pricePerPerson,
             duration,
             groupSize,
@@ -24,16 +22,38 @@ const createExperience = async (req, res) => {
             inclusions
         } = req.body;
 
+        let uploadedImages = [];
+
+        if (images && Array.isArray(images) && images.length > 0) {
+            // Upload all images in parallel
+            uploadedImages = await Promise.all(
+                images.map(async (img) => {
+                    let base64Image = img;
+
+                    if (!base64Image.startsWith("data:image")) {
+                        base64Image = "data:image/jpeg;base64," + base64Image;
+                    }
+
+                    try {
+                        return await uploadOnCloudinary(base64Image);
+                    } catch (error) {
+                        console.error(error.message);
+                        return null;
+                    }
+                })
+            );
+
+            uploadedImages = uploadedImages.filter(Boolean);
+        }
+
+        console.log(req.body);
+        
+
         const experience = await Experience.create({
             title,
             description,
             experienceType,
-            location: {
-                street,
-                city,
-                country,
-                coordinates
-            },
+            location,
             pricePerPerson,
             duration,
             groupSize,
@@ -41,7 +61,7 @@ const createExperience = async (req, res) => {
             ageRequirement,
             fitnessLevel,
             requirements,
-            images,
+            images: uploadedImages,
             inclusions,
             host: req.user._id
         });
@@ -57,6 +77,7 @@ const createExperience = async (req, res) => {
         });
     }
 };
+
 
 // @desc    Get all experiences
 // @route   GET /api/experiences
@@ -128,41 +149,32 @@ const getExperience = async (req, res) => {
 const updateExperience = async (req, res) => {
     try {
         let experience = await Experience.findById(req.params.id);
+        if (!experience) return res.status(404).json({ success: false, message: 'Experience not found' });
 
-        if (!experience) {
-            return res.status(404).json({
-                success: false,
-                message: 'Experience not found'
-            });
-        }
-
-        // Check ownership
         if (experience.host.toString() !== req.user._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: 'Not authorized to update this experience'
-            });
+            return res.status(403).json({ success: false, message: 'Not authorized to update this experience' });
         }
 
         const {
             title,
             description,
             experienceType,
-            street,
-            city,
-            country,
-            coordinates,
+            location,
             pricePerPerson,
             duration,
             groupSize,
             schedule,
             ageRequirement,
             fitnessLevel,
+            images: newImages,
             requirements,
-            images,
             inclusions,
             status
         } = req.body;
+
+        const uploadedImages = newImages && newImages.length > 0
+            ? await Promise.all(newImages.map(img => uploadOnCloudinary(img)))
+            : experience.images;
 
         experience = await Experience.findByIdAndUpdate(
             req.params.id,
@@ -170,12 +182,7 @@ const updateExperience = async (req, res) => {
                 title,
                 description,
                 experienceType,
-                location: {
-                    street,
-                    city,
-                    country,
-                    coordinates
-                },
+                location,
                 pricePerPerson,
                 duration,
                 groupSize,
@@ -183,24 +190,20 @@ const updateExperience = async (req, res) => {
                 ageRequirement,
                 fitnessLevel,
                 requirements,
-                images,
+                images: uploadedImages,
                 inclusions,
                 status
             },
             { new: true, runValidators: true }
         );
 
-        res.status(200).json({
-            success: true,
-            data: experience
-        });
+        res.status(200).json({ success: true, data: experience });
+
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
+
 
 // @desc    Delete experience
 // @route   DELETE /api/experiences/:id
