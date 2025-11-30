@@ -4,6 +4,7 @@ import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
 import ListingGallery from "@/components/Listing/ListingGallery";
 import AverageRating from "@/components/Listing/AverageRating";
 import ReviewsList from "@/components/Listing/ReviewsList";
+import ListingLocation from "@/components/Listing/ListingLocation";
 import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
@@ -265,7 +266,13 @@ const ListingDetails = () => {
           <ReviewsList reviews={reviews} />
         </div>
         {/*================= Location Section ================= */}
-        <div className="listing-location"> location details here</div>
+        <div className="max-w-5xl">
+          <ListingLocation listing={listing} />
+        </div>
+        {/*================= Host Section ================= */}
+        <div className="max-w-5xl">
+          <ListingHost />
+        </div>
       </div>
     </>
   );
