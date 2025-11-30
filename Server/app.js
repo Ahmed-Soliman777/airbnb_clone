@@ -14,14 +14,23 @@ const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/payment.routes");
 const amenityRoute = require("./routes/amenity.routes");
 const wishlistRoute = require("./routes/wishlist.routes");
+const experienceRoutes = require('./routes/experience.routes');
+const serviceRoutes = require('./routes/service.routes');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+//CORS configuration
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend origin
+    credentials: true,               // allow cookies
+  })
+);
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.set("view engine", "ejs");
 
 // Swagger configuration
@@ -74,9 +83,11 @@ app.use("/api", bookingRoute);
 app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
 app.use("/api/wishlist", wishlistRoute);
+app.use('/api/experiences', experienceRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Root route
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.render("index.ejs");
 });
 

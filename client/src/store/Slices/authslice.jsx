@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const BASE_URL = "http://localhost:3000/api";
-
 //  Register
 export const registerUser = createAsyncThunk(
   "/register",
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/register`, {
+      const res = await fetch(`/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -16,9 +14,8 @@ export const registerUser = createAsyncThunk(
       if (!res.ok) throw new Error(data.message || "Registration failed");
       return data;
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return rejectWithValue(err.message);
-     
     }
   }
 );
@@ -28,10 +25,10 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/login`, {
+      const res = await fetch(`api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify(credentials),
       });
 
@@ -39,7 +36,7 @@ export const loginUser = createAsyncThunk(
 
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      return data; 
+      return data;
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -51,10 +48,10 @@ export const verifyEmail = createAsyncThunk(
   "/verifyEmail",
   async ({ email, code }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/verify-email`, {
+      const res = await fetch(`/api/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify({ email, code }),
       });
 
@@ -62,20 +59,19 @@ export const verifyEmail = createAsyncThunk(
 
       if (!res.ok) throw new Error(data.message || "Verification failed");
 
-      return data; 
+      return data;
     } catch (err) {
       return rejectWithValue(err.message);
     }
   }
 );
 
-
 // forget Password
 export const forgetPassword = createAsyncThunk(
   "auth/forgetPassword",
   async (email, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/forget-password`, {
+      const res = await fetch(`/api/forget-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -93,9 +89,10 @@ export const resendVerification = createAsyncThunk(
   "/resendVerification",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${BASE_URL}/resend-code`, {
+      const res = await fetch(`/api/resend`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, 
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
 
         body: JSON.stringify(data),
       });
@@ -108,12 +105,9 @@ export const resendVerification = createAsyncThunk(
   }
 );
 
-
-
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-   
     loading: false,
     error: null,
     successMessage: null,
@@ -121,7 +115,6 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
-      
     },
     clearMessages: (state) => {
       state.error = null;
@@ -165,7 +158,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyEmail.fulfilled, (state,action) => {
+      .addCase(verifyEmail.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
 
@@ -175,18 +168,17 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-// resend verfify email
+      // resend verfify email
       .addCase(resendVerification.pending, (state) => {
-  state.loading = true;
-})
-.addCase(resendVerification.fulfilled, (state) => {
-  state.loading = false;
-})
-.addCase(resendVerification.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
-})
-
+        state.loading = true;
+      })
+      .addCase(resendVerification.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendVerification.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
       //  Forget Password
       .addCase(forgetPassword.pending, (state) => {

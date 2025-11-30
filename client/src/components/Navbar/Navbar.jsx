@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import { useTranslation } from "react-i18next";
 import { Globe, Menu } from 'lucide-react';
@@ -10,9 +10,9 @@ import HomesIcon from "../../assets/home_icon.avif";
 import ExperiencesIcon from "../../assets/experience_icon.avif";
 import ServicesIcon from "../../assets/service_icon.avif";
 import SearchBar from '../SearchBar/SearchBar';
-import MenuList from '../Menu/MenuList';
 
 import './Navbar.css';
+import MenuList from '../Menu/MenuList';
 
 export default function Navbar({ toggleTranslateModal }) {
     const { t } = useTranslation();
@@ -21,33 +21,20 @@ export default function Navbar({ toggleTranslateModal }) {
 
     const location = useLocation();
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [scrollDirection, setScrollDirection] = useState('up');
     const [lastScrollY, setLastScrollY] = useState(0);
-    
-    const menuRef = useRef(null);
 
-    const isServicePage = ['/', '/expierences', '/services'].includes(location.pathname);
+    const isServicePage = ['/', '/experiences', '/services'].includes(location.pathname);
 
     useEffect(() => {
         i18n.changeLanguage(lang);
     }, [lang]);
 
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setIsMenuOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            
+
             if (currentScrollY > 5) {
                 setScrolled(true);
             } else {
@@ -71,14 +58,14 @@ export default function Navbar({ toggleTranslateModal }) {
         if (direction === "rtl") {
             switch (location.pathname) {
                 case "/": return "right-0";
-                case "/expierences": return "right-1/3";
+                case "/experiences": return "right-1/3";
                 case "/services": return "right-2/3";
                 default: return "right-0";
             }
         } else {
             switch (location.pathname) {
                 case "/": return "left-0";
-                case "/expierences": return "left-1/3";
+                case "/experiences": return "left-1/3";
                 case "/services": return "left-2/3";
                 default: return "left-0";
             }
@@ -99,8 +86,8 @@ export default function Navbar({ toggleTranslateModal }) {
                 ${scrolled ? 'scale-95' : 'scale-100'}
             `}>
                 {/* Logo */}
-                <Link 
-                    to={"/"} 
+                <Link
+                    to={"/"}
                     className={`
                         w-20 sm:w-24 md:w-28 lg:w-30 shrink-0
                         transition-all duration-500 ease-in-out
@@ -126,8 +113,8 @@ export default function Navbar({ toggleTranslateModal }) {
                         `}></div>
 
                         {/* Homes */}
-                        <NavLink 
-                            to="/" 
+                        <NavLink
+                            to="/"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 
@@ -144,8 +131,8 @@ export default function Navbar({ toggleTranslateModal }) {
                         </NavLink>
 
                         {/* Experiences */}
-                        <NavLink 
-                            to="/expierences" 
+                        <NavLink
+                            to="/experiences"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 
@@ -163,8 +150,8 @@ export default function Navbar({ toggleTranslateModal }) {
                         </NavLink>
 
                         {/* Services */}
-                        <NavLink 
-                            to="/services" 
+                        <NavLink
+                            to="/services"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 
@@ -195,10 +182,12 @@ export default function Navbar({ toggleTranslateModal }) {
                         transition-all duration-300 ease-in-out
                         ${scrolled ? 'opacity-0 scale-90 w-0 px-0' : 'opacity-100 scale-100'}
                     `}>
-                        {t("navbar.host")}
+                        <Link to="/host">
+                            {t("navbar.host")}
+                        </Link>
                     </span>
 
-                    <span 
+                    <span
                         className={`
                             cursor_pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 cursor-pointer 
                             hover:bg-[#d4d4d4d2] hover:scale-110
@@ -210,34 +199,8 @@ export default function Navbar({ toggleTranslateModal }) {
                         <Globe size={18} className="sm:w-5 sm:h-5" />
                     </span>
 
-                    <span 
-                        className={`
-                            relative cursor-pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 
-                            hover:bg-[#d4d4d4d2] hover:scale-110
-                            transition-all duration-300 ease-in-out
-                            ${scrolled ? 'transform rotate-90' : 'transform rotate-0'}
-                        `}
-                        onClick={() => setIsMenuOpen(prev => !prev)}
-                    >
-                        <Menu size={18} className="sm:w-5 sm:h-5" />
-                    </span>
+                    <MenuList />
 
-                    {/* MenuList */}
-                    {isMenuOpen && (
-                        <div
-                            className={`
-                                absolute top-14 sm:top-16 md:top-17 mt-2 z-50
-                                animate-in fade-in slide-in-from-top-4 duration-300
-                                ${direction === "rtl"
-                                    ? "left-4 sm:left-6 md:left-10"
-                                    : "right-4 sm:right-6 md:right-10"
-                                }
-                            `}
-                            ref={menuRef}
-                        >
-                            <MenuList />
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -245,7 +208,7 @@ export default function Navbar({ toggleTranslateModal }) {
             {isServicePage && (
                 <div className={`
                     mt-2 sm:mt-3 md:mt-4 
-                    transition-all duration-500 ease-in-out z-999
+                    transition-all duration-500 ease-in-out
                     ${scrolled ? 'max-h-0 opacity-0 mt-0 transform -translate-y-4' : 'max-h-96 opacity-100 transform translate-y-0'}
                 `}>
                     <SearchBar />

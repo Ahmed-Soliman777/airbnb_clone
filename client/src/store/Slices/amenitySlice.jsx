@@ -5,7 +5,7 @@ import axios from "axios";
 export const fetchAmenities = createAsyncThunk(
   "amenity/fetchAmenities",
   async () => {
-    const response = await axios.get("http://localhost:3000/api/amenity");
+    const response = await axios.get("/api/amenity");
     // console.log(response.data);
     return response.data;
   }
