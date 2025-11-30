@@ -34,7 +34,7 @@ const RegisterStep2 = () => {
   const savedEmail = localStorage.getItem("registerEmail");
 
   useEffect(() => {
-    if (!savedEmail) navigate("/fregister");
+    if (!savedEmail) navigate("/signup");
   }, [savedEmail, navigate]);
 
   const {

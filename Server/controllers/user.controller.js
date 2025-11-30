@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
       lastName,
       email,
       dob,
-      passwordHash: password,
+      password: password,
       verificationCode
     });
 
@@ -48,7 +48,7 @@ Welcome to our platform!
 
 Your verification code is: ${verificationCode}
 
-If you didn't create an account with us, ignore this message.
+If you didn't create an account with us, you can ignore this message.
 
 Best regards,
 Airbnb Team `
@@ -71,7 +71,7 @@ exports.verifyEmail = async (req, res) => {
     const { email, code } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(401).json({ message: 'User not found' });
     if (user.verificationCode !== code)
       return res.status(400).json({ message: 'Invalid verification code' });
 
@@ -97,6 +97,58 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+exports.resendVerificationCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'User is not found' });
+    }
+
+    if (!user.verificationCode) {
+      return res.status(400).json({ message: 'No verification code found' });
+    }
+
+    // ================================
+    //   SAME Brevo SMTP SETUP
+    // ================================
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      auth: {
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_KEY
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.BREVO_Email,
+      to: email,
+      subject: "Verify your account",
+      text: `Hello ${user.firstName},
+
+Welcome back!
+
+Your verification code is: ${user.verificationCode}
+
+If you didn't request this, you can ignore this email.
+
+Best regards,
+Airbnb Team `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      message: "Verification code resent successfully"
+    });
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+    console.log("RESEND EMAIL ERROR:", err);
+  }
+};
 
 
 
