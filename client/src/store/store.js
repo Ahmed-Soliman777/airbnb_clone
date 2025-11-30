@@ -10,6 +10,7 @@ import experienceFormReducer from "./Slices/experienceFormSlice";
 import serviceFormReducer from "./Slices/serviceFormSlice";
 import homeFormReducer from "./Slices/homeFormSlice";
 import wishlistReducer from "./Slices/wishlistSlice";
+import reviewReducer from "./Slices/reviewSlice";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     experienceForm: experienceFormReducer,
     serviceForm: serviceFormReducer,
     homeForm: homeFormReducer,
+    review: reviewReducer,
   },
 });
 
