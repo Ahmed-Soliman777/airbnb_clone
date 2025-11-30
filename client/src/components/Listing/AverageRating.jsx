@@ -38,26 +38,28 @@ export default function AverageRating({ reviews }) {
       </h2>
 
       {/* Rating categories grid */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-6 py-6 border-b">
-        {ratingCategories.map((cat) => {
+      <div className="grid grid-cols-3 md:grid-cols-7 gap-6 py-6 border-b">
+        {/* Overall Rating */}
+        <div className="mb-6">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-gray-500">Overall Rating</p>
+            <p className="font-semibold">{averageRating}</p>
+            <Star fill="currentColor" stroke="none" className="w-5 h-5" />
+          </div>
+        </div>
+        {ratingCategories.map((cat, index) => {
           const IconComponent = cat.Icon;
           return (
-            <div key={cat.title} className="flex flex-col gap-1">
+            <div key={cat.title} className="flex flex-col gap-1 relative">
               <p className="text-sm text-gray-500">{cat.title}</p>
               <p className="font-semibold">{cat.rating}</p>
               <IconComponent className="w-5 h-5" />
+              {index < ratingCategories.length - 1 && (
+                <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-200" />
+              )}
             </div>
           );
         })}
-      </div>
-
-      {/* Overall Rating */}
-      <div className="mt-10">
-        <h3 className="text-xl font-semibold mb-4">Overall Rating</h3>
-        <div className="flex items-center gap-2">
-          <Star fill="currentColor" stroke="none" className="w-6 h-6" />
-          <span className="text-2xl font-semibold">{averageRating}</span>
-        </div>
       </div>
     </div>
   );
