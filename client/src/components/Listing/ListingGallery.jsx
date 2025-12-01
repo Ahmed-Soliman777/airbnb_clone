@@ -3,11 +3,18 @@ import { Grip, Heart, Share } from "lucide-react";
 import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
+import { useState } from "react";
+import ShareModal from "./ShareModal";
+import PhotoGalleryModal from "./PhotoGalleryModal";
 
-const ListingGallery = ({ title, images = [] }) => {
+const ListingGallery = ({ title, images = [], description }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const wishlistItems = useSelector((state) => state.wishlist.items);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
+
+  const listingUrl = window.location.href;
 
   const isFav = wishlistItems.includes(id);
   const urls = images
@@ -32,6 +39,7 @@ const ListingGallery = ({ title, images = [] }) => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+            onClick={() => setIsShareModalOpen(true)}
           >
             <Share size={18} />
             <div className="underline">Share</div>
@@ -41,11 +49,33 @@ const ListingGallery = ({ title, images = [] }) => {
             className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
             onClick={() => dispatch(toggleWishlistItem(id))}
           >
-            <Heart size={18} fill={isFav ? "red" : "none"} />
+            <Heart
+              size={20}
+              fill={isFav ? "red" : "none"}
+              strokeWidth={isFav ? 0 : 2}
+            />
             <div className="underline">Save</div>
           </Button>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        listingTitle={title || "Listing"}
+        listingUrl={listingUrl}
+        listingImage={urls[0]}
+        listingDescription={description}
+      />
+
+      {/* Photo Gallery Modal */}
+      <PhotoGalleryModal
+        isOpen={isPhotoGalleryOpen}
+        onClose={() => setIsPhotoGalleryOpen(false)}
+        images={images}
+        title={title || "Listing"}
+      />
 
       {/* Gallery */}
       <div className="grid grid-cols-4 grid-rows-2 gap-2 rounded-xl overflow-hidden h-[420px]">
@@ -70,7 +100,10 @@ const ListingGallery = ({ title, images = [] }) => {
             alt="Photo 5"
             className="w-full h-full object-cover"
           />
-          <button className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2">
+          <button
+            onClick={() => setIsPhotoGalleryOpen(true)}
+            className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2"
+          >
             <Grip size={16} />
             Show all photos
           </button>

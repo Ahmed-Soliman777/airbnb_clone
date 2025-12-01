@@ -1,21 +1,45 @@
 import BookingHome from "@/components/BookingHome/BookingHome";
 import Amenity from "@/components/Listing/Amenity";
+import AverageRating from "@/components/Listing/AverageRating";
 import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
 import ListingGallery from "@/components/Listing/ListingGallery";
-import AverageRating from "@/components/Listing/AverageRating";
-import ReviewsList from "@/components/Listing/ReviewsList";
-import ListingLocation from "@/components/Listing/ListingLocation";
 import ListingHost from "@/components/Listing/ListingHost";
+import ListingLocation from "@/components/Listing/ListingLocation";
+import ReviewsList from "@/components/Listing/ReviewsList";
+import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
+import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 
-const placeholderBedroomImg =
+const PLACEHOLDER_BEDROOM_IMG =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80";
+
+const PLACEHOLDER_HOST_AVATAR =
+  "https://randomuser.me/api/portraits/women/55.jpg";
+
+const HIGHLIGHT_FEATURES = [
+  {
+    icon: Info,
+    title: "Outdoor entertainment",
+    description:
+      "The firepit, alfresco dining, BBQ area and outdoor seating are great for summer trips.",
+  },
+  {
+    icon: MapPin,
+    title: "Mountain and garden views",
+    description: "Soak up the views during your stay.",
+  },
+  {
+    icon: Users,
+    title: "Park for free",
+    description: "This is one of the few places in the area with free parking.",
+  },
+];
 
 const ListingDetails = () => {
   const { id } = useParams();
@@ -23,12 +47,78 @@ const ListingDetails = () => {
   const { listing, status } = useSelector((state) => state.listing);
   const { reviews, statistics } = useSelector((state) => state.review);
 
-  useEffect(() => {
-    if (id) {
-      dispatch(GetListingById(id));
-      dispatch(getReviewsByListing(id));
+  // Shared date state
+  const [date, setDate] = useState({
+    from: undefined,
+    to: undefined,
+  });
+
+  const handleSelect = useCallback((range) => {
+    if (!range?.from) {
+      setDate({ from: undefined, to: undefined });
+      return;
     }
+
+    if (
+      !range.to ||
+      isSameDay(range.from, range.to) ||
+      isBefore(range.to, range.from)
+    ) {
+      setDate({ from: range.from, to: undefined });
+    } else {
+      setDate(range);
+    }
+  }, []);
+
+  const nights = useMemo(
+    () => (date?.from && date?.to ? differenceInDays(date.to, date.from) : 0),
+    [date?.from, date?.to]
+  );
+
+  useEffect(() => {
+    if (!id) return;
+
+    dispatch(GetListingById(id));
+    dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
+
+  // Memoize derived data to prevent recalculation on every render
+  const listingData = useMemo(() => {
+    if (!listing) return null;
+
+    return {
+      title: listing.title || "Listing",
+      images: listing.images || [],
+      city: listing.address?.city,
+      country: listing.address?.country,
+      maxGuests: listing.maxGuests,
+      bedroomsCount: listing.bedrooms,
+      bathroomsCount: listing.bathrooms,
+      rating: listing.ratingAvg || 0,
+      reviewsCount: Array.isArray(listing.reviews) ? listing.reviews.length : 0,
+      hostName: listing.hostId?.firstName
+        ? `${listing.hostId.firstName} ${listing.hostId.lastName || ""}`.trim()
+        : listing.host?.name || "Host",
+      hostAvatar:
+        listing.hostId?.avatar ||
+        listing.host?.avatar ||
+        PLACEHOLDER_HOST_AVATAR,
+      amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
+      propertyType: listing.propertyType || "place",
+      description: listing.description,
+    };
+  }, [listing]);
+
+  const bedroomsArr = useMemo(
+    () =>
+      Array.from({ length: listingData?.bedroomsCount || 0 }, (_, i) => ({
+        id: i + 1,
+        title: `Bedroom ${i + 1}`,
+        subtitle: "Comfortable bed",
+        img: PLACEHOLDER_BEDROOM_IMG,
+      })),
+    [listingData?.bedroomsCount]
+  );
 
   // Show loading state
   if (status === "loading") {
@@ -39,34 +129,22 @@ const ListingDetails = () => {
     );
   }
 
-  const title = listing?.title || "Listing";
-  const images = listing?.images || [];
-  const city = listing?.address?.city;
-  const country = listing?.address?.country;
-  const maxGuests = listing?.maxGuests;
-  const bedroomsCount = listing?.bedrooms;
-  const bathroomsCount = listing?.bathrooms;
-  const rating = listing?.ratingAvg || 0;
-  const reviewsCount = Array.isArray(listing?.reviews)
-    ? listing.reviews.length
-    : 0;
-  const hostName = listing?.hostId?.firstName
-    ? `${listing.hostId.firstName} ${listing.hostId.lastName || ""}`.trim()
-    : listing?.host?.name || "Host";
-  const amenities = Array.isArray(listing?.amenities) ? listing.amenities : [];
-
-  const bedroomsArr = Array.from({ length: bedroomsCount || 0 }).map(
-    (_, i) => ({
-      id: i + 1,
-      title: `Bedroom ${i + 1}`,
-      subtitle: "Comfortable bed",
-      img: placeholderBedroomImg,
-    })
-  );
+  // Show error state if no listing data
+  if (!listingData) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+        <p className="text-xl text-gray-600">Listing not found.</p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <ListingGallery title={title} images={images} />
+      <ListingGallery
+        title={listingData.title}
+        images={listingData.images}
+        description={listingData.description}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 relative">
           {/*============= Left Side ================== */}
@@ -74,21 +152,19 @@ const ListingDetails = () => {
             {/* Title & Info */}
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                {city && country
-                  ? `Entire ${
-                      listing?.propertyType || "place"
-                    } in ${city}, ${country}`
-                  : `Entire ${listing?.propertyType || "place"}`}
+                {listingData.city && listingData.country
+                  ? `Entire ${listingData.propertyType} in ${listingData.city}, ${listingData.country}`
+                  : `Entire ${listingData.propertyType}`}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 {[
-                  maxGuests ? `${maxGuests} guests` : null,
-                  bedroomsCount ? `${bedroomsCount} bedrooms` : null,
-                  bathroomsCount
-                    ? `${bathroomsCount} bathroom${
-                        bathroomsCount > 1 ? "s" : ""
-                      }`
-                    : null,
+                  listingData.maxGuests && `${listingData.maxGuests} guests`,
+                  listingData.bedroomsCount &&
+                    `${listingData.bedroomsCount} bedrooms`,
+                  listingData.bathroomsCount &&
+                    `${listingData.bathroomsCount} bathroom${
+                      listingData.bathroomsCount > 1 ? "s" : ""
+                    }`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -115,7 +191,7 @@ const ListingDetails = () => {
               {/* ----------- rating -------------  */}
               <div className="text-center hidden sm:block">
                 <p className="font-semibold text-gray-800 text-sm">
-                  {rating.toFixed(1)} ★
+                  {listingData.rating.toFixed(1)} ★
                 </p>
               </div>
               {/*---------- vertical line ------- */}
@@ -123,7 +199,7 @@ const ListingDetails = () => {
               {/* ----------- Reviews -------------  */}
               <div className="text-center hidden sm:block">
                 <p className="font-semibold text-gray-800 text-sm">
-                  {reviewsCount}{" "}
+                  {listingData.reviewsCount}{" "}
                 </p>
                 <p>Reviews</p>
               </div>
@@ -132,17 +208,13 @@ const ListingDetails = () => {
             {/* Host info */}
             <div className="flex items-center gap-3 sm:gap-4">
               <img
-                src={
-                  listing?.hostId?.avatar ||
-                  listing?.host?.avatar ||
-                  "https://randomuser.me/api/portraits/women/55.jpg"
-                }
+                src={listingData.hostAvatar}
                 alt="Host"
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border"
               />
               <div>
                 <p className="text-sm sm:text-base font-semibold">
-                  Hosted by {hostName}
+                  Hosted by {listingData.hostName}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">Superhost</p>
               </div>
@@ -152,44 +224,25 @@ const ListingDetails = () => {
 
             {/* Amenities */}
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Info className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Outdoor entertainment</p>
-                  <p className="text-sm text-gray-600">
-                    The firepit, alfresco dining, BBQ area and outdoor seating
-                    are great for summer trips.
-                  </p>
+              {HIGHLIGHT_FEATURES.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <Icon className="text-gray-700 mt-1" />
+                  <div>
+                    <p className="font-semibold">{title}</p>
+                    <p className="text-sm text-gray-600">{description}</p>
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Mountain and garden views</p>
-                  <p className="text-sm text-gray-600">
-                    Soak up the views during your stay.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Users className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Park for free</p>
-                  <p className="text-sm text-gray-600">
-                    This is one of the few places in the area with free parking.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
 
             <hr />
 
             {/* Description */}
-            <div className="text-gray-700 leading-relaxed space-y-3">
-              <p>{listing?.description}</p>
-            </div>
+            {listingData.description && (
+              <div className="text-gray-700 leading-relaxed space-y-3">
+                <p>{listingData.description}</p>
+              </div>
+            )}
 
             <div className="max-w-6xl mx-auto px-0 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
               {/* Where you'll sleep */}
@@ -234,23 +287,58 @@ const ListingDetails = () => {
               <hr />
 
               {/* What this place offers */}
-              <section>
-                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
-                  What this place offers
-                </h3>
-                <Amenity amenities={amenities} />
-              </section>
+              {listingData.amenities.length > 0 && (
+                <section>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
+                    What this place offers
+                  </h3>
+                  <Amenity amenities={listingData.amenities} />
+                </section>
+              )}
 
               <hr />
               {/* repeat calendar date picker here */}
-              {/* <DateSelector /> */}
+              <section>
+                <h3 className="text-lg sm:text-xl font-semibold mb-4">
+                  {nights > 0
+                    ? `${nights} night${nights > 1 ? "s" : ""}`
+                    : "Select checkout date"}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Minimum stay: 2 nights
+                </p>
+                <Calendar
+                  mode="range"
+                  numberOfMonths={2}
+                  selected={date}
+                  onSelect={handleSelect}
+                  disabled={(day) =>
+                    date?.from
+                      ? isBefore(day, date.from) ||
+                        isSameDay(day, addDays(date.from, 1))
+                      : false
+                  }
+                  className="rounded-lg w-[80%]"
+                />
+
+                <div
+                  className="text-md cursor-pointer underline mt-2 hover:bg-gray-100 w-max p-2 rounded-md text-align-left"
+                  onClick={() => setDate(null)}
+                >
+                  Clear dates
+                </div>
+              </section>
             </div>
           </div>
 
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome />
+              <BookingHome
+                date={date}
+                setDate={setDate}
+                handleSelect={handleSelect}
+              />
               <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">
@@ -271,7 +359,7 @@ const ListingDetails = () => {
           <ListingLocation listing={listing} />
         </div>
         {/*================= Host Section ================= */}
-        <div className="max-w-5xl">
+        <div className="max-w-5xl mb-40">
           <ListingHost listing={listing} />
         </div>
       </div>
