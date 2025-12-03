@@ -48,5 +48,13 @@
     "Investors":"المستثمرون",
     "Gift cards":"بطاقات الهدايا",
     "Airbnb.org emergency stays":"Airbnb.org للطوارئ"
-  }
+  },
+ 
+  "landing": {
+    "Explore the": "استكشف",
+    "World": "العالم",
+    "Find amazing places to stay around the globe": "اعثر على أماكن رائعة للإقامة حول العالم",
+    "Travel Now": "سافر الآن"
+ 
+}
 }

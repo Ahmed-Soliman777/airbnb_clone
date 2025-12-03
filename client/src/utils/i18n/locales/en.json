@@ -51,5 +51,16 @@
     "Investors":"Investors",
     "Gift cards":"Gift cards",
     "Airbnb.org emergency stays":"Airbnb.org emergency stays"
+  }, 
+ 
+    
+  "landing": {
+    "Explore the": "Explore the",
+    "World": "World",
+    "Find amazing places to stay around the globe": "Find amazing places to stay around the globe",
+    "Travel Now": "Travel Now"
   }
+
+
+  
 }

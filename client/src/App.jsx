@@ -17,7 +17,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
-
+import AirbnbLanding from "./Pages/AirbnbLanding"
 function App() {
   const routes = createBrowserRouter([
     {
@@ -37,6 +37,7 @@ function App() {
         { path: "experiences/:id", element: <ExperienceDetailsPage /> },
         { path: "services", element: <ServicesPage /> },
         { path: "services/:id", element: <ServiceDetailsPage /> },
+            { path: "AirbnbLanding", element: <AirbnbLanding/> },
       ],
     },
     { path: "*", element: <NotFound /> },
