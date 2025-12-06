@@ -47,7 +47,7 @@ const createExperience = async (req, res) => {
         }
 
         console.log(req.body);
-        
+
 
         const experience = await Experience.create({
             title,
@@ -84,13 +84,41 @@ const createExperience = async (req, res) => {
 // @access  Public
 const getExperiences = async (req, res) => {
     try {
-        const { city, country, experienceType, page = 1, limit = 10 } = req.query;
+        const {
+            city,
+            country,
+            experienceType,
+            page = 1,
+            limit = 10,
+            priceRange,
+            categories,
+            minRating
+        } = req.query;
 
         const query = { status: 'active' };
 
         if (city) query['location.city'] = new RegExp(city, 'i');
         if (country) query['location.country'] = new RegExp(country, 'i');
         if (experienceType) query.experienceType = experienceType;
+
+        // Price range filter
+        if (priceRange) {
+            const [minPrice, maxPrice] = JSON.parse(priceRange);
+            query.pricePerPerson = { $gte: minPrice, $lte: maxPrice };
+        }
+
+        // Categories filter
+        if (categories) {
+            const categoryArray = JSON.parse(categories);
+            if (categoryArray.length > 0) {
+                query.experienceType = { $in: categoryArray };
+            }
+        }
+
+        // Rating filter (assuming you have a rating field)
+        if (minRating && parseFloat(minRating) > 0) {
+            query.averageRating = { $gte: parseFloat(minRating) };
+        }
 
         const experiences = await Experience.find(query)
             .populate('host', 'name email')
