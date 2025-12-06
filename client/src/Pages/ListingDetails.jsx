@@ -22,20 +22,33 @@ const PLACEHOLDER_BEDROOM_IMG =
 const PLACEHOLDER_HOST_AVATAR =
   "https://randomuser.me/api/portraits/women/55.jpg";
 
-const HIGHLIGHT_FEATURES = [
+const ICON_MAP = {
+  Info,
+  MapPin,
+  Users,
+  Home: Info,
+  Star: Info,
+  Heart: Info,
+  Key: Info,
+  Wifi: Info,
+  Car: Info,
+  Shield: Info,
+};
+
+const FALLBACK_HIGHLIGHTS = [
   {
-    icon: Info,
+    icon: "Info",
     title: "Outdoor entertainment",
     description:
       "The firepit, alfresco dining, BBQ area and outdoor seating are great for summer trips.",
   },
   {
-    icon: MapPin,
+    icon: "MapPin",
     title: "Mountain and garden views",
     description: "Soak up the views during your stay.",
   },
   {
-    icon: Users,
+    icon: "Users",
     title: "Park for free",
     description: "This is one of the few places in the area with free parking.",
   },
@@ -106,6 +119,9 @@ const ListingDetails = () => {
       amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
       propertyType: listing.propertyType || "place",
       description: listing.description,
+      highlightFeatures: Array.isArray(listing.highlightFeatures) && listing.highlightFeatures.length > 0
+        ? listing.highlightFeatures
+        : FALLBACK_HIGHLIGHTS,
     };
   }, [listing]);
 
@@ -224,15 +240,18 @@ const ListingDetails = () => {
 
             {/* Amenities */}
             <div className="space-y-4">
-              {HIGHLIGHT_FEATURES.map(({ icon: Icon, title, description }) => (
-                <div key={title} className="flex items-start gap-3">
-                  <Icon className="text-gray-700 mt-1" />
-                  <div>
-                    <p className="font-semibold">{title}</p>
-                    <p className="text-sm text-gray-600">{description}</p>
+              {listingData.highlightFeatures.map(({ icon, title, description }) => {
+                const Icon = ICON_MAP[icon] || Info;
+                return (
+                  <div key={title} className="flex items-start gap-3">
+                    <Icon className="text-gray-700 mt-1" />
+                    <div>
+                      <p className="font-semibold">{title}</p>
+                      <p className="text-sm text-gray-600">{description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <hr />

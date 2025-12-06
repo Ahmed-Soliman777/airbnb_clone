@@ -61,6 +61,22 @@ const listingSchema = new mongoose.Schema(
         ref: "Amenities",
       },
     ],
+    highlightFeatures: [
+      {
+        icon: {
+          type: String,
+          enum: ["Info", "MapPin", "Users", "Home", "Star", "Heart", "Key", "Wifi", "Car", "Shield"],
+        },
+        title: {
+          type: String,
+          required: true,
+        },
+        description: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     hostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

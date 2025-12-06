@@ -339,7 +339,7 @@ const getListingReviews = async (req, res) => {
     // Get all reviews for the listing
     const Review = require("../models/Review.model");
     const reviews = await Review.find({ listingId: id })
-      .populate("author", "firstName lastName profilePhoto")
+      .populate("author", "firstName lastName profilePhoto createdAt")
       .sort({ createdAt: -1 });
 
     // Calculate review statistics
