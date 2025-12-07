@@ -4,9 +4,10 @@ import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
 import ListingGallery from "@/components/Listing/ListingGallery";
 import ListingRate from "@/components/Listing/ListingRate";
 import ListingReviews from "@/components/Listing/ListingReviews";
+import ReportListing from "@/components/Listing/ReportListing";
 import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
-import { FlagOff, Info, MapPin, Users } from "lucide-react";
+import { Info, MapPin, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
@@ -244,12 +245,7 @@ const ListingDetails = () => {
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
               <BookingHome />
-              <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
-                <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">
-                  Report this listing
-                </p>
-              </div>
+              <ReportListing listingId={id} />
             </div>
           </div>
         </div>
