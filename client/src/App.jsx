@@ -17,6 +17,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import SearchListing from "./Pages/SearchListing";
 
 function App() {
   const routes = createBrowserRouter([
@@ -26,6 +27,7 @@ function App() {
       children: [
         { index: true, element: <Home /> },
         { path: "homes", element: <Home /> },
+        { path: "search", element: <SearchListing /> },
         { path: "room/:id", element: <ListingDetails /> },
         { path: "signup", element: <RegisterStep1 /> },
         { path: "register", element: <RegisterStep2 /> },

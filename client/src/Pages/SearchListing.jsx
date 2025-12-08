@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Calendar,
-  MapPin,
-  Users,
-  Bed,
-  Bath,
-  DollarSign,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
-import "./SearchListing.css";
+import { Bath, Bed, MapPin, SlidersHorizontal, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import FiltersPopup from "../components/Search/FiltersPopup";
+import ListingCard from "../components/Listing/ListingCard";
 
 export default function SearchListing() {
   const [searchParams] = useSearchParams();
@@ -116,13 +108,15 @@ export default function SearchListing() {
     parseInt(filters.infants || 0);
 
   return (
-    <div className="search-listing-page">
+    <div className="max-w-[1440px] mx-auto px-5 py-5 min-h-screen">
       {/* Search Header */}
-      <div className="search-header">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-200 gap-4">
         <div className="search-info">
-          <h1>{totalResults} Stays Found</h1>
+          <h1 className="text-2xl font-semibold mb-2 text-gray-900">
+            {totalResults} Stays Found
+          </h1>
           {filters.location_search && (
-            <p className="search-location">
+            <p className="flex items-center gap-1.5 text-gray-500 text-sm">
               <MapPin size={16} />
               {filters.location_search}
             </p>
@@ -130,7 +124,7 @@ export default function SearchListing() {
         </div>
 
         <button
-          className="filter-button"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 hover:border-gray-900 cursor-pointer text-sm font-medium transition-all duration-200"
           onClick={() => setShowFilters(!showFilters)}
         >
           <SlidersHorizontal size={20} />
@@ -138,194 +132,49 @@ export default function SearchListing() {
         </button>
       </div>
 
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="filters-panel">
-          <div className="filters-header">
-            <h2>Filters</h2>
-            <button className="close-btn" onClick={() => setShowFilters(false)}>
-              <X size={24} />
-            </button>
-          </div>
-
-          <div className="filters-content">
-            {/* Price Range */}
-            <div className="filter-group">
-              <h3>Price Range</h3>
-              <div className="price-inputs">
-                <input
-                  type="number"
-                  placeholder="Min price"
-                  value={filters.min_price}
-                  onChange={(e) =>
-                    handleFilterChange("min_price", e.target.value)
-                  }
-                />
-                <span>to</span>
-                <input
-                  type="number"
-                  placeholder="Max price"
-                  value={filters.max_price}
-                  onChange={(e) =>
-                    handleFilterChange("max_price", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Property Type */}
-            <div className="filter-group">
-              <h3>Property Type</h3>
-              <select
-                value={filters.property_type_id}
-                onChange={(e) =>
-                  handleFilterChange("property_type_id", e.target.value)
-                }
-              >
-                <option value="">All Types</option>
-                <option value="house">House</option>
-                <option value="apartment">Apartment</option>
-                <option value="villa">Villa</option>
-                <option value="cabin">Cabin</option>
-                <option value="hotel">Hotel</option>
-              </select>
-            </div>
-
-            {/* Rooms & Bathrooms */}
-            <div className="filter-group">
-              <h3>Rooms</h3>
-              <div className="room-inputs">
-                <div>
-                  <label>Bedrooms</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={filters.min_bedrooms}
-                    onChange={(e) =>
-                      handleFilterChange("min_bedrooms", e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <label>Bathrooms</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={filters.min_bathrooms}
-                    onChange={(e) =>
-                      handleFilterChange("min_bathrooms", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Sort By */}
-            <div className="filter-group">
-              <h3>Sort By</h3>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-              >
-                <option value="recommended">Recommended</option>
-                <option value="price_low">Price: Low to High</option>
-                <option value="price_high">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="filters-footer">
-            <button className="clear-btn" onClick={clearFilters}>
-              Clear All
-            </button>
-            <button className="apply-btn" onClick={applyFilters}>
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Filters Popup */}
+      <FiltersPopup
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        filters={filters}
+        handleFilterChange={handleFilterChange}
+        applyFilters={applyFilters}
+        clearFilters={clearFilters}
+        totalResults={totalResults}
+      />
 
       {/* Listings Grid */}
-      <div className="listings-container">
+      <div className="mt-6">
         {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Searching for perfect stays...</p>
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-500 text-base">
+              Searching for perfect stays...
+            </p>
           </div>
         ) : error ? (
-          <div className="error-state">
-            <p>{error}</p>
-            <button onClick={fetchListings}>Try Again</button>
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center">
+            <p className="text-red-600 text-base mb-4">{error}</p>
+            <button
+              onClick={fetchListings}
+              className="px-6 py-3 bg-gray-900 text-white rounded-lg cursor-pointer text-sm font-medium hover:bg-black"
+            >
+              Try Again
+            </button>
           </div>
         ) : listings.length === 0 ? (
-          <div className="empty-state">
-            <h2>No listings found</h2>
-            <p>Try adjusting your search or filters</p>
+          <div className="flex flex-col items-center justify-center py-20 px-5 text-center">
+            <h2 className="text-2xl font-semibold mb-3 text-gray-900">
+              No listings found
+            </h2>
+            <p className="text-gray-500 text-base">
+              Try adjusting your search or filters
+            </p>
           </div>
         ) : (
-          <div className="listings-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {listings.map((listing) => (
-              <div
-                key={listing._id}
-                className="listing-card"
-                onClick={() => navigate(`/listing/${listing._id}`)}
-              >
-                <div className="listing-image">
-                  <img
-                    src={listing.images?.[0]?.url || "/placeholder.jpg"}
-                    alt={listing.title}
-                  />
-                </div>
-
-                <div className="listing-details">
-                  <div className="listing-header">
-                    <h3>{listing.title}</h3>
-                    {listing.rating && (
-                      <span className="rating">★ {listing.rating}</span>
-                    )}
-                  </div>
-
-                  <p className="listing-type">{listing.propertyType}</p>
-
-                  <div className="listing-specs">
-                    {listing.maxGuests && (
-                      <span>
-                        <Users size={14} /> {listing.maxGuests} guests
-                      </span>
-                    )}
-                    {listing.bedrooms && (
-                      <span>
-                        <Bed size={14} /> {listing.bedrooms} beds
-                      </span>
-                    )}
-                    {listing.bathrooms && (
-                      <span>
-                        <Bath size={14} /> {listing.bathrooms} baths
-                      </span>
-                    )}
-                  </div>
-
-                  {listing.amenities && listing.amenities.length > 0 && (
-                    <div className="listing-amenities">
-                      {listing.amenities.slice(0, 3).map((amenity, idx) => (
-                        <span key={idx} className="amenity-tag">
-                          {amenity.name || amenity}
-                        </span>
-                      ))}
-                      {listing.amenities.length > 3 && (
-                        <span className="amenity-more">
-                          +{listing.amenities.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="listing-price">
-                    <span className="price">${listing.pricePerNight}</span>
-                    <span className="period">/ night</span>
-                  </div>
-                </div>
-              </div>
+              <ListingCard key={listing._id} listing={listing} />
             ))}
           </div>
         )}
