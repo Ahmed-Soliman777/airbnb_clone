@@ -50,12 +50,24 @@ export const deleteListing = createAsyncThunk(
   }
 );
 
+// ------------- 6. Search listings --------------
+export const searchListings = createAsyncThunk(
+  "listing/searchListings",
+  async (searchParams) => {
+    const queryString = new URLSearchParams(searchParams).toString();
+    const response = await axios.get(`/api/listings/search?${queryString}`);
+    return response.data;
+  }
+);
+
 //============ Listing Slice =================
 const listingSlice = createSlice({
   name: "listingSlice",
   initialState: {
     listings: [],
     listing: null,
+    searchResults: [],
+    searchMetadata: null,
     status: "idle",
     error: null,
   },
@@ -101,6 +113,20 @@ const listingSlice = createSlice({
       // ------------- 5. Delete a listing --------------
       .addCase(deleteListing.fulfilled, (state, action) => {
         state.listings = state.listings.filter((l) => l.id !== action.payload);
+      })
+
+      // ------------- 6. Search listings --------------
+      .addCase(searchListings.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(searchListings.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.searchResults = action.payload.items;
+        state.searchMetadata = action.payload.search_metadata;
+      })
+      .addCase(searchListings.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       });
   },
 });
