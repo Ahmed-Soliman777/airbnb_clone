@@ -6,6 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
+  searchListings,
   getListingReviews,
 } = require("../controllers/listing.controller.js");
 
@@ -63,6 +64,68 @@ const { default: upload } = require("../middleware/multer.js");
  *                       type: string
  */
 router.get("/listings", getListings);
+
+/**
+ * @swagger
+ * /listings/search:
+ *   get:
+ *     summary: Search listings with filters (public)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: location_search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkin
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkout
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: adults
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: children
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: min_price
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: max_price
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: property_type_id
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: min_bedrooms
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: min_bathrooms
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [recommended, price_low, price_high]
+ *     responses:
+ *       200:
+ *         description: Search results with metadata
+ */
+router.get("/listings/search", searchListings);
 
 /**
  * @swagger
