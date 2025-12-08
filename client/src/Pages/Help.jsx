@@ -4,7 +4,7 @@ import HelpSearch from "../components/Help/HelpSearch";
 import HelpLoginSection from "../components/Help/HelpLoginSection";
 import HelpGuides from "../components/Help/HelpGuides";
 import HelpExploreMore from "../components/Help/HelpExploreMore";
-import HelpContact from "../components/Help/HelpContact";
+// import HelpContact from "../components/Help/HelpContact";
 import HelpArticles from "../components/Help/HelpArticales";
 import HelpCategories from "../components/Help/HelpCategories";
 function HelpPage() {
@@ -28,9 +28,6 @@ function HelpPage() {
 
       {/* Explore More */}
       <HelpExploreMore />
-
-      {/* Contact Section */}
-      <HelpContact />
     </div>
   );
 }
