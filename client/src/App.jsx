@@ -17,7 +17,7 @@ import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
 import SearchListing from "./Pages/SearchListing";
-import AirbnbLanding from "./Pages/AirbnbLanding"
+import AirbnbLanding from "./Pages/AirbnbLanding";
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
@@ -41,7 +41,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/">
               <RegisterStep1 />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "register",
@@ -49,7 +49,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/">
               <RegisterStep2 />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "login",
@@ -57,7 +57,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/">
               <Login />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "forget-password",
@@ -65,7 +65,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/">
               <ForgetPassword />
             </AuthGuard>
-          )
+          ),
         },
 
         { path: "help", element: <Help /> },
@@ -76,7 +76,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <Host />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/welcome",
@@ -84,7 +84,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostWelcomePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/dashboard",
@@ -92,14 +92,14 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostDashboardPage />
             </AuthGuard>
-          )
+          ),
         },
 
         { path: "experiences", element: <ExperiencesPage /> },
         { path: "experiences/:id", element: <ExperienceDetailsPage /> },
         { path: "services", element: <ServicesPage /> },
         { path: "services/:id", element: <ServiceDetailsPage /> },
-            { path: "AirbnbLanding", element: <AirbnbLanding/> },
+        { path: "AirbnbLanding", element: <AirbnbLanding /> },
         { path: "experiences/search", element: <ExperienceSearchPage /> },
         { path: "services/search", element: <ServiceSearchPage /> },
       ],
