@@ -16,6 +16,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import AirbnbLanding from "./Pages/AirbnbLanding"
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
@@ -96,6 +97,7 @@ function App() {
         { path: "experiences/:id", element: <ExperienceDetailsPage /> },
         { path: "services", element: <ServicesPage /> },
         { path: "services/:id", element: <ServiceDetailsPage /> },
+            { path: "AirbnbLanding", element: <AirbnbLanding/> },
         { path: "experiences/search", element: <ExperienceSearchPage /> },
         { path: "services/search", element: <ServiceSearchPage /> },
       ],
