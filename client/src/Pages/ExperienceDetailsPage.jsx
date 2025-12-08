@@ -71,7 +71,7 @@ const ExperienceDetailsPage = () => {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-background border-b">
+            <header className="bg-background border-b">
                 <div className="container max-w-6xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <Link
