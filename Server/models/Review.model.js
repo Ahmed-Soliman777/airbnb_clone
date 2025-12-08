@@ -16,5 +16,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+//use || to avoid model overwrite error in dev environment
 module.exports =
   mongoose.models.Review || mongoose.model("Review", reviewSchema);

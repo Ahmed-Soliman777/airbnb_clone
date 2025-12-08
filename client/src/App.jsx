@@ -16,6 +16,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import SearchListing from "./Pages/SearchListing";
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
@@ -30,6 +31,7 @@ function App() {
       children: [
         { index: true, element: <Home /> },
         { path: "homes", element: <Home /> },
+        { path: "search", element: <SearchListing /> },
         { path: "room/:id", element: <ListingDetails /> },
 
         {

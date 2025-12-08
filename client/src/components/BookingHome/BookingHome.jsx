@@ -2,21 +2,15 @@ import React, { useState } from "react";
 import {
   differenceInDays,
   format,
-  isBefore,
-  isSameDay,
   subDays,
 } from "date-fns";
 import DateSelector from "./DateSelector";
 import GuestSelector from "./GuestSelector";
 
-function BookingHome() {
+function BookingHome({ date, setDate, handleSelect }) {
   const [openGuests, setOpenGuests] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const [date, setDate] = useState({
-    from: undefined,
-    to: undefined,
-  });
   const [guests, setGuests] = useState({
     adults: 1,
     children: 0,
@@ -28,22 +22,6 @@ function BookingHome() {
     date?.from && date?.to ? differenceInDays(date.to, date.from) : 0;
 
   const freeCancelDate = date?.from ? subDays(date.from, 5) : undefined;
-
-  const handleSelect = (range) => {
-    if (!range?.from) {
-      setDate({ from: undefined, to: undefined });
-    } else if (range?.from && !range?.to) {
-      setDate({ from: range.from, to: undefined });
-    } else if (range?.from && range?.to) {
-      if (isSameDay(range.from, range.to)) {
-        setDate({ from: range.from, to: undefined });
-      } else if (isBefore(range.to, range.from)) {
-        setDate({ from: range.from, to: undefined });
-      } else {
-        setDate(range);
-      }
-    }
-  };
 
   return (
     <>

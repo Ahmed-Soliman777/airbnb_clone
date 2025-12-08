@@ -6,6 +6,8 @@ const {
   getListingById,
   updateListing,
   deleteListing,
+  searchListings,
+  getListingReviews,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -65,6 +67,68 @@ router.get("/listings", getListings);
 
 /**
  * @swagger
+ * /listings/search:
+ *   get:
+ *     summary: Search listings with filters (public)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: location_search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkin
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkout
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: adults
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: children
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: min_price
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: max_price
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: property_type_id
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: min_bedrooms
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: min_bathrooms
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [recommended, price_low, price_high]
+ *     responses:
+ *       200:
+ *         description: Search results with metadata
+ */
+router.get("/listings/search", searchListings);
+
+/**
+ * @swagger
  * /listings/{id}:
  *   get:
  *     summary: Get a listing by ID (public)
@@ -83,6 +147,63 @@ router.get("/listings", getListings);
  *         description: Listing not found
  */
 router.get("/listings/:id", getListingById);
+
+/**
+ * @swagger
+ * /listings/{id}/reviews:
+ *   get:
+ *     summary: Get all reviews for a listing (public)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of reviews with statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 reviews:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       comment:
+ *                         type: string
+ *                       author:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           firstName:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           profilePhoto:
+ *                             type: string
+ *                       createdAt:
+ *                         type: string
+ *                 statistics:
+ *                   type: object
+ *                   properties:
+ *                     totalReviews:
+ *                       type: number
+ *                     avgRating:
+ *                       type: number
+ *       404:
+ *         description: Listing not found
+ */
+router.get("/listings/:id/reviews", getListingReviews);
 
 /**
  * @swagger

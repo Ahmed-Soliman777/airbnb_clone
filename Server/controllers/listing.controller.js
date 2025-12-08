@@ -83,12 +83,52 @@ const getListingById = async (req, res) => {
     const { id } = req.params;
 
     const listing = await Listing.findById(id)
-      .populate("hostId", "name email")
+      .populate(
+        "hostId",
+        "firstName lastName profilePhoto email createdAt role listings"
+      )
       .populate("amenities", "name")
       .populate("reviews");
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // -------------- this section is to calculate host stats --------------
+    // Calculate host stats
+    if (listing.hostId) {
+      const hostListings = listing.hostId.listings || [];
+
+      // Get all reviews for host's listings
+      const Review = require("../models/Review.model");
+      const hostReviews = await Review.find({
+        listingId: { $in: hostListings },
+      });
+
+      // Calculate average rating and review count
+      const totalReviews = hostReviews.length;
+      const avgRating =
+        totalReviews > 0
+          ? (
+              hostReviews.reduce((sum, review) => sum + review.rating, 0) /
+              totalReviews
+            ).toFixed(2)
+          : 0;
+
+      // Calculate years hosting
+      const yearsHosting = Math.floor(
+        (Date.now() - new Date(listing.hostId.createdAt)) /
+          (365.25 * 24 * 60 * 60 * 1000)
+      );
+
+      // Add host stats to response
+      listing._doc.hostStats = {
+        totalReviews,
+        avgRating: parseFloat(avgRating),
+        yearsHosting,
+        isSuperhost:
+          listing.hostId.role === "host" || listing.hostId.role === "main-host",
+      };
     }
 
     res.status(200).json(listing);
@@ -156,64 +196,172 @@ const searchListings = async (req, res) => {
   // Extract query parameters and validate them if they are valid
   const {
     address,
-    startDate = null,
-    endDate = null,
-    maxGuests,
-    pricePerNight,
-    maxPrice,
-    propertyType,
-    maxBedrooms,
-    maxBathrooms,
+    location_search,
+    date_picker_type,
+    monthly_start_date,
+    monthly_end_date,
+    monthly_length,
+    checkin,
+    checkout,
+    adults = 0,
+    children = 0,
+    infants = 0,
+    pets = 0,
+    min_price,
+    max_price,
+    property_type_id,
+    room_types,
+    min_bedrooms,
+    min_bathrooms,
+    amenities,
     sortBy,
+    search_type,
+    refinement_paths,
   } = req.query;
 
-  // Validate data types and ranges
-  if (maxGuests && isNaN(parseInt(maxGuests))) {
-    return res.status(400).json({ message: "Invalid guests parameter" });
+  // Calculate total guests
+  const totalGuests =
+    parseInt(adults || 0) + parseInt(children || 0) + parseInt(infants || 0);
+
+  // Validate numeric parameters
+  if (min_price && isNaN(parseInt(min_price))) {
+    return res.status(400).json({ message: "Invalid min_price parameter" });
   }
 
-  if (pricePerNight && isNaN(parseInt(pricePerNight))) {
-    return res.status(400).json({ message: "Invalid pricePerNight parameter" });
+  if (max_price && isNaN(parseInt(max_price))) {
+    return res.status(400).json({ message: "Invalid max_price parameter" });
   }
 
-  if (maxPrice && isNaN(parseInt(maxPrice))) {
-    return res.status(400).json({ message: "Invalid maxPrice parameter" });
+  if (min_bedrooms && isNaN(parseInt(min_bedrooms))) {
+    return res.status(400).json({ message: "Invalid min_bedrooms parameter" });
   }
 
-  if (maxBedrooms && isNaN(parseInt(maxBedrooms))) {
-    return res.status(400).json({ message: "Invalid maxBedrooms parameter" });
+  if (min_bathrooms && isNaN(parseInt(min_bathrooms))) {
+    return res.status(400).json({ message: "Invalid min_bathrooms parameter" });
   }
 
-  if (
-    pricePerNight &&
-    maxPrice &&
-    parseInt(pricePerNight) > parseInt(maxPrice)
-  ) {
+  if (min_price && max_price && parseInt(min_price) > parseInt(max_price)) {
     return res.status(400).json({
-      message: "pricePerNight must be less than or equal to maxPrice",
+      message: "min_price must be less than or equal to max_price",
     });
   }
 
   // Build MongoDB Query Object
   const query = {};
-  if (address) query.address = address;
-  if (startDate && endDate) {
-    query.available_dates = {
-      $gte: new Date(startDate),
-      $lte: new Date(endDate),
-    };
+
+  // Location search
+  if (address || location_search) {
+    query.address = address || location_search;
   }
-  if (pricePerNight) query.price = { $gte: parseInt(pricePerNight) };
-  if (maxPrice) query.price = { ...query.price, $lte: parseInt(maxPrice) };
-  if (propertyType) query.propertyType = propertyType;
-  if (maxBedrooms) query.bedrooms = { $gte: parseInt(maxBedrooms) };
 
+  // Date filtering - handle both monthly stays and regular stays
+  if (date_picker_type === "monthly_stay") {
+    if (monthly_start_date && monthly_end_date) {
+      query.available_dates = {
+        $gte: new Date(monthly_start_date),
+        $lte: new Date(monthly_end_date),
+      };
+    }
+  } else {
+    if (checkin && checkout) {
+      query.available_dates = {
+        $gte: new Date(checkin),
+        $lte: new Date(checkout),
+      };
+    }
+  }
+
+  // Guest capacity
+  if (totalGuests > 0) {
+    query.maxGuests = { $gte: totalGuests };
+  }
+
+  // Price filtering
+  if (min_price) query.pricePerNight = { $gte: parseInt(min_price) };
+  if (max_price)
+    query.pricePerNight = { ...query.pricePerNight, $lte: parseInt(max_price) };
+
+  // Property type
+  if (property_type_id || room_types) {
+    query.propertyType = property_type_id || room_types;
+  }
+
+  // Bedrooms and bathrooms
+  if (min_bedrooms) query.bedrooms = { $gte: parseInt(min_bedrooms) };
+  if (min_bathrooms) query.bathrooms = { $gte: parseInt(min_bathrooms) };
+
+  // Amenities filtering
+  if (amenities) {
+    const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
+    query.amenities = { $all: amenitiesArray };
+  }
+
+  // Sort options
   let sortOptions = {};
-  if (sortBy === "price_asc") sortOptions.price = 1;
-  else if (sortBy === "price_desc") sortOptions.price = -1;
+  if (sortBy === "price_asc" || sortBy === "price_low") {
+    sortOptions.pricePerNight = 1;
+  } else if (sortBy === "price_desc" || sortBy === "price_high") {
+    sortOptions.pricePerNight = -1;
+  } else if (sortBy === "recommended") {
+    // Default sorting by rating or relevance
+    sortOptions = { rating: -1 };
+  }
 
-  const listings = await Listing.find(query).sort(sortOptions).exec();
-  res.status(200).json({ items: listings });
+  const listings = await Listing.find(query)
+    .sort(sortOptions)
+    .populate("hostId", "firstName lastName profilePhoto")
+    .populate("amenities", "name")
+    .exec();
+
+  res.status(200).json({
+    items: listings,
+    search_metadata: {
+      date_picker_type,
+      location_search,
+      monthly_length,
+      search_type,
+      total_results: listings.length,
+    },
+  });
+};
+
+// Get listing reviews
+const getListingReviews = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if listing exists
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Get all reviews for the listing
+    const Review = require("../models/Review.model");
+    const reviews = await Review.find({ listingId: id })
+      .populate("author", "firstName lastName profilePhoto createdAt")
+      .sort({ createdAt: -1 });
+
+    // Calculate review statistics
+    const totalReviews = reviews.length;
+    const avgRating =
+      totalReviews > 0
+        ? (
+            reviews.reduce((sum, review) => sum + review.rating, 0) /
+            totalReviews
+          ).toFixed(2)
+        : 0;
+
+    res.status(200).json({
+      reviews,
+      statistics: {
+        totalReviews,
+        avgRating: parseFloat(avgRating),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 module.exports = {
@@ -223,4 +371,5 @@ module.exports = {
   updateListing,
   deleteListing,
   searchListings,
+  getListingReviews,
 };
