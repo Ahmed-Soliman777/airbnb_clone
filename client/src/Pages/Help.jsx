@@ -1,8 +1,4 @@
 import React from 'react';
-
-
-
-
 import { Search } from "lucide-react";
 const HelpPage = () => {
 
@@ -30,6 +26,6 @@ const HelpPage = () => {
 
     </div>
   );
-};
+}
 
 export default HelpPage;
