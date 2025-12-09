@@ -26,7 +26,13 @@ const createListing = async (req, res) => {
     } = req.body;
 
     // Required fields check (parse numbers)
-    if (!title || !description || !propertyType || !pricePerNight || !maxGuests) {
+    if (
+      !title ||
+      !description ||
+      !propertyType ||
+      !pricePerNight ||
+      !maxGuests
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -66,7 +72,9 @@ const createListing = async (req, res) => {
       if (Array.isArray(range)) {
         return { startDate: new Date(range[0]), endDate: new Date(range[1]) };
       }
-      return range;
+
+      const date = new Date(range);
+      return { startDate: date, endDate: date };
     });
 
     const newListing = new Listing({
@@ -92,7 +100,6 @@ const createListing = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 // Get all listings
 const getListings = async (req, res) => {
