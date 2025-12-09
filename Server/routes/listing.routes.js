@@ -1,4 +1,4 @@
-const express = require("express");
+`const express = require("express");
 const router = express.Router();
 const {
   createListing,
@@ -271,8 +271,8 @@ router.post(
   "/listings",
   protect,
   authenticateUser(["host", "admin"]),
-  createListing,
-  upload.array("images", 10)
+  upload.array("images", 10),
+  createListing
 );
 
 /**
@@ -426,3 +426,4 @@ router.delete(
 );
 
 module.exports = router;
+`
