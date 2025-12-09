@@ -6,6 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
+  searchListings,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -62,6 +63,71 @@ const { default: upload } = require("../middleware/multer.js");
  *                       type: string
  */
 router.get("/listings", getListings);
+
+/**
+ * @swagger
+ * /listings/search:
+ *   get:
+ *     summary: Search listings with filters
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: location_search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkin
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: checkout
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: adults
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: children
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: min_price
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: max_price
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: property_type_id
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: min_bedrooms
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: min_bathrooms
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: amenities
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
+router.get("/listings/search", searchListings);
 
 /**
  * @swagger
