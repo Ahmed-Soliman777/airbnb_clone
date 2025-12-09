@@ -1,27 +1,28 @@
-import { v2 as cloudinary } from "cloudinary";
+const { v2: cloudinary } = require("cloudinary");
+const fs = require("fs");
 
-const uploadOnCloudinary = async (base64String) => {
+const uploadOnCloudinary = async (filePath) => {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
   try {
-    // if (!fs.existsSync(base64String)) {
-    //   throw new Error("File does not exist: " + base64String);
-    // }
+    if (!fs.existsSync(filePath)) {
+      throw new Error("File does not exist: " + filePath);
+    }
     // Upload file to Cloudinary
-    const result = await cloudinary.uploader.upload(base64String, {
+    const result = await cloudinary.uploader.upload(filePath, {
       folder: "airbnb_clone",
     });
 
     // Remove file from local uploads folder after successful upload to Cloudinary
-    // fs.unlinkSync(base64String);
-    return result.secure_url;
+    fs.unlinkSync(filePath);
+    return result;
   } catch (error) {
     console.error("Error uploading to Cloudinary:", error);
     throw error;
   }
 };
 
-export { uploadOnCloudinary };
+module.exports = { uploadOnCloudinary };

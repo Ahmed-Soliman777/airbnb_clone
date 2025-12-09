@@ -1,4 +1,4 @@
-`const express = require("express");
+const express = require("express");
 const router = express.Router();
 const {
   createListing,
@@ -12,7 +12,7 @@ const {
 
 const protect = require("../middleware/userMiddleware.js");
 const authenticateUser = require("../middleware/authUser.js");
-const { default: upload } = require("../middleware/multer.js");
+const upload = require("../middleware/multer.js");
 
 /**
  * @swagger
@@ -426,4 +426,3 @@ router.delete(
 );
 
 module.exports = router;
-`

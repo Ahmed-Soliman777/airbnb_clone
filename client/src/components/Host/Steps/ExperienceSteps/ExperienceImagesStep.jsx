@@ -3,7 +3,10 @@ import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { addExperienceImage, removeExperienceImage } from "@/store/Slices/experienceFormSlice";
+import {
+  addExperienceImage,
+  removeExperienceImage,
+} from "@/store/Slices/experienceFormSlice";
 
 export default function ExperienceImagesStep({ data, onUpdate }) {
   const dispatch = useDispatch();
@@ -21,21 +24,15 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
 
   const processFiles = (files) => {
     const fileArray = Array.from(files);
-    const imageUrls = [];
+    const validFiles = fileArray.filter((file) =>
+      file.type.startsWith("image/")
+    );
 
-    fileArray.forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imageUrls.push(e.target.result);
-          if (imageUrls.length === fileArray.filter(f => f.type.startsWith("image/")).length) {
-            onUpdate({ images: [...(data.images || []), ...imageUrls] });
-            dispatch(addExperienceImage(imageUrls));
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    if (validFiles.length > 0) {
+      // Store the actual File objects instead of base64
+      onUpdate({ images: [...(data.images || []), ...validFiles] });
+      dispatch(addExperienceImage(validFiles));
+    }
   };
 
   const handleDrop = (e) => {
@@ -81,10 +78,11 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            dragActive
               ? "border-primary bg-accent"
               : "border-border hover:border-primary/50"
-            }`}
+          }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">
@@ -120,7 +118,9 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
                   className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
                 >
                   <img
-                    src={image}
+                    src={
+                      image instanceof File ? URL.createObjectURL(image) : image
+                    }
                     alt={`Experience ${index + 1}`}
                     className="w-full h-full object-cover"
                   />

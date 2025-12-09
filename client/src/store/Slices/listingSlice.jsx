@@ -27,17 +27,37 @@ export const createListing = createAsyncThunk(
     const formData = new FormData();
 
     // add text fields...
-    formData.append("availability", JSON.stringify(newListing.availability));
     formData.append("title", newListing.title);
     formData.append("description", newListing.description);
     formData.append("propertyType", newListing.propertyType);
     formData.append("pricePerNight", newListing.pricePerNight);
     formData.append("maxGuests", newListing.maxGuests);
+    formData.append("cleaningFee", newListing.cleaningFee || 0);
+    formData.append("bedrooms", newListing.bedrooms || 1);
+    formData.append("bathrooms", newListing.bathrooms || 1);
 
-    // REAL FIX:
+    // Location fields
+    formData.append("street", newListing.street || "");
+    formData.append("city", newListing.city || "");
+    formData.append("country", newListing.country || "");
+    formData.append(
+      "coordinates",
+      JSON.stringify(newListing.coordinates || { lat: 0, lng: 0 })
+    );
+
+    // Amenities
+    formData.append("amenities", JSON.stringify(newListing.amenities || []));
+
+    // Availability
+    formData.append(
+      "availability",
+      JSON.stringify(newListing.availability || [])
+    );
+
+    // Images - MUST be File objects!
     newListing.images.forEach((file) => {
       console.log("FILE BEING SENT:", file);
-      formData.append("images", file);  // MUST be a File!
+      formData.append("images", file);
     });
 
     const response = await axios.post("/api/listings", formData, {
@@ -47,8 +67,6 @@ export const createListing = createAsyncThunk(
     return response.data;
   }
 );
-
-
 
 // ------------- 4. Update an existing listing --------------
 export const updateListing = createAsyncThunk(
