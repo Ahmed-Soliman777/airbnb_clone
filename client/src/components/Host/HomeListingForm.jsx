@@ -46,7 +46,6 @@ const HomeListingForm = ({ onBack }) => {
   });
 
   console.log(listingData);
-  
 
   const updateListingData = (data) => {
     setListingData((prev) => ({ ...prev, ...data }));
@@ -80,22 +79,12 @@ const HomeListingForm = ({ onBack }) => {
     switch (currentStep) {
       case 0:
         return (
-          <BasicDetailsStep
-            data={listingData}
-            onUpdate={updateListingData}
-          />
+          <BasicDetailsStep data={listingData} onUpdate={updateListingData} />
         );
       case 1:
-        return (
-          <LocationStep
-            data={listingData}
-            onUpdate={updateListingData}
-          />
-        );
+        return <LocationStep data={listingData} onUpdate={updateListingData} />;
       case 2:
-        return (
-          <PricingStep data={listingData} onUpdate={updateListingData} />
-        );
+        return <PricingStep data={listingData} onUpdate={updateListingData} />;
       case 3:
         return (
           <PropertyDetailsStep
@@ -104,9 +93,7 @@ const HomeListingForm = ({ onBack }) => {
           />
         );
       case 4:
-        return (
-          <ImagesStep data={listingData} onUpdate={updateListingData} />
-        );
+        return <ImagesStep data={listingData} onUpdate={updateListingData} />;
       case 5:
         return (
           <AmenitiesStep data={listingData} onUpdate={updateListingData} />
@@ -162,8 +149,8 @@ const HomeListingForm = ({ onBack }) => {
             {status === "loading"
               ? "Submitting..."
               : currentStep === steps.length - 1
-                ? "Submit Listing"
-                : "Next"}
+              ? "Submit Listing"
+              : "Next"}
           </Button>
         </div>
       </div>

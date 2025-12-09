@@ -19,18 +19,31 @@ export const getAllExperiences = createAsyncThunk(
 // Search experiences with pagination
 export const searchExperiences = createAsyncThunk(
   "experience/searchExperiences",
-  async ({ city, date, guests, page = 1, limit = 10, priceRange, categories, minRating }, { rejectWithValue }) => {
+  async (
+    {
+      city,
+      date,
+      guests,
+      page = 1,
+      limit = 10,
+      priceRange,
+      categories,
+      minRating,
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const params = new URLSearchParams();
-      if (city) params.append('city', city);
-      if (date) params.append('date', date);
-      if (guests) params.append('guests', guests);
-      params.append('page', page);
-      params.append('limit', limit);
+      if (city) params.append("city", city);
+      if (date) params.append("date", date);
+      if (guests) params.append("guests", guests);
+      params.append("page", page);
+      params.append("limit", limit);
 
-      if (priceRange) params.append('priceRange', JSON.stringify(priceRange));
-      if (categories && categories.length > 0) params.append('categories', JSON.stringify(categories));
-      if (minRating) params.append('minRating', minRating);
+      if (priceRange) params.append("priceRange", JSON.stringify(priceRange));
+      if (categories && categories.length > 0)
+        params.append("categories", JSON.stringify(categories));
+      if (minRating) params.append("minRating", minRating);
 
       const response = await axios.get(`${API_URL}?${params.toString()}`);
       return { ...response.data, page };
@@ -56,8 +69,58 @@ export const createExperience = createAsyncThunk(
   "experience/createExperience",
   async (experienceData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(API_URL, experienceData, {
+      const formData = new FormData();
+
+      // Append all fields to FormData
+      formData.append("title", experienceData.title);
+      formData.append("description", experienceData.description);
+      formData.append("experienceType", experienceData.experienceType);
+      formData.append("pricePerPerson", experienceData.pricePerPerson);
+      formData.append("duration", experienceData.duration);
+      formData.append("ageRequirement", experienceData.ageRequirement || "");
+      formData.append("fitnessLevel", experienceData.fitnessLevel || "");
+
+      // Append location fields
+      formData.append("street", experienceData.street || "");
+      formData.append("city", experienceData.city || "");
+      formData.append("country", experienceData.country || "");
+      formData.append(
+        "coordinates",
+        JSON.stringify(experienceData.coordinates || {})
+      );
+
+      // Append complex objects as JSON strings
+      formData.append(
+        "groupSize",
+        JSON.stringify(experienceData.groupSize || {})
+      );
+      formData.append(
+        "schedule",
+        JSON.stringify(experienceData.schedule || [])
+      );
+      formData.append(
+        "requirements",
+        JSON.stringify(experienceData.requirements || [])
+      );
+      formData.append(
+        "inclusions",
+        JSON.stringify(experienceData.inclusions || [])
+      );
+
+      // Append image files
+      if (experienceData.images && Array.isArray(experienceData.images)) {
+        experienceData.images.forEach((image) => {
+          if (image instanceof File) {
+            formData.append("images", image);
+          }
+        });
+      }
+
+      const response = await axios.post(API_URL, formData, {
         withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       return response.data;
     } catch (error) {
@@ -217,6 +280,9 @@ const experienceSlice = createSlice({
   },
 });
 
-export const { clearExperienceError, clearCurrentExperience, clearSearchResults } =
-  experienceSlice.actions;
+export const {
+  clearExperienceError,
+  clearCurrentExperience,
+  clearSearchResults,
+} = experienceSlice.actions;
 export default experienceSlice.reducer;

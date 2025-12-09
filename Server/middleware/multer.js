@@ -1,17 +1,32 @@
 import multer from "multer";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Set up multer storage configuration tio save files to './public/uploads/' directory
-let storage = multer.diskStorage({
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Set upload folder path
+const uploadPath = path.join(__dirname, "../public/uploads");
+
+// Ensure the uploads folder exists
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
+
+// Set up multer storage configuration to save files to './public/uploads/' directory
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/uploads/");
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
-//create upload middleware using multer
+// Create upload middleware using multer
 // Initialize multer with the defined storage configuration
-let upload = multer({ storage: storage });
+const upload = multer({ storage: storage });
 
 export default upload;

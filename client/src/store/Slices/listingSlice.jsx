@@ -24,7 +24,46 @@ export const GetListingById = createAsyncThunk(
 export const createListing = createAsyncThunk(
   "listing/createListing",
   async (newListing) => {
-    const response = await axios.post("/api/listings", newListing);
+    const formData = new FormData();
+
+    // add text fields...
+    formData.append("title", newListing.title);
+    formData.append("description", newListing.description);
+    formData.append("propertyType", newListing.propertyType);
+    formData.append("pricePerNight", newListing.pricePerNight);
+    formData.append("maxGuests", newListing.maxGuests);
+    formData.append("cleaningFee", newListing.cleaningFee || 0);
+    formData.append("bedrooms", newListing.bedrooms || 1);
+    formData.append("bathrooms", newListing.bathrooms || 1);
+
+    // Location fields
+    formData.append("street", newListing.street || "");
+    formData.append("city", newListing.city || "");
+    formData.append("country", newListing.country || "");
+    formData.append(
+      "coordinates",
+      JSON.stringify(newListing.coordinates || { lat: 0, lng: 0 })
+    );
+
+    // Amenities
+    formData.append("amenities", JSON.stringify(newListing.amenities || []));
+
+    // Availability
+    formData.append(
+      "availability",
+      JSON.stringify(newListing.availability || [])
+    );
+
+    // Images - MUST be File objects!
+    newListing.images.forEach((file) => {
+      console.log("FILE BEING SENT:", file);
+      formData.append("images", file);
+    });
+
+    const response = await axios.post("/api/listings", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     return response.data;
   }
 );
