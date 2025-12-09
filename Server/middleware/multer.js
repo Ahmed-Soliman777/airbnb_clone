@@ -1,6 +1,11 @@
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Set upload folder path
 const uploadPath = path.join(__dirname, "../public/uploads");
@@ -24,4 +29,4 @@ const storage = multer.diskStorage({
 // Initialize multer with the defined storage configuration
 const upload = multer({ storage: storage });
 
-module.exports = upload;
+export default upload;
