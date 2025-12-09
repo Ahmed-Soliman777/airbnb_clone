@@ -1,16 +1,35 @@
 import { useState } from "react";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, X } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 const AvailabilityStep = ({ data, onUpdate }) => {
-  const [selectedDates, setSelectedDates] = useState(data.availability || []);
+  //use range selection for availability
+  const [dateRanges, setDateRanges] = useState(data.availability || []);
+  const [currentRange, setCurrentRange] = useState(null);
 
-  const handleDateSelect = (dates) => {
-    if (dates) {
-      setSelectedDates(dates);
-      onUpdate({ availability: dates });
+  const handleDateSelect = (range) => {
+    setCurrentRange(range);
+  };
+
+  const addDateRange = () => {
+    if (currentRange?.from && currentRange?.to) {
+      const newRange = {
+        startDate: currentRange.from,
+        endDate: currentRange.to,
+      };
+      const updatedRanges = [...dateRanges, newRange];
+      setDateRanges(updatedRanges);
+      onUpdate({ availability: updatedRanges });
+      setCurrentRange(null);
     }
+  };
+
+  const removeDateRange = (index) => {
+    const updatedRanges = dateRanges.filter((_, i) => i !== index);
+    setDateRanges(updatedRanges);
+    onUpdate({ availability: updatedRanges });
   };
 
   return (
