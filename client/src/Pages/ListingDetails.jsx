@@ -16,12 +16,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 
-const PLACEHOLDER_BEDROOM_IMG =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80";
-
-const PLACEHOLDER_HOST_AVATAR =
-  "https://randomuser.me/api/portraits/women/55.jpg";
-
 const ICON_MAP = {
   Info,
   MapPin,
@@ -35,37 +29,19 @@ const ICON_MAP = {
   Shield: Info,
 };
 
-const FALLBACK_HIGHLIGHTS = [
-  {
-    icon: "Info",
-    title: "Outdoor entertainment",
-    description:
-      "The firepit, alfresco dining, BBQ area and outdoor seating are great for summer trips.",
-  },
-  {
-    icon: "MapPin",
-    title: "Mountain and garden views",
-    description: "Soak up the views during your stay.",
-  },
-  {
-    icon: "Users",
-    title: "Park for free",
-    description: "This is one of the few places in the area with free parking.",
-  },
-];
-
 const ListingDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { listing, status } = useSelector((state) => state.listing);
   const { reviews, statistics } = useSelector((state) => state.review);
 
-  // Shared date state
+  // Shared date state for calendar and booking component
   const [date, setDate] = useState({
     from: undefined,
     to: undefined,
   });
 
+  // Handle date selection from calendar
   const handleSelect = useCallback((range) => {
     if (!range?.from) {
       setDate({ from: undefined, to: undefined });
@@ -83,17 +59,25 @@ const ListingDetails = () => {
     }
   }, []);
 
+  // Calculate number of nights
   const nights = useMemo(
     () => (date?.from && date?.to ? differenceInDays(date.to, date.from) : 0),
     [date?.from, date?.to]
   );
 
+  // Fetch listing and reviews on component mount
   useEffect(() => {
     if (!id) return;
 
     dispatch(GetListingById(id));
     dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
+
+  // // Debug: Log reviews and statistics
+  // useEffect(() => {
+  //   console.log("Reviews:", reviews);
+  //   console.log("Statistics:", statistics);
+  // }, [reviews, statistics]);
 
   // Memoize derived data to prevent recalculation on every render
   const listingData = useMemo(() => {
@@ -115,26 +99,14 @@ const ListingDetails = () => {
       hostAvatar:
         listing.hostId?.avatar ||
         listing.host?.avatar ||
-        PLACEHOLDER_HOST_AVATAR,
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          listing.hostId?.firstName || listing.host?.name || "H"
+        )}&background=random`,
       amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
       propertyType: listing.propertyType || "place",
       description: listing.description,
-      highlightFeatures: Array.isArray(listing.highlightFeatures) && listing.highlightFeatures.length > 0
-        ? listing.highlightFeatures
-        : FALLBACK_HIGHLIGHTS,
     };
   }, [listing]);
-
-  const bedroomsArr = useMemo(
-    () =>
-      Array.from({ length: listingData?.bedroomsCount || 0 }, (_, i) => ({
-        id: i + 1,
-        title: `Bedroom ${i + 1}`,
-        subtitle: "Comfortable bed",
-        img: PLACEHOLDER_BEDROOM_IMG,
-      })),
-    [listingData?.bedroomsCount]
-  );
 
   // Show loading state
   if (status === "loading") {
@@ -238,24 +210,6 @@ const ListingDetails = () => {
 
             <hr />
 
-            {/* Amenities */}
-            <div className="space-y-4">
-              {listingData.highlightFeatures.map(({ icon, title, description }) => {
-                const Icon = ICON_MAP[icon] || Info;
-                return (
-                  <div key={title} className="flex items-start gap-3">
-                    <Icon className="text-gray-700 mt-1" />
-                    <div>
-                      <p className="font-semibold">{title}</p>
-                      <p className="text-sm text-gray-600">{description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <hr />
-
             {/* Description */}
             {listingData.description && (
               <div className="text-gray-700 leading-relaxed space-y-3">
@@ -265,7 +219,7 @@ const ListingDetails = () => {
 
             <div className="max-w-6xl mx-auto px-0 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
               {/* Where you'll sleep */}
-              <section>
+              {/* <section>
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
                   Where you'll sleep
                 </h3>
@@ -301,7 +255,7 @@ const ListingDetails = () => {
                     </p>
                   )}
                 </div>
-              </section>
+              </section> */}
 
               <hr />
 
@@ -369,9 +323,22 @@ const ListingDetails = () => {
         </div>
 
         {/*================= Rating and Reviews Sections ================= */}
-        <div className="max-w-5xl">
-          <AverageRating reviews={reviews} statistics={statistics} />
-          <ReviewsList reviews={reviews} />
+        <div className="max-w-5xl mt-12">
+          <hr className="mb-8" />
+          {reviews && reviews.length > 0 ? (
+            <>
+              <AverageRating reviews={reviews} statistics={statistics} />
+              <ReviewsList reviews={reviews} />
+            </>
+          ) : (
+            <div className="py-8">
+              <h2 className="text-2xl font-semibold mb-4">No reviews yet</h2>
+              <p className="text-gray-600">
+                This listing doesn't have any reviews yet. Be the first to leave
+                a review!
+              </p>
+            </div>
+          )}
         </div>
         {/*================= Location Section ================= */}
         <div className="max-w-5xl">

@@ -16,7 +16,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
-import SearchListing from "./Pages/SearchListing";
+import SearchListing from "./Pages/ListingSearch";
 import AirbnbLanding from "./Pages/AirbnbLanding";
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";

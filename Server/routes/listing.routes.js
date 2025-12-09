@@ -7,6 +7,7 @@ const {
   updateListing,
   deleteListing,
   searchListings,
+  getListingReviews,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -369,5 +370,26 @@ router.delete(
   authenticateUser(["host", "admin"]),
   deleteListing
 );
+
+/**
+ * @swagger
+ * /listings/{id}/reviews:
+ *   get:
+ *     summary: Get all reviews for a specific listing
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Listing ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reviews retrieved successfully
+ *       404:
+ *         description: Listing not found
+ */
+router.get("/listings/:id/reviews", getListingReviews);
 
 module.exports = router;

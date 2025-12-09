@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import FiltersPopup from "../components/Search/FiltersPopup";
 import ListingCard from "../components/Listing/ListingCard";
+import SearchResultsMap from "../components/Search/SearchResultsMap";
 
-export default function SearchListing() {
+export default function ListingSearch() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -108,7 +109,7 @@ export default function SearchListing() {
     parseInt(filters.infants || 0);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-5 py-5 min-h-screen">
+    <div className="max-w-[1440px] mx-auto px-5 pt-5 min-h-screen">
       {/* Search Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-200 gap-4">
         <div className="search-info">
@@ -172,10 +173,18 @@ export default function SearchListing() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {listings.map((listing) => (
-              <ListingCard key={listing._id} listing={listing} />
-            ))}
+          <div className="flex gap-4 h-100%">
+            {/* Grid of searched listings */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {listings.map((listing) => (
+                <ListingCard key={listing._id} listing={listing} />
+              ))}
+            </div>
+
+            {/* Map of searched listings */}
+            <div className="flex-1">
+              <SearchResultsMap listings={listings} />
+            </div>
           </div>
         )}
       </div>
