@@ -24,10 +24,31 @@ export const GetListingById = createAsyncThunk(
 export const createListing = createAsyncThunk(
   "listing/createListing",
   async (newListing) => {
-    const response = await axios.post("/api/listings", newListing);
+    const formData = new FormData();
+
+    // add text fields...
+    formData.append("availability", JSON.stringify(newListing.availability));
+    formData.append("title", newListing.title);
+    formData.append("description", newListing.description);
+    formData.append("propertyType", newListing.propertyType);
+    formData.append("pricePerNight", newListing.pricePerNight);
+    formData.append("maxGuests", newListing.maxGuests);
+
+    // REAL FIX:
+    newListing.images.forEach((file) => {
+      console.log("FILE BEING SENT:", file);
+      formData.append("images", file);  // MUST be a File!
+    });
+
+    const response = await axios.post("/api/listings", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     return response.data;
   }
 );
+
+
 
 // ------------- 4. Update an existing listing --------------
 export const updateListing = createAsyncThunk(
