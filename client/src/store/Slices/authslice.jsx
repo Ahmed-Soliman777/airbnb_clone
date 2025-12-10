@@ -105,6 +105,23 @@ export const resendVerification = createAsyncThunk(
   }
 );
 
+// Fetch current user from token
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/profile`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to fetch user");
+      return data.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 // Logout
 export const logoutUser = createAsyncThunk(
   "auth/logout",
@@ -210,6 +227,20 @@ const authSlice = createSlice({
         state.successMessage = "Reset link sent to your email.";
       })
       .addCase(forgetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch current user
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

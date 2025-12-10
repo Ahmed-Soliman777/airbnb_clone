@@ -5,7 +5,7 @@ const Service = require('../models/Service.model');
 // @access  Private
 const createService = async (req, res) => {
   try {
-    const {
+    let {
       title,
       description,
       serviceCategory,
@@ -15,9 +15,25 @@ const createService = async (req, res) => {
       availability,
       requirements,
       skills,
-      images,
       serviceDetails
     } = req.body;
+
+    // Parse nested objects if they are strings (from FormData)
+    if (typeof location === 'string') location = JSON.parse(location);
+    if (typeof packages === 'string') packages = JSON.parse(packages);
+    if (typeof availability === 'string') availability = JSON.parse(availability);
+    if (typeof requirements === 'string') requirements = JSON.parse(requirements);
+    if (typeof skills === 'string') skills = JSON.parse(skills);
+    if (typeof serviceDetails === 'string') serviceDetails = JSON.parse(serviceDetails);
+
+    // Handle images
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => ({
+        url: `/uploads/${file.filename}`,
+        alt: file.originalname
+      }));
+    }
 
     const service = await Service.create({
       title,
