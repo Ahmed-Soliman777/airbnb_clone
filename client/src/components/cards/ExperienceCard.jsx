@@ -14,8 +14,8 @@ const ExperienceCard = ({ experience }) => {
         experienceType,
     } = experience;
 
-    const mainImage = images?.[0]?.url || "/placeholder.svg";
-    const altText = images?.[0]?.alt || title;
+    const mainImage = (images?.[0] && (typeof images[0] === 'string' ? images[0] : images[0].url)) || "/placeholder.svg";
+    const altText = (images?.[0] && (typeof images[0] === 'string' ? title : images[0].alt)) || title;
 
     return (
         <Link to={`/experiences/${_id}`} className="group block">

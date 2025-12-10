@@ -34,20 +34,22 @@ const createExperience = async (req, res) => {
                         base64Image = "data:image/jpeg;base64," + base64Image;
                     }
 
-                    try {
-                        return await uploadOnCloudinary(base64Image);
-                    } catch (error) {
-                        console.error(error.message);
-                        return null;
-                    }
+                    // Directly await the upload. If it fails, Promise.all will reject, 
+                    // and the main catch block will handle it.
+                    return await uploadOnCloudinary(base64Image);
                 })
             );
 
             uploadedImages = uploadedImages.filter(Boolean);
         }
 
-        console.log(req.body);
-
+        // Validate required location fields
+        if (!location || !location.city || !location.country) {
+            return res.status(400).json({
+                success: false,
+                message: 'Location with city and country is required'
+            });
+        }
 
         const experience = await Experience.create({
             title,
@@ -61,7 +63,7 @@ const createExperience = async (req, res) => {
             ageRequirement,
             fitnessLevel,
             requirements,
-            images: uploadedImages,
+            images: uploadedImages.map(url => ({ url, alt: 'Experience image' })),
             inclusions,
             host: req.user._id
         });

@@ -10,6 +10,8 @@ import experienceFormReducer from './Slices/experienceFormSlice';
 import serviceFormReducer from './Slices/serviceFormSlice';
 import homeFormReducer from './Slices/homeFormSlice';
 import wishlistReducer from './Slices/wishlistSlice';
+import messagesReducer from './Slices/messagesSlice';
+import bookingReducer from "./Slices/bookingSlice";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +26,8 @@ const store = configureStore({
     experienceForm: experienceFormReducer,
     serviceForm: serviceFormReducer,
     homeForm: homeFormReducer,
+    messages: messagesReducer,
+    booking: bookingReducer,
   },
 });
 

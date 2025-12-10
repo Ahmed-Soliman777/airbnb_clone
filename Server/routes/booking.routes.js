@@ -129,7 +129,6 @@ router.get(
 router.get(
   "/booking/user/:userId",
   authMiddleware,
-  authorization("guest", "admin"),
   getBookingsForUser
 );
 
@@ -235,7 +234,6 @@ router.patch(
 router.delete(
   "/booking/:id",
   authMiddleware,
-  authorization("guest", "host", "admin"),
   deleteBooking
 );
 

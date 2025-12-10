@@ -19,37 +19,75 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
     }
   };
 
-  const processFiles = (files) => {
-    const fileArray = Array.from(files);
-    const imageUrls = [];
+  // Compress image helper
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
 
-    fileArray.forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imageUrls.push(e.target.result);
-          if (imageUrls.length === fileArray.filter(f => f.type.startsWith("image/")).length) {
-            onUpdate({ images: [...(data.images || []), ...imageUrls] });
-            dispatch(addExperienceImage(imageUrls));
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
           }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.7 quality
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
         };
-        reader.readAsDataURL(file);
-      }
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
     });
   };
 
-  const handleDrop = (e) => {
+  const processFiles = async (files) => {
+    const fileArray = Array.from(files);
+
+    // Process only images
+    const imageFiles = fileArray.filter(file => file.type.startsWith("image/"));
+
+    if (imageFiles.length > 0) {
+      // Compress all images in parallel
+      const compressedImages = await Promise.all(
+        imageFiles.map(file => compressImage(file))
+      );
+
+      onUpdate({ images: [...(data.images || []), ...compressedImages] });
+      dispatch(addExperienceImage(compressedImages));
+    }
+  };
+
+  const handleDrop = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      processFiles(e.dataTransfer.files);
+      await processFiles(e.dataTransfer.files);
     }
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      processFiles(e.target.files);
+      await processFiles(e.target.files);
     }
   };
 
@@ -82,8 +120,8 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-              ? "border-primary bg-accent"
-              : "border-border hover:border-primary/50"
+            ? "border-primary bg-accent"
+            : "border-border hover:border-primary/50"
             }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
