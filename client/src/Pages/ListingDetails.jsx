@@ -7,7 +7,6 @@ import ListingHost from "@/components/Listing/ListingHost";
 import ListingLocation from "@/components/Listing/ListingLocation";
 import ReviewsList from "@/components/Listing/ReviewsList";
 import { Calendar } from "@/components/ui/calendar";
-import { Card } from "@/components/ui/card";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
 import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
@@ -16,22 +15,25 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 
-const ICON_MAP = {
-  Info,
-  MapPin,
-  Users,
-  Home: Info,
-  Star: Info,
-  Heart: Info,
-  Key: Info,
-  Wifi: Info,
-  Car: Info,
-  Shield: Info,
-};
+// const ICON_MAP = {
+//   Info,
+//   MapPin,
+//   Users,
+//   Home: Info,
+//   Star: Info,
+//   Heart: Info,
+//   Key: Info,
+//   Wifi: Info,
+//   Car: Info,
+//   Shield: Info,
+// };
 
 const ListingDetails = () => {
+  // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
+
+  // Get listing and reviews state from Redux store
   const { listing, status } = useSelector((state) => state.listing);
   const { reviews, statistics } = useSelector((state) => state.review);
 
@@ -68,16 +70,9 @@ const ListingDetails = () => {
   // Fetch listing and reviews on component mount
   useEffect(() => {
     if (!id) return;
-
     dispatch(GetListingById(id));
     dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
-
-  // // Debug: Log reviews and statistics
-  // useEffect(() => {
-  //   console.log("Reviews:", reviews);
-  //   console.log("Statistics:", statistics);
-  // }, [reviews, statistics]);
 
   // Memoize derived data to prevent recalculation on every render
   const listingData = useMemo(() => {
@@ -135,7 +130,7 @@ const ListingDetails = () => {
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 relative">
-          {/*============= Left Side ================== */}
+          {/* Left Side: listing details */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Title & Info */}
             <div>

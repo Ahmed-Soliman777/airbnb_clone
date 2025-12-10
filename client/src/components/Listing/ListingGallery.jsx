@@ -8,9 +8,13 @@ import ShareModal from "./ShareModal";
 import PhotoGalleryModal from "./PhotoGalleryModal";
 
 const ListingGallery = ({ title, images = [], description }) => {
+  // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
+  // Get wishlist items from Redux store
   const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  // Local state for modals
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
 

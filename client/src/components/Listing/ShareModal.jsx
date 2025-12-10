@@ -4,7 +4,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Files, Mail, MessageSquare, Share2 } from "lucide-react";
+import {
+  Check,
+  CheckCheckIcon,
+  CircleCheck,
+  CircleCheckBig,
+  Files,
+  Mail,
+  MessageSquare,
+  Share2,
+} from "lucide-react";
 import { useState } from "react";
 
 const ShareModal = ({
@@ -15,14 +24,17 @@ const ShareModal = ({
   listingImage,
   listingDescription,
 }) => {
+  // State to track if URL has been copied
   const [copiedURL, setCopiedURL] = useState(false);
 
+  // Function to copy listing URL to clipboard
   const handleCopyLink = () => {
     navigator.clipboard.writeText(listingUrl);
     setCopiedURL(true);
     setTimeout(() => setCopiedURL(false), 2000);
   };
 
+  // Define share options
   const shareOptions = [
     {
       name: "Copy Link",
@@ -33,7 +45,13 @@ const ShareModal = ({
       name: "Email",
       icon: <Mail size={24} />,
       action: () => {
-        window.location.href = `mailto:?subject=Check out this listing: ${listingTitle}&body=${listingUrl}`;
+        const subject = encodeURIComponent(
+          `Check out this listing: ${listingTitle}`
+        );
+        const body = encodeURIComponent(
+          `Check out this listing: ${listingTitle}\n\nLink: ${listingUrl}`
+        );
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
       },
     },
     {
@@ -111,14 +129,15 @@ const ShareModal = ({
       action: () => {
         const embedCode = `<iframe src="${listingUrl}" width="600" height="400" frameborder="0"></iframe>`;
         navigator.clipboard.writeText(embedCode);
-        alert("Embed code copied to clipboard!");
+        setCopiedURL(true);
+        setTimeout(() => setCopiedURL(false), 2000);
       },
     },
   ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl rounded-4xl">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl rounded-4xl pt-11">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             Share this place
@@ -151,7 +170,7 @@ const ShareModal = ({
         </div>
 
         {/* Share Options Grid */}
-        <div className="grid grid-cols-2 gap-1 py-4">
+        <div className="grid grid-cols-2 gap-1 pt-4">
           {shareOptions.map((option) => (
             <button
               key={option.name}
@@ -166,20 +185,16 @@ const ShareModal = ({
               </span>
             </button>
           ))}
-
           {/* copied link notification */}
-          <div
-            className={`col-span-2 mt-2 text-center text-sm font-medium ${
-              copiedURL ? "opacity-100" : "opacity-0"
-            } transition-opacity`}
-          >
-            {copiedURL ? (
-              <div className="flex items-center justify-center gap-2">
-                <Check fill="green" size={16} />
-                Link copied to clipboard!
+          <div className="relative col-span-2">
+            {copiedURL && (
+              <div
+                className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                    p-2 bg-white rounded-lg flex items-center justify-center gap-2 border"
+              >
+                <CircleCheck size={20} fill="green" stroke="white" /> Link
+                copied to clipboard!
               </div>
-            ) : (
-              <div>&nbsp;</div>
             )}
           </div>
         </div>
