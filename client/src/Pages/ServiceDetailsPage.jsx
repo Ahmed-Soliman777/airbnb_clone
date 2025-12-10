@@ -1,10 +1,13 @@
-import { useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getServiceById, clearCurrentService } from "@/store/Slices/serviceSlice";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
 import {
     ArrowLeft,
     Star,
@@ -14,14 +17,30 @@ import {
     Heart,
     Check,
     MessageCircle,
-    Calendar,
+    Calendar as CalendarIcon,
     Shield,
 } from "lucide-react";
+import { format } from "date-fns";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const ServiceDetailsPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
+    // const { toast } = useToast();
     const { service, status } = useSelector((state) => state.service);
+    const { user } = useSelector((state) => state.auth);
+
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [dateOpen, setDateOpen] = useState(false);
+    const [selectedTime, setSelectedTime] = useState("");
+    const [availableSlots, setAvailableSlots] = useState([]);
 
     useEffect(() => {
         dispatch(getServiceById(id));
@@ -29,6 +48,29 @@ const ServiceDetailsPage = () => {
             dispatch(clearCurrentService());
         };
     }, [dispatch, id]);
+
+    useEffect(() => {
+        if (selectedDate && service?.availability) {
+            const dayName = format(selectedDate, 'EEEE'); // e.g., "Monday"
+            const daySchedule = service.availability.find(d => d.day === dayName);
+
+            if (daySchedule && daySchedule.isAvailable) {
+                // Generate slots
+                const slots = [];
+                let start = parseInt(daySchedule.startTime.split(':')[0]);
+                const end = parseInt(daySchedule.endTime.split(':')[0]);
+
+                for (let i = start; i < end; i++) {
+                    const time = `${i.toString().padStart(2, '0')}:00`;
+                    slots.push(time);
+                }
+                setAvailableSlots(slots);
+            } else {
+                setAvailableSlots([]);
+            }
+        }
+        setSelectedTime(""); // Reset time when date changes
+    }, [selectedDate, service]);
 
     if (status === "loading" || !service) {
         return (
@@ -66,10 +108,40 @@ const ServiceDetailsPage = () => {
         reviewCount = 0,
     } = service;
 
+    const handleReserve = () => {
+        if (!user) {
+            toast({
+                title: "Login Required",
+                description: "Please login to make a reservation.",
+                variant: "destructive",
+            });
+            navigate("/login");
+            return;
+        }
+
+        if (!selectedDate || !selectedTime) {
+            toast.error("Please select both date and time");
+            return;
+        }
+
+        navigate("/checkout", {
+            state: {
+                type: "service",
+                item: service,
+                checkInDate: selectedDate,
+                checkOutDate: selectedDate,
+                selectedTime,
+                guests: 1,
+                totalPrice: hourlyRate,
+                hourlyRate,
+            },
+        });
+    };
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className=" border-b">
+            <header className="sticky top-0 z-50 bg-background border-b">
                 <div className="container max-w-6xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <Link
@@ -98,7 +170,7 @@ const ServiceDetailsPage = () => {
                         <>
                             <div className="col-span-4 md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto">
                                 <img
-                                    src={images[0].url}
+                                    src={images[0]}
                                     alt={title}
                                     className="w-full h-full object-cover"
                                 />
@@ -106,7 +178,7 @@ const ServiceDetailsPage = () => {
                             {images.slice(1, 5).map((img, index) => (
                                 <div key={index} className="hidden md:block aspect-[4/3]">
                                     <img
-                                        src={img.url}
+                                        src={img}
                                         alt={`${title} ${index + 2}`}
                                         className="w-full h-full object-cover"
                                     />
@@ -278,22 +350,72 @@ const ServiceDetailsPage = () => {
                             </div>
 
                             <div className="space-y-4 mb-6">
-                                <div className="border rounded-lg p-3">
-                                    <label className="text-xs font-medium text-muted-foreground">
-                                        DATE
-                                    </label>
-                                    <p className="font-medium">Select a date</p>
-                                </div>
-                                <div className="border rounded-lg p-3">
+                                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                                    <PopoverTrigger asChild>
+                                        <button className="w-full border rounded-lg p-3 text-left hover:border-foreground transition-colors">
+                                            <label className="text-xs font-medium text-muted-foreground">
+                                                DATE
+                                            </label>
+                                            <p className="font-medium">
+                                                {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Select a date"}
+                                            </p>
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={selectedDate}
+                                            onSelect={(date) => {
+                                                setSelectedDate(date);
+                                                setDateOpen(false);
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+
+                                <div className="space-y-1">
                                     <label className="text-xs font-medium text-muted-foreground">
                                         TIME
                                     </label>
-                                    <p className="font-medium">Select time</p>
+                                    <Select
+                                        value={selectedTime}
+                                        onValueChange={setSelectedTime}
+                                        disabled={!selectedDate || availableSlots.length === 0}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder={
+                                                !selectedDate
+                                                    ? "Select date first"
+                                                    : availableSlots.length === 0
+                                                        ? "No slots available"
+                                                        : "Select time"
+                                            } />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableSlots.map((time) => (
+                                                <SelectItem key={time} value={time}>
+                                                    {time}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
-                            <Button className="w-full mb-4" size="lg">
-                                Request Booking
+                            <Button
+                                className="w-full mb-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
+                                size="lg"
+                                onClick={handleReserve}
+                                disabled={!selectedDate || !selectedTime}
+                            >
+                                {!selectedDate
+                                    ? "Select a date"
+                                    : !selectedTime
+                                        ? "Select a time"
+                                        : "Request Booking"
+                                }
                             </Button>
 
                             <Button variant="outline" className="w-full" size="lg">

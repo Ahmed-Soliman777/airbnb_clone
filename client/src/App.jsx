@@ -20,8 +20,13 @@ import AirbnbLanding from "./Pages/AirbnbLanding"
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
-import HostWelcomePage from "./pages/HostWelcomePage";
-import HostDashboardPage from "./pages/HostDashboardPage";
+import HostWelcomePage from "./Pages/HostWelcomePage";
+import HostDashboardPage from "./Pages/HostDashboardPage";
+import CheckoutPage from "./Pages/CheckoutPage";
+import PaymentSuccessPage from "./Pages/PaymentSuccessPage";
+import PaymentCancelPage from "./Pages/PaymentCancelPage";
+import ReservationsPage from "./Pages/ReservationsPage";
+import MessagesPage from "./Pages/MessagesPage"
 
 function App() {
   const routes = createBrowserRouter([
@@ -92,12 +97,37 @@ function App() {
             </AuthGuard>
           )
         },
-
+        {
+          path: "messages",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <MessagesPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "checkout",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <CheckoutPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "reservations",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <ReservationsPage />
+            </AuthGuard>
+          )
+        },
+        { path: "payment/success", element: <PaymentSuccessPage /> },
+        { path: "payment/cancel", element: <PaymentCancelPage /> },
         { path: "experiences", element: <ExperiencesPage /> },
         { path: "experiences/:id", element: <ExperienceDetailsPage /> },
         { path: "services", element: <ServicesPage /> },
         { path: "services/:id", element: <ServiceDetailsPage /> },
-            { path: "AirbnbLanding", element: <AirbnbLanding/> },
+        { path: "AirbnbLanding", element: <AirbnbLanding /> },
         { path: "experiences/search", element: <ExperienceSearchPage /> },
         { path: "services/search", element: <ServiceSearchPage /> },
       ],
