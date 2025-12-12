@@ -11,6 +11,7 @@ import serviceFormReducer from "./Slices/serviceFormSlice";
 import homeFormReducer from "./Slices/homeFormSlice";
 import wishlistReducer from "./Slices/wishlistSlice";
 import reviewReducer from "./Slices/reviewSlice";
+import recentlyViewedReducer from "./Slices/recentlyViewedSlice";
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     serviceForm: serviceFormReducer,
     homeForm: homeFormReducer,
     review: reviewReducer,
+    recentlyViewed: recentlyViewedReducer,
   },
 });
 

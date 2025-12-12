@@ -10,6 +10,7 @@ import StickyNavbar from "@/components/Listing/StickyNavbar";
 import { Calendar } from "@/components/ui/calendar";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
+import { addRecentlyViewed } from "@/store/Slices/recentlyViewedSlice";
 import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
@@ -37,6 +38,7 @@ const ListingDetails = () => {
   // Get listing and reviews state from Redux store
   const { listing, status } = useSelector((state) => state.listing);
   const { reviews, statistics } = useSelector((state) => state.review);
+  const user = useSelector((state) => state.auth.user);
 
   // Shared date state for calendar and booking component
   const [date, setDate] = useState({
@@ -85,22 +87,13 @@ const ListingDetails = () => {
     dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
 
-  // Track recently viewed listings
+  // Track recently viewed listings (only for logged-in users)
   useEffect(() => {
-    if (!id || !listing) return;
+    if (!id || !listing || !user) return;
     
-    // Get current recently viewed from localStorage
-    const recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
-    
-    // Remove if already exists (to move to front)
-    const filtered = recentlyViewed.filter(listingId => listingId !== id);
-    
-    // Add to front and limit to 10 items
-    const updated = [id, ...filtered].slice(0, 10);
-    
-    // Save back to localStorage
-    localStorage.setItem("recentlyViewed", JSON.stringify(updated));
-  }, [id, listing]);
+    // User is logged in - save to database
+    dispatch(addRecentlyViewed(id));
+  }, [id, listing, user, dispatch]);
 
   // Handle scroll for sticky navbar
   useEffect(() => {

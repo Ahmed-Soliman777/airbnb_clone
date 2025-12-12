@@ -1,14 +1,16 @@
 import Amenity from "@/components/Listing/Amenity";
 import AmenityExtractor from "@/components/Amenities/test";
 import ListingCarousel from "@/components/Listing/ListingCarousel";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { GetAllListings } from "@/store/Slices/listingSlice";
+import { fetchRecentlyViewed } from "@/store/Slices/recentlyViewedSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
   const { listings, status, error } = useSelector((state) => state.listing);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const user = useSelector((state) => state.auth.user);
+  const recentlyViewed = useSelector((state) => state.recentlyViewed.items);
 
   useEffect(() => {
     if (status === "idle") {
@@ -16,24 +18,21 @@ const Home = () => {
     }
   }, [dispatch, status]);
 
+  // Fetch recently viewed for logged-in users only
   useEffect(() => {
-    // Get recently viewed listings from localStorage
-    const viewedListings = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
-    
-    // Filter to get full listing objects from the viewed IDs
-    if (status === "succeeded" && viewedListings.length > 0) {
-      const recentListings = viewedListings
-        .map(id => listings.find(listing => listing._id === id))
-        .filter(Boolean) // Remove undefined entries
-        .slice(0, 10); // Limit to 10 most recent
-      setRecentlyViewed(recentListings);
+    console.log("User:", user);
+    console.log("Recently Viewed Items:", recentlyViewed);
+
+    if (user) {
+      console.log("Fetching recently viewed...");
+      dispatch(fetchRecentlyViewed());
     }
-  }, [listings, status]);
+  }, [user, dispatch]);
 
   return (
     <div>
-      {/* Recently Viewed Section */}
-      {recentlyViewed.length > 0 && (
+      {/* Recently Viewed Section - Only for logged-in users */}
+      {user && recentlyViewed.length > 0 && (
         <section className="w-10/12 py-10 relative mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold">Recently Viewed</h2>
@@ -43,7 +42,7 @@ const Home = () => {
       )}
 
       <section className="w-10/12 py-10 relative mx-auto">
-      {/* Recently Viewed */}
+        {/* Recently Viewed */}
 
         {/*--------------- Header for title ------------------- */}
         <div className="flex justify-between items-center mb-6">
