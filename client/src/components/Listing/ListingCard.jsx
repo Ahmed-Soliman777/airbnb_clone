@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
 
-export default function ListingCard({ listing }) {
+export default function ListingCard({ listing, size = "small" }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const wishlistItems = useSelector((state) => state.wishlist.items);
@@ -12,12 +12,18 @@ export default function ListingCard({ listing }) {
   const listingId = listing._id || listing.id;
   const isFav = wishlistItems.includes(listingId);
 
+  // Define image sizes
+  const imageSizeClasses = {
+    small: "w-36 h-36 lg:w-full lg:aspect-square",
+    large: "w-full aspect-square",
+  };
+
   return (
     <Card
       className="overflow-hidden border-0 shadow-none gap-3 cursor-pointer hover:opacity-90 transition-opacity"
       onClick={() => navigate(`/room/${listingId}`)}
     >
-      <div className="relative w-36 h-36 lg:w-full lg:aspect-square">
+      <div className={`relative ${imageSizeClasses[size]}`}>
         <img
           src={
             listing.images?.[0]?.url ||

@@ -2,6 +2,7 @@ const StickyNavbar = ({ show, activeSection, onNavigate }) => {
   const navItems = [
     { id: "photos", label: "Photos" },
     { id: "amenities", label: "Amenities" },
+    { id: "availability", label: "Availability" },
     { id: "reviews", label: "Reviews" },
     { id: "location", label: "Location" },
   ];

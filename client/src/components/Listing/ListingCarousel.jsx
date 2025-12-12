@@ -10,7 +10,10 @@ import { useEffect } from "react";
 import { fetchWishlist } from "@/store/Slices/wishlistSlice";
 import ListingCard from "./ListingCard";
 
-export default function PopularHomesCarousel({ listings = [] }) {
+export default function PopularHomesCarousel({
+  listings = [],
+  cardSize = "small",
+}) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
@@ -20,6 +23,15 @@ export default function PopularHomesCarousel({ listings = [] }) {
       dispatch(fetchWishlist());
     }
   }, [dispatch, user]);
+
+  // Define carousel item sizes
+  const carouselItemSizes = {
+    small:
+      "basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%]",
+    large:
+      "basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[20%] lg:max-w-[20%]",
+  };
+
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
@@ -40,9 +52,9 @@ export default function PopularHomesCarousel({ listings = [] }) {
           {listings.map((listing) => (
             <CarouselItem
               key={listing._id || listing.id}
-              className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
+              className={`${carouselItemSizes[cardSize]} shrink-0`}
             >
-              <ListingCard listing={listing} />
+              <ListingCard listing={listing} size={cardSize} />
             </CarouselItem>
           ))}
           {/*---------------- End of Carousel Item ---------------- */}

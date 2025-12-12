@@ -50,6 +50,7 @@ const ListingDetails = () => {
   const galleryRef = useRef(null);
   const photosRef = useRef(null);
   const amenitiesRef = useRef(null);
+  const availabilityRef = useRef(null);
   const reviewsRef = useRef(null);
   const locationRef = useRef(null);
 
@@ -84,6 +85,23 @@ const ListingDetails = () => {
     dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
 
+  // Track recently viewed listings
+  useEffect(() => {
+    if (!id || !listing) return;
+    
+    // Get current recently viewed from localStorage
+    const recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+    
+    // Remove if already exists (to move to front)
+    const filtered = recentlyViewed.filter(listingId => listingId !== id);
+    
+    // Add to front and limit to 10 items
+    const updated = [id, ...filtered].slice(0, 10);
+    
+    // Save back to localStorage
+    localStorage.setItem("recentlyViewed", JSON.stringify(updated));
+  }, [id, listing]);
+
   // Handle scroll for sticky navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -96,6 +114,7 @@ const ListingDetails = () => {
       const sections = [
         { ref: photosRef, name: "photos" },
         { ref: amenitiesRef, name: "amenities" },
+        { ref: availabilityRef, name: "availability" },
         { ref: reviewsRef, name: "reviews" },
         { ref: locationRef, name: "location" },
       ];
@@ -121,6 +140,7 @@ const ListingDetails = () => {
     const refMap = {
       photos: photosRef,
       amenities: amenitiesRef,
+      availability: availabilityRef,
       reviews: reviewsRef,
       location: locationRef,
     };
@@ -336,7 +356,7 @@ const ListingDetails = () => {
 
               <hr />
               {/* repeat calendar date picker */}
-              <section>
+              <section ref={availabilityRef}>
                 <h3 className="text-lg sm:text-xl font-semibold mb-4">
                   {nights > 0
                     ? `${nights} night${nights > 1 ? "s" : ""}`
