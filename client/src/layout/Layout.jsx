@@ -15,6 +15,7 @@ export default function Layout() {
   const closeModal = () => setShowGlobalModal(false);
 
   const hideHeaderFooter = location.pathname === "/not-found";
+  const isListingDetailsPage = location.pathname.startsWith("/room/");
 
   // update HTML direction whenever language changes
   useEffect(() => {
@@ -24,7 +25,10 @@ export default function Layout() {
   return (
     <>
       {!hideHeaderFooter && (
-        <Navbar toggleTranslateModal={toggleTranslateModal} />
+        <Navbar
+          toggleTranslateModal={toggleTranslateModal}
+          isSticky={!isListingDetailsPage}
+        />
       )}
 
       <Outlet />

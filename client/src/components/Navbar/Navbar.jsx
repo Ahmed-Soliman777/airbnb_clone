@@ -15,7 +15,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import './Navbar.css';
 import MenuList from '../Menu/MenuList';
 
-export default function Navbar({ toggleTranslateModal }) {
+export default function Navbar({ toggleTranslateModal, isSticky = true }) {
     const { t } = useTranslation();
     const lang = useSelector(state => state.lang.default_language);
     const direction = useSelector(state => state.lang.direction);
@@ -84,7 +84,7 @@ export default function Navbar({ toggleTranslateModal }) {
     return (
         <nav className={`
             bg-(--color-light-gray) px-4 sm:px-6 md:px-8 lg:px-12 
-            sticky top-0 z-40
+            ${isSticky ? 'sticky top-0' : 'relative'} z-40
             transition-all duration-500 ease-in-out
             ${scrolled ? 'py-1 shadow-lg backdrop-blur-sm bg-opacity-95' : 'py-2'}
             ${scrollDirection === 'down' && scrolled ? 'transform -translate-y-2' : 'transform translate-y-0'}

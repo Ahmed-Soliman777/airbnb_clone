@@ -8,7 +8,7 @@ const StickyNavbar = ({ show, activeSection, onNavigate }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 transition-transform duration-300 ${
+      className={`fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 transition-transform duration-300 ${
         show ? "translate-y-0" : "-translate-y-full"
       }`}
     >

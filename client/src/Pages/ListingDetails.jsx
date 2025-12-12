@@ -127,7 +127,8 @@ const ListingDetails = () => {
     const ref = refMap[sectionId];
     if (ref?.current) {
       const yOffset = -100;
-      const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      const y =
+        ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
@@ -194,7 +195,10 @@ const ListingDetails = () => {
           description={listingData.description}
         />
       </div>
-      <div ref={photosRef} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+      <div
+        ref={photosRef}
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 relative">
           {/* Left Side: listing details */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
