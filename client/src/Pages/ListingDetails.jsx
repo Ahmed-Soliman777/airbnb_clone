@@ -6,12 +6,13 @@ import ListingGallery from "@/components/Listing/ListingGallery";
 import ListingHost from "@/components/Listing/ListingHost";
 import ListingLocation from "@/components/Listing/ListingLocation";
 import ReviewsList from "@/components/Listing/ReviewsList";
+import StickyNavbar from "@/components/Listing/StickyNavbar";
 import { Calendar } from "@/components/ui/calendar";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
 import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 
@@ -42,6 +43,15 @@ const ListingDetails = () => {
     from: undefined,
     to: undefined,
   });
+
+  // Sticky navbar state
+  const [showStickyNav, setShowStickyNav] = useState(false);
+  const [activeSection, setActiveSection] = useState("photos");
+  const galleryRef = useRef(null);
+  const photosRef = useRef(null);
+  const amenitiesRef = useRef(null);
+  const reviewsRef = useRef(null);
+  const locationRef = useRef(null);
 
   // Handle date selection from calendar
   const handleSelect = useCallback((range) => {
@@ -74,6 +84,54 @@ const ListingDetails = () => {
     dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
 
+  // Handle scroll for sticky navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (galleryRef.current) {
+        const galleryBottom = galleryRef.current.getBoundingClientRect().bottom;
+        setShowStickyNav(galleryBottom < 0);
+      }
+
+      // Determine active section based on scroll position
+      const sections = [
+        { ref: photosRef, name: "photos" },
+        { ref: amenitiesRef, name: "amenities" },
+        { ref: reviewsRef, name: "reviews" },
+        { ref: locationRef, name: "location" },
+      ];
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.ref.current) {
+          const rect = section.ref.current.getBoundingClientRect();
+          if (rect.top <= 150) {
+            setActiveSection(section.name);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to section
+  const scrollToSection = (sectionId) => {
+    const refMap = {
+      photos: photosRef,
+      amenities: amenitiesRef,
+      reviews: reviewsRef,
+      location: locationRef,
+    };
+    const ref = refMap[sectionId];
+    if (ref?.current) {
+      const yOffset = -100;
+      const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
   // Memoize derived data to prevent recalculation on every render
   const listingData = useMemo(() => {
     if (!listing) return null;
@@ -87,7 +145,7 @@ const ListingDetails = () => {
       bedroomsCount: listing.bedrooms,
       bathroomsCount: listing.bathrooms,
       rating: listing.ratingAvg || 0,
-      reviewsCount: Array.isArray(listing.reviews) ? listing.reviews.length : 0,
+      reviewsCount: Array.isArray(reviews) ? reviews.length : 0,
       hostName: listing.hostId?.firstName
         ? `${listing.hostId.firstName} ${listing.hostId.lastName || ""}`.trim()
         : listing.host?.name || "Host",
@@ -101,7 +159,7 @@ const ListingDetails = () => {
       propertyType: listing.propertyType || "place",
       description: listing.description,
     };
-  }, [listing]);
+  }, [listing, reviews]);
 
   // Show loading state
   if (status === "loading") {
@@ -123,12 +181,20 @@ const ListingDetails = () => {
 
   return (
     <>
-      <ListingGallery
-        title={listingData.title}
-        images={listingData.images}
-        description={listingData.description}
+      <StickyNavbar
+        show={showStickyNav}
+        activeSection={activeSection}
+        onNavigate={scrollToSection}
       />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+
+      <div ref={galleryRef}>
+        <ListingGallery
+          title={listingData.title}
+          images={listingData.images}
+          description={listingData.description}
+        />
+      </div>
+      <div ref={photosRef} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 relative">
           {/* Left Side: listing details */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -182,7 +248,7 @@ const ListingDetails = () => {
               {/* ----------- Reviews -------------  */}
               <div className="text-center hidden sm:block">
                 <p className="font-semibold text-gray-800 text-sm">
-                  {listingData.reviewsCount}{" "}
+                  {listingData.reviewsCount}
                 </p>
                 <p>Reviews</p>
               </div>
@@ -256,7 +322,7 @@ const ListingDetails = () => {
 
               {/* What this place offers */}
               {listingData.amenities.length > 0 && (
-                <section>
+                <section ref={amenitiesRef}>
                   <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
                     What this place offers
                   </h3>
@@ -265,7 +331,7 @@ const ListingDetails = () => {
               )}
 
               <hr />
-              {/* repeat calendar date picker here */}
+              {/* repeat calendar date picker */}
               <section>
                 <h3 className="text-lg sm:text-xl font-semibold mb-4">
                   {nights > 0
@@ -318,7 +384,7 @@ const ListingDetails = () => {
         </div>
 
         {/*================= Rating and Reviews Sections ================= */}
-        <div className="max-w-5xl mt-12">
+        <div ref={reviewsRef} className="max-w-5xl mt-12">
           <hr className="mb-8" />
           {reviews && reviews.length > 0 ? (
             <>
@@ -336,7 +402,7 @@ const ListingDetails = () => {
           )}
         </div>
         {/*================= Location Section ================= */}
-        <div className="max-w-5xl">
+        <div ref={locationRef} className="max-w-5xl">
           <ListingLocation listing={listing} />
         </div>
         {/*================= Host Section ================= */}
