@@ -11,6 +11,8 @@ import Login from "./Pages/Login";
 import ForgetPassword from "./Pages/ForgetPassword";
 import RegisterStep1 from "./Pages/RegisterStep1";
 import RegisterStep2 from "./Pages/RegisterStep2";
+import Help from "./Pages/Help";
+import Host from "./Pages/Host";
 
 function App() {
   const routes = createBrowserRouter([
@@ -25,8 +27,8 @@ function App() {
         { path: "register", element: <RegisterStep2 /> },
         { path: "login", element: <Login /> },
         { path: "forget-password", element: <ForgetPassword /> },
-
-        
+        { path: "help", element: <Help /> },
+        { path: "host", element: <Host /> },
       ],
     },
     { path: "*", element: <NotFound /> },

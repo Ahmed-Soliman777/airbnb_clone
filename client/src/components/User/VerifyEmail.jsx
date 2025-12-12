@@ -17,7 +17,7 @@ export default function VerifyEmail({ isOpen = true, onClose }) {
   const onSubmit = (data) => {
     dispatch(verifyEmail({ email: user?.email, code: data.code })).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
-        navigate("/login");
+        navigate("/");
       }
     });
   };
