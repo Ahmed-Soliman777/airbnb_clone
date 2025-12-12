@@ -1,34 +1,8 @@
-// const express = require("express");
-// const router = express.Router();
-
-// const auth = require("../middleware/userMiddleware");
-// const authorize = require("../middleware/authUser");
-// const {
-//   getWishlist,
-//   toggleWishlist,
-//   deleteWishlist,
-// } = require("../controllers/wishlist.controller");
-
-// // Guest adds/removes a favorite for themselves
-// router.post("/:listingId", auth, authorize(["guest"]), toggleWishlist);
-
-// router.delete("/:listingId", auth, authorize(["guest"]), deleteWishlist);
-
-// // Guest views their own wishlist
-// router.get("/", auth, authorize(["guest"]), getWishlist);
-
-// // // Admin views wishlist of any user by userId
-// // router.get("/user/:userId", auth, authorize(["admin"]), getWishlistByUser);
-// module.exports = router;
-
 const express = require("express");
 const router = express.Router();
 
-// Middleware للتحقق من الـ authentication
 const auth = require("../middleware/userMiddleware");
 const authorize = require("../middleware/authUser");
-
-// استيراد الـ controller functions
 const {
   getWishlists,
   getCollection,
@@ -40,12 +14,10 @@ const {
   getListsContainingListing,
 } = require("../controllers/wishlist.controller");
 
-// ⭐ أهم route: Toggle (أول مرة يضيف، تاني مرة يشيل)
-// POST /api/wishlist/toggle/:listingId
+// toggle listing in wishlist
 router.post("/toggle/:listingId", auth, authorize(["guest"]), toggleListing);
 
-// اعرف الـ listing موجود في أنهي قوائم (للـ heart icon)
-// GET /api/wishlist/listing/:listingId
+// get which lists contain a listing
 router.get(
   "/listing/:listingId",
   auth,
@@ -53,12 +25,10 @@ router.get(
   getListsContainingListing
 );
 
-// جلب كل القوائم
-// GET /api/wishlist/collections
+// get all wishlist collections
 router.get("/collections", auth, authorize(["guest"]), getWishlists);
 
-// جلب قائمة واحدة
-// GET /api/wishlist/collections/:collectionId
+// get a specific wishlist collection by ID
 router.get(
   "/collections/:collectionId",
   auth,
@@ -66,12 +36,10 @@ router.get(
   getCollection
 );
 
-// إنشاء قائمة جديدة (من الـ popup)
-// POST /api/wishlist/collections
+// create a new wishlist collection
 router.post("/collections", auth, authorize(["guest"]), createWishlist);
 
-// إضافة listing لقائمة موجودة (من الـ popup)
-// POST /api/wishlist/collections/:collectionId/listings/:listingId
+// add listing to a wishlist collection
 router.post(
   "/collections/:collectionId/listings/:listingId",
   auth,
@@ -79,17 +47,15 @@ router.post(
   addToWishlist
 );
 
-// حذف listing من قائمة
-// POST /api/wishlist/collections/:collectionId/remove
-router.post(
-  "/collections/:collectionId/remove",
+// remove listing from a wishlist collection
+router.delete(
+  "/collections/:collectionId/listings/:listingId",
   auth,
   authorize(["guest"]),
   removeFromWishlist
 );
 
-// حذف قائمة كاملة
-// DELETE /api/wishlist/collections/:collectionId
+// delete an entire wishlist collection
 router.delete(
   "/collections/:collectionId",
   auth,

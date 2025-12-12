@@ -11,17 +11,27 @@ import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import {
-  fetchWishlist,
-  toggleWishlistItem,
+  fetchWishlistCollections,
+  toggleListing,
 } from "@/store/Slices/wishlistSlice";
-
 export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const { savedListings } = useSelector((state) => state.wishlist);
+  const { token } = useSelector((state) => state.auth);
+
   useEffect(() => {
-    dispatch(fetchWishlist());
+    dispatch(fetchWishlistCollections());
   }, [dispatch]);
+
+  const handleHeartClick = (e, listingId) => {
+    e.stopPropagation();
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    dispatch(toggleListing(listingId));
+  };
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
@@ -41,7 +51,7 @@ export default function PopularHomesCarousel({ listings = [] }) {
           {/*---------------- Start of Carousel Item ---------------- */}
           {listings.map((listing) => {
             const listingId = listing._id || listing.id;
-            const isFav = wishlistItems.includes(listingId);
+            const isFav = savedListings[listingId]?.isSaved || false;
             return (
               <CarouselItem
                 key={listing._id || listing.id}
@@ -64,11 +74,7 @@ export default function PopularHomesCarousel({ listings = [] }) {
                     />
                     <button
                       className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add favorite logic here
-                        dispatch(toggleWishlistItem(listingId));
-                      }}
+                      onClick={(e) => handleHeartClick(e, listingId)}
                     >
                       <Heart
                         size={25}
