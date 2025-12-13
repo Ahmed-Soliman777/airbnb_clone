@@ -5,6 +5,9 @@ const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const cookieParser = require("cookie-parser");
+const messageRoutes = require('./routes/message.routes');
+const { initializeSocket } = require('./socket');
+const http = require('http');
 
 // Routes
 const userRoute = require("./routes/user.routes");
@@ -13,18 +16,30 @@ const reviewRoute = require("./routes/review.routes");
 const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/payment.routes");
 const amenityRoute = require("./routes/amenity.routes");
-const wishlistRoute = require("./routes/wishlist.routes"); 
+const wishlistRoute = require("./routes/wishlist.routes");
 const experienceRoutes = require('./routes/experience.routes');
 const serviceRoutes = require('./routes/service.routes');
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = initializeSocket(server);
 const port = process.env.PORT || 3000;
 
+//CORS configuration
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend origin
+    credentials: true,               // allow cookies
+  })
+);
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.set("view engine", "ejs");
+app.set('io', io);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -37,7 +52,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:" + port + "/api/g2",
+        url: "http://localhost:" + port + "/api",
       },
     ],
     components: {
@@ -56,14 +71,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-//CORS configuration
-app.use(
-  cors({
-    origin: "http://localhost:5173", // frontend origin
-    credentials: true,               // allow cookies
-  })
-);
-
 // Routes
 app.use("/api", userRoute);
 app.use("/api", listingRoute);
@@ -74,6 +81,7 @@ app.use("/api", reviewRoute);
 app.use("/api/wishlist", wishlistRoute);
 app.use('/api/experiences', experienceRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Root route
 app.get("/api", (req, res) => {
@@ -98,7 +106,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
 });

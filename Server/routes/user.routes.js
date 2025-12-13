@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/user.controller.js");
 const auth = require('../middleware/userMiddleware.js');
 const role = require('../middleware/authUser.js');
+const User = require('../models/User.model.js');
 
 /**
  * @swagger
@@ -196,6 +197,61 @@ router.delete('/:id', auth, userController.deleteUser);
  *         description: Unauthorized
  */
 router.post('/become-host', auth, userController.becomeHost);
+/**
+ * @swagger
+ * /users/resend-code:
+ *   post:
+ *     summary: Resend verification code to user's email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: aml@example.com
+ *     responses:
+ *       200:
+ *         description: Verification code resent successfully
+ *       400:
+ *         description: Bad request / No verification code found
+ *       404:
+ *         description: User not found
+ */
+router.post('/resend-code', userController.resendVerificationCode);
+
+router.post('/logout', auth, userController.logout);
+
+
+// here is profile for host no guest profile
+router.get('/profile', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-passwordHash -salt');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
 
 
 module.exports = router;

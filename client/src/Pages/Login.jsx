@@ -86,7 +86,7 @@ export default function Login() {
         <div className="text-sm text-center mt-4 space-y-1">
           <p>
             Not You?{" "}
-            <Link to="/fregister" className="text-black text-xs underline">
+            <Link to="/signup" className="text-black text-xs underline">
               Use another account
             </Link>
           </p>

@@ -9,15 +9,19 @@ const {
   getHostServices
 } = require('../controllers/service.controller.js');
 const auth = require('../middleware/userMiddleware.js');
+const { default: upload } = require('../middleware/multer.js');
 
 // Public routes
 router.get('/', getServices);
+
+// Protected routes (require authentication)
+router.get('/host/my-services', auth, getHostServices);
 router.get('/:id', getService);
 
 // Protected routes (require authentication)
-router.post('/', auth, createService);
+router.post('/', auth, upload.array('images', 10), createService);
 router.put('/:id', auth, updateService);
 router.delete('/:id', auth, deleteService);
-router.get('/host/my-services', auth, getHostServices);
+
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Experience = require('../models/Experience.model');
+const { uploadOnCloudinary } = require('../config/cloudinary');
 
 // @desc    Create new experience listing
 // @route   POST /api/experiences
@@ -9,10 +10,7 @@ const createExperience = async (req, res) => {
             title,
             description,
             experienceType,
-            street,
-            city,
-            country,
-            coordinates,
+            location,
             pricePerPerson,
             duration,
             groupSize,
@@ -24,16 +22,40 @@ const createExperience = async (req, res) => {
             inclusions
         } = req.body;
 
+        let uploadedImages = [];
+
+        if (images && Array.isArray(images) && images.length > 0) {
+            // Upload all images in parallel
+            uploadedImages = await Promise.all(
+                images.map(async (img) => {
+                    let base64Image = img;
+
+                    if (!base64Image.startsWith("data:image")) {
+                        base64Image = "data:image/jpeg;base64," + base64Image;
+                    }
+
+                    // Directly await the upload. If it fails, Promise.all will reject, 
+                    // and the main catch block will handle it.
+                    return await uploadOnCloudinary(base64Image);
+                })
+            );
+
+            uploadedImages = uploadedImages.filter(Boolean);
+        }
+
+        // Validate required location fields
+        if (!location || !location.city || !location.country) {
+            return res.status(400).json({
+                success: false,
+                message: 'Location with city and country is required'
+            });
+        }
+
         const experience = await Experience.create({
             title,
             description,
             experienceType,
-            location: {
-                street,
-                city,
-                country,
-                coordinates
-            },
+            location,
             pricePerPerson,
             duration,
             groupSize,
@@ -41,7 +63,7 @@ const createExperience = async (req, res) => {
             ageRequirement,
             fitnessLevel,
             requirements,
-            images,
+            images: uploadedImages.map(url => ({ url, alt: 'Experience image' })),
             inclusions,
             host: req.user._id
         });
@@ -58,18 +80,47 @@ const createExperience = async (req, res) => {
     }
 };
 
+
 // @desc    Get all experiences
 // @route   GET /api/experiences
 // @access  Public
 const getExperiences = async (req, res) => {
     try {
-        const { city, country, experienceType, page = 1, limit = 10 } = req.query;
+        const {
+            city,
+            country,
+            experienceType,
+            page = 1,
+            limit = 10,
+            priceRange,
+            categories,
+            minRating
+        } = req.query;
 
         const query = { status: 'active' };
 
         if (city) query['location.city'] = new RegExp(city, 'i');
         if (country) query['location.country'] = new RegExp(country, 'i');
         if (experienceType) query.experienceType = experienceType;
+
+        // Price range filter
+        if (priceRange) {
+            const [minPrice, maxPrice] = JSON.parse(priceRange);
+            query.pricePerPerson = { $gte: minPrice, $lte: maxPrice };
+        }
+
+        // Categories filter
+        if (categories) {
+            const categoryArray = JSON.parse(categories);
+            if (categoryArray.length > 0) {
+                query.experienceType = { $in: categoryArray };
+            }
+        }
+
+        // Rating filter (assuming you have a rating field)
+        if (minRating && parseFloat(minRating) > 0) {
+            query.averageRating = { $gte: parseFloat(minRating) };
+        }
 
         const experiences = await Experience.find(query)
             .populate('host', 'name email')
@@ -128,41 +179,32 @@ const getExperience = async (req, res) => {
 const updateExperience = async (req, res) => {
     try {
         let experience = await Experience.findById(req.params.id);
+        if (!experience) return res.status(404).json({ success: false, message: 'Experience not found' });
 
-        if (!experience) {
-            return res.status(404).json({
-                success: false,
-                message: 'Experience not found'
-            });
-        }
-
-        // Check ownership
         if (experience.host.toString() !== req.user._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: 'Not authorized to update this experience'
-            });
+            return res.status(403).json({ success: false, message: 'Not authorized to update this experience' });
         }
 
         const {
             title,
             description,
             experienceType,
-            street,
-            city,
-            country,
-            coordinates,
+            location,
             pricePerPerson,
             duration,
             groupSize,
             schedule,
             ageRequirement,
             fitnessLevel,
+            images: newImages,
             requirements,
-            images,
             inclusions,
             status
         } = req.body;
+
+        const uploadedImages = newImages && newImages.length > 0
+            ? await Promise.all(newImages.map(img => uploadOnCloudinary(img)))
+            : experience.images;
 
         experience = await Experience.findByIdAndUpdate(
             req.params.id,
@@ -170,12 +212,7 @@ const updateExperience = async (req, res) => {
                 title,
                 description,
                 experienceType,
-                location: {
-                    street,
-                    city,
-                    country,
-                    coordinates
-                },
+                location,
                 pricePerPerson,
                 duration,
                 groupSize,
@@ -183,24 +220,20 @@ const updateExperience = async (req, res) => {
                 ageRequirement,
                 fitnessLevel,
                 requirements,
-                images,
+                images: uploadedImages,
                 inclusions,
                 status
             },
             { new: true, runValidators: true }
         );
 
-        res.status(200).json({
-            success: true,
-            data: experience
-        });
+        res.status(200).json({ success: true, data: experience });
+
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
+
 
 // @desc    Delete experience
 // @route   DELETE /api/experiences/:id

@@ -54,20 +54,20 @@ async function handleGetTransactions(req, res) {
 // HANDLE STRIPE PAYMENT + RESERVATION CREATION
 async function handlePayment(req, res) {
 
-  
-  
+
+
   const token = req.cookies?.token;
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token" });
   }
-  
+
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const userId = decoded.userId;
   console.log("Decoded token:", decoded);
   console.log("User ID:", userId);
-  
+
   try {
-    const { listing, checkInDate, checkOutDate, guestsCount, totalPrice } =
+    const { listing, service, experience, checkInDate, checkOutDate, guestsCount, totalPrice } =
       req.body;
 
     //  Create Stripe Checkout Session
@@ -77,25 +77,27 @@ async function handlePayment(req, res) {
           price_data: {
             currency: "usd",
             product_data: { name: "Booking Reservation" },
-            unit_amount: totalPrice * 100,
+            unit_amount: Math.round(totalPrice * 100), // Ensure integer
           },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.BASE_URL}/api/complete`,
-      cancel_url: `${process.env.BASE_URL}/api/cancel`,
+      success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment/cancel`,
     });
 
-    // Create Booking entry (correct field names)
+    // Create Booking entry
     const booking = await Booking.create({
       user: userId,
       listing,
+      service,
+      experience,
       checkInDate,
       checkOutDate,
       guestsCount,
       totalPrice,
-      status: "pending",
+      status: "confirmed",
       stripeSessionId: session.id,
     });
 
@@ -122,8 +124,55 @@ async function handlePayment(req, res) {
   }
 }
 
+// VERIFY STRIPE PAYMENT SESSION
+async function verifyPayment(req, res) {
+  try {
+    const { sessionId } = req.params;
+
+    if (!sessionId) {
+      return res.status(400).json({ message: "Session ID is required" });
+    }
+
+    // Retrieve the Stripe session
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // Find the booking by session ID
+    const booking = await Booking.findOne({ stripeSessionId: sessionId });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Update booking status based on payment status
+    if (session.payment_status === "paid") {
+      booking.status = "confirmed";
+      await booking.save();
+
+      return res.status(200).json({
+        success: true,
+        status: "confirmed",
+        booking: booking,
+        message: "Payment verified successfully",
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        status: session.payment_status,
+        message: "Payment not completed",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 module.exports = {
   handleCreateTransactions,
   handleGetTransactions,
   handlePayment,
+  verifyPayment,
 };

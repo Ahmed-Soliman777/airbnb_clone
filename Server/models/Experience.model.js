@@ -79,18 +79,12 @@ const experienceSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    requirements: [{
-        type: String,
-        trim: true
-    }],
+    requirements: [String],
     images: [{
         url: String,
         alt: String
     }],
-    inclusions: [{
-        type: String,
-        trim: true
-    }],
+    inclusions: [String],
     host: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
   try {
-    const { firstName,lastName, email,dob, password } = req.body;
+    const { firstName, lastName, email, dob, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
       lastName,
       email,
       dob,
-      passwordHash: password,
+      password: password,
       verificationCode
     });
 
@@ -33,13 +33,13 @@ exports.register = async (req, res) => {
       host: "smtp-relay.brevo.com",
       port: 587,
       auth: {
-        user: process.env.BREVO_SMTP_USER,  
-        pass: process.env.BREVO_SMTP_KEY   
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_KEY
       }
     });
 
     const mailOptions = {
-      from: process.env.BREVO_Email, 
+      from: process.env.BREVO_Email,
       to: email,
       subject: "Verify your account",
       text: `Hello ${firstName},
@@ -48,7 +48,7 @@ Welcome to our platform!
 
 Your verification code is: ${verificationCode}
 
-If you didn't create an account with us, ignore this message.
+If you didn't create an account with us, you can ignore this message.
 
 Best regards,
 Airbnb Team `
@@ -62,7 +62,7 @@ Airbnb Team `
 
   } catch (err) {
     res.status(400).json({ message: err.message });
-    console.log("EMAIL ERROR:",err);
+    console.log("EMAIL ERROR:", err);
   }
 };
 
@@ -71,7 +71,7 @@ exports.verifyEmail = async (req, res) => {
     const { email, code } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(401).json({ message: 'User not found' });
     if (user.verificationCode !== code)
       return res.status(400).json({ message: 'Invalid verification code' });
 
@@ -83,12 +83,12 @@ exports.verifyEmail = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: "production",
-      sameSite: "strict",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
-    res.json({ 
+    res.json({
       message: 'Email verified successfully',
       token
     });
@@ -97,6 +97,58 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+exports.resendVerificationCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'User is not found' });
+    }
+
+    if (!user.verificationCode) {
+      return res.status(400).json({ message: 'No verification code found' });
+    }
+
+    // ================================
+    //   SAME Brevo SMTP SETUP
+    // ================================
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      auth: {
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_KEY
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.BREVO_Email,
+      to: email,
+      subject: "Verify your account",
+      text: `Hello ${user.firstName},
+
+Welcome back!
+
+Your verification code is: ${user.verificationCode}
+
+If you didn't request this, you can ignore this email.
+
+Best regards,
+Airbnb Team `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      message: "Verification code resent successfully"
+    });
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+    console.log("RESEND EMAIL ERROR:", err);
+  }
+};
 
 
 
@@ -114,9 +166,9 @@ exports.login = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: "production",
-      sameSite: "strict",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
     res.json({ token });
@@ -132,7 +184,7 @@ exports.logout = async (req, res) => {
 
 exports.becomeHost = async (req, res) => {
   try {
-    const userId = req.user && req.user.userId; 
+    const userId = req.user._id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const user = await User.findById(userId);
@@ -150,6 +202,7 @@ exports.becomeHost = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 // (admin فقط)
@@ -179,11 +232,11 @@ exports.updateUser = async (req, res) => {
         user.email = email;
       }
     } else {
-      user.email = user.email; 
+      user.email = user.email;
     }
 
     user.firstName = firstName || user.firstName;
-     user.lastName = lastName || user.lastName;
+    user.lastName = lastName || user.lastName;
     user.phone = phone || user.phone;
 
     if (password) {

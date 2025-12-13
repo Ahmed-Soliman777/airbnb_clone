@@ -8,6 +8,12 @@ export const fetchWishlist = createAsyncThunk(
       const response = await fetch("/api/wishlist", {
         credentials: "include",
       });
+
+      // If unauthorized, return empty array (user not logged in)
+      if (response.status === 401) {
+        return [];
+      }
+
       const data = await response.json();
       return data.wishlist || [];
     } catch (error) {
