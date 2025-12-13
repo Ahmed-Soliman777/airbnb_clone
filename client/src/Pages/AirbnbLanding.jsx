@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 
 export default function AirbnbLanding() {
   const canvasRef = useRef(null);
@@ -78,8 +79,8 @@ export default function AirbnbLanding() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900">
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         className="absolute inset-0 w-full h-full"
         style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 1s' }}
       />
@@ -97,9 +98,9 @@ export default function AirbnbLanding() {
             {t('landing.Find amazing places to stay around the globe')}
           </p>
 
-          <button className="px-12 py-5 bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-lg font-bold rounded-full hover:shadow-2xl hover:scale-105 transition-all duration-300">
+          <Link to="/homes" className="px-12 py-5 bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-lg font-bold rounded-full hover:shadow-2xl hover:scale-105 transition-all duration-300">
             {t('landing.Travel Now')}
-          </button>
+          </Link>
         </div>
       </div>
     </div>

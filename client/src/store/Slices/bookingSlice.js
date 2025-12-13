@@ -79,11 +79,25 @@ export const cancelBooking = createAsyncThunk(
         }
     }
 );
+export const fetchHostBookings = createAsyncThunk(
+    "booking/fetchHostBookings",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/bookings/host`, {
+                withCredentials: true
+            });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
 
 const bookingSlice = createSlice({
     name: "booking",
     initialState: {
         bookings: [],
+        hostBookings: [],
         currentBooking: null,
         status: "idle",
         error: null,
@@ -144,6 +158,11 @@ const bookingSlice = createSlice({
                 if (index !== -1) {
                     state.bookings[index] = action.payload;
                 }
+                // Also update in hostBookings if it exists
+                const hostIndex = state.hostBookings.findIndex(b => b._id === action.payload._id);
+                if (hostIndex !== -1) {
+                    state.hostBookings[hostIndex] = action.payload;
+                }
                 if (state.currentBooking?._id === action.payload._id) {
                     state.currentBooking = action.payload;
                 }
@@ -151,9 +170,23 @@ const bookingSlice = createSlice({
             // Cancel booking
             .addCase(cancelBooking.fulfilled, (state, action) => {
                 state.bookings = state.bookings.filter(b => b._id !== action.payload.bookingId);
+                state.hostBookings = state.hostBookings.filter(b => b._id !== action.payload.bookingId);
                 if (state.currentBooking?._id === action.payload.bookingId) {
                     state.currentBooking = null;
                 }
+            })
+            // Fetch host bookings
+            .addCase(fetchHostBookings.pending, (state) => {
+                state.status = "loading";
+                state.error = null;
+            })
+            .addCase(fetchHostBookings.fulfilled, (state, action) => {
+                state.status = "succeeded";
+                state.hostBookings = action.payload;
+            })
+            .addCase(fetchHostBookings.rejected, (state, action) => {
+                state.status = "failed";
+                state.error = action.payload;
             });
     },
 });

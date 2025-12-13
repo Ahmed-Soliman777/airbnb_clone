@@ -27,6 +27,11 @@ import PaymentSuccessPage from "./Pages/PaymentSuccessPage";
 import PaymentCancelPage from "./Pages/PaymentCancelPage";
 import ReservationsPage from "./Pages/ReservationsPage";
 import MessagesPage from "./Pages/MessagesPage"
+import EditExperiencePage from "./Pages/EditExperiencePage";
+import EditServicePage from "./Pages/EditServicePage";
+import LandingPage from "./Pages/AirbnbLanding";
+import HostWalletPage from "./Pages/HostWalletPage";
+import HostGuestsPage from "./Pages/HostGuestsPage";
 
 function App() {
   const routes = createBrowserRouter([
@@ -34,10 +39,9 @@ function App() {
       path: "/",
       element: <Layout />,
       children: [
-        { index: true, element: <Home /> },
+        { index: true, element: <LandingPage /> },
         { path: "homes", element: <Home /> },
         { path: "room/:id", element: <ListingDetails /> },
-
         {
           path: "signup",
           element: (
@@ -98,6 +102,22 @@ function App() {
           )
         },
         {
+          path: "host/experiences/edit/:id",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <EditExperiencePage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/services/edit/:id",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <EditServicePage />
+            </AuthGuard>
+          )
+        },
+        {
           path: "messages",
           element: (
             <AuthGuard requireAuth={true}>
@@ -118,6 +138,22 @@ function App() {
           element: (
             <AuthGuard requireAuth={true}>
               <ReservationsPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/guests",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <HostGuestsPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/wallet",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <HostWalletPage />
             </AuthGuard>
           )
         },
