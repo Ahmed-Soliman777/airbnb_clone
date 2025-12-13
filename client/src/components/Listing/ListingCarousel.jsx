@@ -11,10 +11,9 @@ import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import {
-  fetchWishlist,
-  toggleWishlistItem,
+  fetchWishlistCollections,
+  toggleListing,
 } from "@/store/Slices/wishlistSlice";
-
 export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -46,7 +45,7 @@ export default function PopularHomesCarousel({ listings = [] }) {
           {/*---------------- Start of Carousel Item ---------------- */}
           {listings.map((listing) => {
             const listingId = listing._id || listing.id;
-            const isFav = wishlistItems.includes(listingId);
+            const isFav = savedListings[listingId]?.isSaved || false;
             return (
               <CarouselItem
                 key={listing._id || listing.id}
@@ -69,11 +68,7 @@ export default function PopularHomesCarousel({ listings = [] }) {
                     />
                     <button
                       className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add favorite logic here
-                        dispatch(toggleWishlistItem(listingId));
-                      }}
+                      onClick={(e) => handleHeartClick(e, listingId)}
                     >
                       <Heart
                         size={25}
