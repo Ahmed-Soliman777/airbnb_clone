@@ -13,33 +13,10 @@ export const fetchWishlistCollections = createAsyncThunk(
         },
       });
 
+      // If unauthorized, return empty array (user not logged in)
       if (response.status === 401) {
         return [];
       }
-
-      const data = await response.json();
-      return data.collections || [];
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-//  Toggle Listing
-export const toggleListing = createAsyncThunk(
-  "wishlist/toggleListing",
-  async (listingId, { rejectWithValue, getState }) => {
-    try {
-      const { auth } = getState();
-      const response = await fetch(`/api/wishlist/toggle/${listingId}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to toggle listing");
 
       const data = await response.json();
       return { listingId, ...data };

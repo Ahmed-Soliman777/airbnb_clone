@@ -6,7 +6,9 @@ import { useNavigate } from "react-router-dom";
 export default function VerifyEmail({ isOpen = true, onClose }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, user } = useSelector((state) => state.auth);
+  const { loading, error,success } = useSelector((state) => state.auth);
+const savedEmail = localStorage.getItem("registerEmail");
+
 
   const {
     register,
@@ -15,7 +17,7 @@ export default function VerifyEmail({ isOpen = true, onClose }) {
   } = useForm();
 
   const onSubmit = (data) => {
-    dispatch(verifyEmail({ email: user?.email, code: data.code })).then((res) => {
+    dispatch(verifyEmail({ email: savedEmail, code: data.verificationCode })).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
         navigate("/");
       }
@@ -23,7 +25,7 @@ export default function VerifyEmail({ isOpen = true, onClose }) {
   };
 
   const handleResend = () => {
-    dispatch(resendVerification({ email: user.email }));
+    dispatch(resendVerification({ email: savedEmail }));
   };
 
   if (!isOpen) return null;
@@ -55,11 +57,11 @@ export default function VerifyEmail({ isOpen = true, onClose }) {
             </label>
             <input
               type="text"
-              {...register("code", {
+              {...register("verificationCode", {
                 required: "Verification code is required",
                 minLength: {
-                  value: 4,
-                  message: "Code must be at least 4 digits",
+                  value: 6,
+                  message: "Code must be at least 6 digits",
                 },
               })}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -81,6 +83,10 @@ export default function VerifyEmail({ isOpen = true, onClose }) {
               Email verified successfully!
             </p>
           )}
+          {success && (
+  <p className="text-green-600 text-sm text-center">{success}</p>
+)}
+
 
           {/* Submit Button */}
           <button

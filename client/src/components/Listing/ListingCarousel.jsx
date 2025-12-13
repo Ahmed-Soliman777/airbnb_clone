@@ -17,21 +17,15 @@ import {
 export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { savedListings } = useSelector((state) => state.wishlist);
-  const { token } = useSelector((state) => state.auth);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    dispatch(fetchWishlistCollections());
-  }, [dispatch]);
-
-  const handleHeartClick = (e, listingId) => {
-    e.stopPropagation();
-    if (!token) {
-      navigate("/login");
-      return;
+    // Only fetch wishlist if user is logged in
+    if (user) {
+      dispatch(fetchWishlist());
     }
-    dispatch(toggleListing(listingId));
-  };
+  }, [dispatch, user]);
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}

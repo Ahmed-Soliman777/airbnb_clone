@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { addExperienceImage, removeExperienceImage } from "@/store/Slices/experienceFormSlice";
 
 export default function ExperienceImagesStep({ data, onUpdate }) {
+  const dispatch = useDispatch();
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e) => {
@@ -16,22 +19,82 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
     }
   };
 
-  const handleDrop = (e) => {
+  // Compress image helper
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.7 quality
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const processFiles = async (files) => {
+    const fileArray = Array.from(files);
+
+    // Process only images
+    const imageFiles = fileArray.filter(file => file.type.startsWith("image/"));
+
+    if (imageFiles.length > 0) {
+      // Compress all images in parallel
+      const compressedImages = await Promise.all(
+        imageFiles.map(file => compressImage(file))
+      );
+
+      onUpdate({ images: [...(data.images || []), ...compressedImages] });
+      dispatch(addExperienceImage(compressedImages));
+    }
+  };
+
+  const handleDrop = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    // Handle file upload logic here
-    console.log("Files dropped:", e.dataTransfer.files);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processFiles(e.dataTransfer.files);
+    }
   };
 
-  const handleFileSelect = (e) => {
-    // Handle file selection logic here
-    console.log("Files selected:", e.target.files);
+  const handleFileSelect = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      await processFiles(e.target.files);
+    }
   };
 
   const removeImage = (index) => {
     const updatedImages = data.images.filter((_, i) => i !== index);
     onUpdate({ images: updatedImages });
+    dispatch(removeExperienceImage(index));
   };
 
   return (
@@ -50,17 +113,16 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
 
       <div className="max-w-xl mx-auto">
         <Label className="mb-3 block">Experience Photos</Label>
-        
+
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragActive
-              ? "border-primary bg-accent"
-              : "border-border hover:border-primary/50"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
+            ? "border-primary bg-accent"
+            : "border-border hover:border-primary/50"
+            }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">
@@ -75,9 +137,9 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
             accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
-            id="file-upload"
+            id="experience-file-upload"
           />
-          <label htmlFor="file-upload">
+          <label htmlFor="experience-file-upload">
             <Button type="button" variant="outline" asChild>
               <span>Choose Files</span>
             </Button>

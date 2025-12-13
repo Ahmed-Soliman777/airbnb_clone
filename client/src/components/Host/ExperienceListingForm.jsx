@@ -50,6 +50,32 @@ const ExperienceListingForm = ({ onBack }) => {
         setListingData((prev) => ({ ...prev, ...data }));
     };
 
+    const isStepValid = () => {
+        switch (currentStep) {
+            case 0: // Basic Details
+                return (
+                    listingData.title?.trim().length > 0 &&
+                    listingData.experienceType &&
+                    listingData.description?.trim().length > 0
+                );
+            case 1: // Location
+                return (
+                    listingData.street?.trim().length > 0 &&
+                    listingData.city?.trim().length > 0 &&
+                    listingData.country?.trim().length > 0
+                );
+            case 2: // Pricing
+                return (
+                    listingData.pricePerPerson > 0 &&
+                    listingData.duration &&
+                    listingData.groupSize?.min > 0
+                );
+            case 5: // Images
+                return (listingData.images?.length || 0) >= 1;
+            default:
+                return true;
+        }
+    };
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep((prev) => prev + 1);
@@ -66,7 +92,24 @@ const ExperienceListingForm = ({ onBack }) => {
 
     const handleSubmit = async () => {
         try {
-            await dispatch(createExperience(listingData)).unwrap();
+            // Transform flat location fields into nested location object for backend
+            const transformedData = {
+                ...listingData,
+                location: {
+                    street: listingData.street,
+                    city: listingData.city,
+                    country: listingData.country,
+                    coordinates: listingData.coordinates
+                }
+            };
+
+            // Remove flat location fields from top level
+            delete transformedData.street;
+            delete transformedData.city;
+            delete transformedData.country;
+            delete transformedData.coordinates;
+
+            await dispatch(createExperience(transformedData)).unwrap();
             toast.success("Experience listing created successfully!");
             onBack();
         } catch (error) {
@@ -155,7 +198,7 @@ const ExperienceListingForm = ({ onBack }) => {
                         onClick={handleNext}
                         size="lg"
                         className="min-w-[120px]"
-                        disabled={status === "loading"}
+                        disabled={status === "loading" || !isStepValid()}
                     >
                         {status === "loading"
                             ? "Submitting..."

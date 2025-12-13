@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
-import { Globe, Menu } from 'lucide-react';
+import { Globe, Menu, User } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import i18n from '@/utils/i18n';
+import { isAuthenticated } from '@/utils/cookies';
 
 import Logo from "../../assets/Airbnb-Logo.wine.svg";
 import HomesIcon from "../../assets/home_icon.avif";
@@ -20,12 +21,20 @@ export default function Navbar({ toggleTranslateModal }) {
     const direction = useSelector(state => state.lang.direction);
 
     const location = useLocation();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const [scrolled, setScrolled] = useState(false);
     const [scrollDirection, setScrollDirection] = useState('up');
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    const isServicePage = ['/', '/expierences', '/services'].includes(location.pathname);
+    const isServicePage = ['/', '/experiences', '/services'].includes(location.pathname) || 
+        location.pathname.startsWith('/experiences/search') || 
+        location.pathname.startsWith('/services/search');
+
+    // Check authentication status
+    useEffect(() => {
+        setIsLoggedIn(isAuthenticated());
+    }, [location]);
 
     useEffect(() => {
         i18n.changeLanguage(lang);
@@ -58,14 +67,14 @@ export default function Navbar({ toggleTranslateModal }) {
         if (direction === "rtl") {
             switch (location.pathname) {
                 case "/": return "right-0";
-                case "/expierences": return "right-1/3";
+                case "/experiences": return "right-1/3";
                 case "/services": return "right-2/3";
                 default: return "right-0";
             }
         } else {
             switch (location.pathname) {
                 case "/": return "left-0";
-                case "/expierences": return "left-1/3";
+                case "/experiences": return "left-1/3";
                 case "/services": return "left-2/3";
                 default: return "left-0";
             }
@@ -132,7 +141,7 @@ export default function Navbar({ toggleTranslateModal }) {
 
                         {/* Experiences */}
                         <NavLink
-                            to="/expierences"
+                            to="/experiences"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 
@@ -182,9 +191,11 @@ export default function Navbar({ toggleTranslateModal }) {
                         transition-all duration-300 ease-in-out
                         ${scrolled ? 'opacity-0 scale-90 w-0 px-0' : 'opacity-100 scale-100'}
                     `}>
-                        <Link to="/host">
-                            {t("navbar.host")}
-                        </Link>
+                        {location.pathname.startsWith('/host') ? (
+                            <Link to="/">Switch to traveling</Link>
+                        ) : (
+                            <Link to="/host">{t("navbar.host")}</Link>
+                        )}
                     </span>
 
                     <span
@@ -198,6 +209,20 @@ export default function Navbar({ toggleTranslateModal }) {
                     >
                         <Globe size={18} className="sm:w-5 sm:h-5" />
                     </span>
+
+                    {/* Profile Image - Only visible when logged in */}
+                    {isLoggedIn && (
+                        <Link
+                            to="/profile"
+                            className={`
+                                cursor-pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2
+                                hover:bg-[#d4d4d4d2] hover:scale-110
+                                transition-all duration-300 ease-in-out
+                            `}
+                        >
+                            <User size={18} className="sm:w-5 sm:h-5" />
+                        </Link>
+                    )}
 
                     <MenuList />
 
