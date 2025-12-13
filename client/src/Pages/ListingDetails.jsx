@@ -7,6 +7,7 @@ import ListingHost from "@/components/Listing/ListingHost";
 import ListingLocation from "@/components/Listing/ListingLocation";
 import ReviewsList from "@/components/Listing/ReviewsList";
 import StickyNavbar from "@/components/Listing/StickyNavbar";
+import ReportListingDialog from "@/components/Listing/ReportListingDialog";
 import { Calendar } from "@/components/ui/calendar";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
@@ -55,6 +56,9 @@ const ListingDetails = () => {
   const availabilityRef = useRef(null);
   const reviewsRef = useRef(null);
   const locationRef = useRef(null);
+
+  // Report dialog state
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   // Handle date selection from calendar
   const handleSelect = useCallback((range) => {
@@ -390,7 +394,10 @@ const ListingDetails = () => {
                 setDate={setDate}
                 handleSelect={handleSelect}
               />
-              <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
+              <div 
+                className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center hover:text-gray-700 transition-colors"
+                onClick={() => setShowReportDialog(true)}
+              >
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">
                   Report this listing
@@ -427,6 +434,14 @@ const ListingDetails = () => {
           <ListingHost listing={listing} />
         </div>
       </div>
+
+      {/* Report Listing Dialog */}
+      <ReportListingDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        listingId={id}
+        listingTitle={listingData?.title}
+      />
     </>
   );
 };

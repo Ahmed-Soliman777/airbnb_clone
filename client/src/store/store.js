@@ -12,6 +12,7 @@ import homeFormReducer from "./Slices/homeFormSlice";
 import wishlistReducer from "./Slices/wishlistSlice";
 import reviewReducer from "./Slices/reviewSlice";
 import recentlyViewedReducer from "./Slices/recentlyViewedSlice";
+import reportReducer from "./Slices/reportSlice";
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     homeForm: homeFormReducer,
     review: reviewReducer,
     recentlyViewed: recentlyViewedReducer,
+    report: reportReducer,
   },
 });
 

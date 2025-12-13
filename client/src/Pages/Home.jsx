@@ -27,7 +27,7 @@ const Home = () => {
       console.log("Fetching recently viewed...");
       dispatch(fetchRecentlyViewed());
     }
-  }, [user, dispatch]);
+  }, [user, dispatch, recentlyViewed]);
 
   return (
     <div>
