@@ -63,7 +63,9 @@ export default function MenuList() {
                 <DropdownMenuSeparator />
                 {isLoggedIn && (
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>Messages</DropdownMenuItem>
+                        <Link to='/messages'>
+                            <DropdownMenuItem>Messages</DropdownMenuItem>
+                        </Link>
                         <DropdownMenuSeparator />
                     </DropdownMenuGroup>
                 )}

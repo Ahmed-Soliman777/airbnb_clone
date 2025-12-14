@@ -16,7 +16,7 @@ export default function Layout() {
   const toggleTranslateModal = () => setShowGlobalModal((prev) => !prev);
   const closeModal = () => setShowGlobalModal(false);
 
-  const hideHeaderFooter = location.pathname === "/not-found";
+  const hideHeaderFooter = location.pathname === "/not-found" || location.pathname === "/";
 
   // Fetch current user on app load
   useEffect(() => {

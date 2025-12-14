@@ -1,5 +1,8 @@
 const transactionModel = require("../models/Payment.model");
 const Booking = require("../models/Booking.model");
+const Listing = require("../models/Listing.model");
+const Service = require("../models/Service.model");
+const Experience = require("../models/Experience.model");
 const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
 
 const jwt = require("jsonwebtoken");
@@ -170,9 +173,48 @@ async function verifyPayment(req, res) {
   }
 }
 
+// GET HOST PAYMENTS/PROFITS
+async function getHostPayments(req, res) {
+  try {
+    const hostId = req.user._id;
+
+    // Find all listings, services, and experiences owned by this host
+    const hostListings = await Listing.find({ hostId: hostId }).select("_id");
+    const hostServices = await Service.find({ host: hostId }).select("_id");
+    const hostExperiences = await Experience.find({ host: hostId }).select("_id");
+
+    // Get IDs arrays
+    const listingIds = hostListings.map(l => l._id);
+    const serviceIds = hostServices.map(s => s._id);
+    const experienceIds = hostExperiences.map(e => e._id);
+
+    // Find all bookings (confirmed and pending) for this host's properties
+    const bookings = await Booking.find({
+      $or: [
+        { listing: { $in: listingIds } },
+        { service: { $in: serviceIds } },
+        { experience: { $in: experienceIds } }
+      ]
+    })
+      .populate("user", "firstName lastName email phone profilePhoto")
+      .populate("listing", "title hostId")
+      .populate("service", "title host")
+      .populate("experience", "title host")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: bookings
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 module.exports = {
   handleCreateTransactions,
   handleGetTransactions,
   handlePayment,
   verifyPayment,
+  getHostPayments,
 };

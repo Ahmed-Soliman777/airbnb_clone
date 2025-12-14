@@ -70,7 +70,7 @@ const ListingDetails = () => {
                 {city && country
                   ? `Entire ${
                       listing?.propertyType || "place"
-                    } in ${city}, ${country}`
+                  } in ${city}, ${country}`
                   : `Entire ${listing?.propertyType || "place"}`}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
@@ -78,9 +78,8 @@ const ListingDetails = () => {
                   maxGuests ? `${maxGuests} guests` : null,
                   bedroomsCount ? `${bedroomsCount} bedrooms` : null,
                   bathroomsCount
-                    ? `${bathroomsCount} bathroom${
-                        bathroomsCount > 1 ? "s" : ""
-                      }`
+                    ? `${bathroomsCount} bathroom${bathroomsCount > 1 ? "s" : ""
+                    }`
                     : null,
                 ]
                   .filter(Boolean)
@@ -243,7 +242,7 @@ const ListingDetails = () => {
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome />
+              <BookingHome listing={listing} />
               <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">

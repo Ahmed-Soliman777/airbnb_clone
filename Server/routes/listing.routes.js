@@ -1,4 +1,4 @@
-`const express = require("express");
+const express = require("express");
 const router = express.Router();
 const {
   createListing,
@@ -6,6 +6,7 @@ const {
   getListingById,
   updateListing,
   deleteListing,
+  getHostListings,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -62,6 +63,27 @@ const { default: upload } = require("../middleware/multer.js");
  *                       type: string
  */
 router.get("/listings", getListings);
+
+/**
+ * @swagger
+ * /listings/host/my-listings:
+ *   get:
+ *     summary: Get all listings for the authenticated host
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of host's listings
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/listings/host/my-listings",
+  protect, // Ensure 'protect' middleware is used to populate req.user
+  authenticateUser(["host", "admin"]),
+  getHostListings
+);
 
 /**
  * @swagger
@@ -211,6 +233,7 @@ router.put(
   "/listings/:id",
   protect,
   authenticateUser(["host", "admin"]),
+  upload.array("images", 10),
   updateListing
 );
 
@@ -305,4 +328,3 @@ router.delete(
 );
 
 module.exports = router;
-`

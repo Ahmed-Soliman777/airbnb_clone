@@ -1,6 +1,8 @@
 const Booking = require("../models/Booking.model.js");
 const User = require("../models/User.model.js");
 const Listing = require("../models/Listing.model.js");
+const Service = require("../models/Service.model.js");
+const Experience = require("../models/Experience.model.js");
 
 // create booking
 const createBooking = async (req, res) => {
@@ -197,6 +199,41 @@ const deleteBooking = async (req, res) => {
   }
 };
 
+// get all bookings for host
+const getAllBookingsForHost = async (req, res) => {
+  try {
+    const hostId = req.user._id;
+
+    // Find all listings, services, and experiences owned by this host
+    const hostListings = await Listing.find({ hostId: hostId }).select("_id");
+    const hostServices = await Service.find({ host: hostId }).select("_id");
+    const hostExperiences = await Experience.find({ host: hostId }).select("_id");
+
+    // Get IDs arrays
+    const listingIds = hostListings.map(l => l._id);
+    const serviceIds = hostServices.map(s => s._id);
+    const experienceIds = hostExperiences.map(e => e._id);
+
+    // Find bookings for any of these listings, services, or experiences
+    const bookings = await Booking.find({
+      $or: [
+        { listing: { $in: listingIds } },
+        { service: { $in: serviceIds } },
+        { experience: { $in: experienceIds } }
+      ]
+    })
+      .populate("user", "firstName lastName email phone profilePhoto")
+      .populate("listing", "title hostId")
+      .populate("service", "title host")
+      .populate("experience", "title host")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: bookings });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   getBookingById,
@@ -204,4 +241,5 @@ module.exports = {
   getBookingsForListing,
   updateBookingStatus,
   deleteBooking,
+  getAllBookingsForHost
 };

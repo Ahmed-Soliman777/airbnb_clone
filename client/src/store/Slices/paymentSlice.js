@@ -43,6 +43,22 @@ export const verifyPayment = createAsyncThunk(
   }
 );
 
+// Fetch host payments/profits
+export const fetchHostPayments = createAsyncThunk(
+  "payment/fetchHostPayments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/payment/host`,
+        { withCredentials: true }
+      );
+      return response.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 const paymentSlice = createSlice({
   name: "payment",
   initialState: {
@@ -51,6 +67,8 @@ const paymentSlice = createSlice({
     checkoutUrl: null,
     bookingId: null,
     paymentStatus: null, // 'pending', 'success', 'failed'
+    hostPayments: [], // Array of bookings with payment info for host
+    hostPaymentsStatus: "idle", // 'idle', 'loading', 'succeeded', 'failed'
   },
   reducers: {
     clearPaymentState: (state) => {
@@ -94,6 +112,20 @@ const paymentSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.paymentStatus = 'failed';
+      })
+      // Fetch host payments
+      .addCase(fetchHostPayments.pending, (state) => {
+        state.hostPaymentsStatus = "loading";
+        state.error = null;
+      })
+      .addCase(fetchHostPayments.fulfilled, (state, action) => {
+        state.hostPaymentsStatus = "succeeded";
+        state.hostPayments = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchHostPayments.rejected, (state, action) => {
+        state.hostPaymentsStatus = "failed";
+        state.error = action.payload;
       });
   },
 });

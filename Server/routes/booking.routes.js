@@ -8,6 +8,7 @@ const {
   getBookingsForListing,
   updateBookingStatus,
   deleteBooking,
+  getAllBookingsForHost,
 } = require("../controllers/booking.controller.js");
 
 const authMiddleware = require("../middleware/userMiddleware");
@@ -236,5 +237,7 @@ router.delete(
   authMiddleware,
   deleteBooking
 );
+
+router.get("/bookings/host", authMiddleware, getAllBookingsForHost);
 
 module.exports = router;
