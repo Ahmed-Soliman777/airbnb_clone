@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 //  Register
 export const registerUser = createAsyncThunk(
@@ -66,24 +67,7 @@ export const verifyEmail = createAsyncThunk(
   }
 );
 
-// forget Password
-export const forgetPassword = createAsyncThunk(
-  "auth/forgetPassword",
-  async (email, { rejectWithValue }) => {
-    try {
-      const res = await fetch(`/api/forget-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Request failed");
-      return data;
-    } catch (err) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
+
 //resend verify email
 export const resendVerification = createAsyncThunk(
   "/resendVerification",
@@ -104,6 +88,202 @@ export const resendVerification = createAsyncThunk(
     }
   }
 );
+export const sendResetCode = createAsyncThunk(
+  "/sendResetCode",
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/reset/send-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send reset code");
+
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+// VERIFY RESET CODE
+export const verifyResetCode = createAsyncThunk(
+  "auth/verifyResetCode",
+  async ({ email, code }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/reset/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Invalid or expired code");
+
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async ({ email, newPassword }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`/api/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, newPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+//profil get data 
+export const fetchUserProfile = createAsyncThunk(
+    'auth/fetchUserProfile',
+    async (_, { rejectWithValue }) => { 
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'GET',
+            });
+            
+            const data = await res.json();
+            
+            if (!res.ok) {
+                return rejectWithValue(data.message || 'Failed to fetch profile.');
+            }
+            
+            return data; 
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+//profile edit data
+const EDITABLE_FIELDS = [
+    'profilePhoto', 
+    'jobTitle', 
+    'school', 
+    'travelCities', 
+    'interests', 
+    'preferredLanguages', 
+    'aboutMe',
+    'location',
+];
+
+
+export const updateProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async (profileData, { rejectWithValue }) => {
+        try {
+            const updatesToSend = {};
+            for (const key of EDITABLE_FIELDS) {
+                if (Object.hasOwn(profileData, key)) {
+                    updatesToSend[key] = profileData[key];
+                }
+            }
+
+            if (Object.keys(updatesToSend).length === 0) {
+                 return rejectWithValue('No valid fields provided for update.');
+            }
+
+            const res = await fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatesToSend),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return rejectWithValue(data.message || 'Failed to update profile.');
+            }
+            
+            return data; 
+        } catch (error) {
+            console.error("Update Profile Error:", error);
+            return rejectWithValue(error.message);
+        }
+    }
+);
+ 
+//photo 
+const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file); 
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+//photo
+export const uploadProfilePhoto = createAsyncThunk(
+    'auth/uploadProfilePhoto',
+    async (file, { rejectWithValue }) => { 
+        try {
+            const base64String = await convertFileToBase64(file);
+
+            const payload = {
+                base64Image: base64String, 
+            };
+            const res = await fetch('/api/profile/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+            
+            if (!res.ok) {
+                return rejectWithValue(data.message || 'Image upload failed.');
+            }
+            
+            return data.profilePhoto; 
+
+        } catch (error) {
+            console.error("Base64 Upload Error:", error);
+            return rejectWithValue(error.message || 'Error during file processing.');
+        }
+    }
+);
+
+//booking 
+export const fetchUserBookings = createAsyncThunk(
+    'auth/fetchUserBookings',
+    // GetState allows us to access the Redux state
+    async (_, { rejectWithValue, getState }) => { 
+        try {
+            const userId = getState().auth.user.id; 
+            
+            if (!userId) {
+                return rejectWithValue("User ID is missing for fetching bookings.");
+            }
+
+            // Endpoint  /api/bookings/:userId
+            const response = await axios.get(`/api/bookings/${userId}`); 
+            
+            return response.data.data; 
+
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
+        }
+    }
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -111,6 +291,11 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     successMessage: null,
+     resetEmail: "",
+     updateError: null,
+     updateStatus: 'idle',
+     photoUploadStatus: 'idle',
+     photoUploadError: null,
   },
   reducers: {
     logout: (state) => {
@@ -180,19 +365,93 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      //  Forget Password
-      .addCase(forgetPassword.pending, (state) => {
+    
+       .addCase(sendResetCode.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.successMessage = null;
       })
-      .addCase(forgetPassword.fulfilled, (state) => {
-        state.loading = false;
-        state.successMessage = "Reset link sent to your email.";
-      })
-      .addCase(forgetPassword.rejected, (state, action) => {
+      .addCase(sendResetCode.fulfilled, (state, action) => {
+  state.loading = false;
+  state.successMessage = "Reset code sent to your email.";
+  state.resetEmail = action.meta.arg.email; 
+})
+
+      .addCase(sendResetCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // VERIFY RESET CODE
+.addCase(verifyResetCode.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(verifyResetCode.fulfilled, (state, action) => {
+  state.loading = false;
+  state.successMessage = action.payload.message || "Code verified!";
+})
+.addCase(verifyResetCode.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+
+.addCase(resetPassword.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(resetPassword.fulfilled, (state, action) => {
+  state.loading = false;
+  state.successMessage = action.payload.message;
+  state.resetEmail = ""; // clear after reset
+})
+.addCase(resetPassword.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+
+.addCase(fetchUserProfile.pending, (state) => {
+                state.loading = true; 
+                state.error = null;
+            })
+            .addCase(fetchUserProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload; 
+            })
+            .addCase(fetchUserProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+                state.user = null; 
+            })
+
+            //update profile 
+
+            .addCase(updateProfile.pending, (state) => {
+                state.updateStatus = 'loading';
+                state.updateError = null;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.updateStatus = 'fulfilled';
+                state.updateError = null;
+                state.user = { ...state.user, ...action.payload }; 
+            })
+            .addCase(updateProfile.rejected, (state, action) => {
+                state.updateStatus = 'failed';
+                state.updateError = action.payload || 'Failed to update profile.';
+            })
+
+
+  .addCase(uploadProfilePhoto.pending, (state) => {
+        state.photoUploadStatus = 'loading';
+    })
+    .addCase(uploadProfilePhoto.fulfilled, (state, action) => {
+        state.photoUploadStatus = 'fulfilled';
+        state.user.profilePhoto = action.payload; 
+    })
+    .addCase(uploadProfilePhoto.rejected, (state, action) => {
+        state.photoUploadStatus = 'failed';
+        state.error = action.payload; 
+    })
+           
   },
 });
 

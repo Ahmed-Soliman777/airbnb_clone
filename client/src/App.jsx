@@ -17,6 +17,8 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import ResetPassword from "./Pages/ResetPassword";
+import ProfilePage from "./Pages/Profile";
 
 function App() {
   const routes = createBrowserRouter([
@@ -31,6 +33,8 @@ function App() {
         { path: "register", element: <RegisterStep2 /> },
         { path: "login", element: <Login /> },
         { path: "forget-password", element: <ForgetPassword /> },
+        { path: "reset-password", element: <ResetPassword /> },
+         { path: "profile", element: <ProfilePage /> },
         { path: "help", element: <Help /> },
         { path: "host", element: <Host /> },
         { path: "experiences", element: <ExperiencesPage /> },
