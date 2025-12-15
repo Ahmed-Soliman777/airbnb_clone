@@ -13,19 +13,53 @@ import { useEffect } from "react";
 import {
   fetchWishlistCollections,
   toggleListing,
+  openCreateDialog,
 } from "@/store/Slices/wishlistSlice";
+import WishlistDialog from "@/components/Wishlist/WishlistDialog";
+import { isAuthenticated } from "@/utils/cookies";
 export default function PopularHomesCarousel({ listings = [] }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const savedListings = useSelector((state) => state.wishlist.savedListings);
+  const collections = useSelector((state) => state.wishlist.collections); // ⭐ جيب القوائم من Redux
   const user = useSelector((state) => state.auth.user);
-
+  const showCreateDialog = useSelector(
+    (state) => state.wishlist.showCreateDialog
+  );
   useEffect(() => {
-    // Only fetch wishlist if user is logged in
     if (user) {
-      dispatch(fetchWishlist());
+      dispatch(fetchWishlistCollections());
     }
   }, [dispatch, user]);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchWishlistCollections());
+    }
+  }, [dispatch, user]);
+
+  const handleHeartClick = (e, listingId) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated()) {
+      navigate("/login");
+      return;
+    }
+
+    const isSaved = savedListings[listingId]?.isSaved;
+
+    if (isSaved) {
+      dispatch(toggleListing(listingId));
+    } else {
+      dispatch(
+        openCreateDialog({
+          listingId,
+          collections: collections,
+        })
+      );
+    }
+  };
+
   return (
     <section className="relative mx-auto">
       {/*--------------- Start of Carousel ------------------- */}
@@ -67,7 +101,7 @@ export default function PopularHomesCarousel({ listings = [] }) {
                       className="w-full h-full object-cover rounded-2xl"
                     />
                     <button
-                      className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
+                      className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300 cursor-pointer"
                       onClick={(e) => handleHeartClick(e, listingId)}
                     >
                       <Heart
@@ -105,6 +139,8 @@ export default function PopularHomesCarousel({ listings = [] }) {
           {/*---------------- End of Carousel Item ---------------- */}
         </CarouselContent>
       </Carousel>
+      {/* Wishlist Dialog */}
+      {showCreateDialog && <WishlistDialog />}
     </section>
   );
 }

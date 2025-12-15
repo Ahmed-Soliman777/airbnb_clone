@@ -124,14 +124,18 @@ const createWishlist = async (req, res) => {
       isSaved: true,
     });
   } catch (err) {
-    if (err.code === 11000) {
-      return res
-        .status(409)
-        .json({ message: "Collection with this name already exists" });
-    }
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
+  // } catch (err) {
+  //   if (err.code === 11000) {
+  //     return res
+  //       .status(409)
+  //       .json({ message: "Collection with this name already exists" });
+  //   }
+  //   console.error(err);
+  //   res.status(500).json({ message: "Server error" });
+  // }
 };
 
 //  Add listing to an existing collection

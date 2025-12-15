@@ -27,7 +27,7 @@ const wishlistCollectionSchema = new mongoose.Schema(
   }
 );
 
-wishlistCollectionSchema.index({ user: 1, name: 1 }, { unique: true });
+// wishlistCollectionSchema.index({ user: 1, name: 1 }, { unique: true });
 module.exports =
   mongoose.models.WishlistCollection ||
   mongoose.model("WishlistCollection", wishlistCollectionSchema);
