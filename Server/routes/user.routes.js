@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/user.controller.js");
 const auth = require('../middleware/userMiddleware.js');
 const role = require('../middleware/authUser.js');
+const User = require('../models/User.model.js');
 
 /**
  * @swagger
@@ -366,6 +367,34 @@ router.get("/profile", auth, userController.getProfile);
 router.patch('/profile', auth , userController.updateProfile);
 
 router.post('/profile/upload', auth, userController.uploadProfilePhoto);
+
+router.post('/logout', auth, userController.logout);
+
+
+// here is profile for host no guest profile
+router.get('/profile', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-passwordHash -salt');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
 
 
 module.exports = router;

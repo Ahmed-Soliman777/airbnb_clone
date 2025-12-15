@@ -1,10 +1,13 @@
-import { useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getExperienceById, clearCurrentExperience } from "@/store/Slices/experienceSlice";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
 import {
     ArrowLeft,
     Star,
@@ -15,13 +18,23 @@ import {
     Heart,
     Shield,
     Check,
-    Calendar,
+    Calendar as CalendarIcon,
+    Minus,
+    Plus,
 } from "lucide-react";
+import { format } from "date-fns";
 
 const ExperienceDetailsPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
+    // const { toast } = useToast();
     const { experience, status } = useSelector((state) => state.experience);
+    const { user } = useSelector((state) => state.auth);
+
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [guestCount, setGuestCount] = useState(1);
+    const [dateOpen, setDateOpen] = useState(false);
 
     useEffect(() => {
         dispatch(getExperienceById(id));
@@ -68,6 +81,43 @@ const ExperienceDetailsPage = () => {
         reviewCount = 0,
     } = experience;
 
+    const handleReserve = () => {
+        if (!user) {
+            toast({
+                title: "Login Required",
+                description: "Please login to make a reservation.",
+                variant: "destructive",
+            });
+            navigate("/login");
+            return;
+        }
+
+        if (!selectedDate) {
+            toast({
+                title: "Select a Date",
+                description: "Please select a date for your experience.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const totalPrice = pricePerPerson * guestCount;
+
+        navigate("/checkout", {
+            state: {
+                type: "experience",
+                item: experience,
+                checkInDate: selectedDate,
+                checkOutDate: selectedDate,
+                guests: guestCount,
+                totalPrice,
+                pricePerPerson,
+            },
+        });
+    };
+
+    const maxGuests = groupSize?.max || 10;
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -100,17 +150,19 @@ const ExperienceDetailsPage = () => {
                         <>
                             <div className="col-span-4 md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto">
                                 <img
-                                    src={images[0]?.url}
+                                    src={(typeof images[0] === 'string' ? images[0] : images[0]?.url) || "/placeholder.svg"}
                                     alt={title}
                                     className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.src = "/placeholder.svg"; }}
                                 />
                             </div>
                             {images.slice(1, 5).map((img, index) => (
                                 <div key={index} className="hidden md:block aspect-[4/3]">
                                     <img
-                                        src={img.url}
+                                        src={(typeof img === 'string' ? img : img?.url) || "/placeholder.svg"}
                                         alt={`${title} ${index + 2}`}
                                         className="w-full h-full object-cover"
+                                        onError={(e) => { e.target.src = "/placeholder.svg"; }}
                                     />
                                 </div>
                             ))}
@@ -120,6 +172,11 @@ const ExperienceDetailsPage = () => {
                             <p className="text-muted-foreground">No images available</p>
                         </div>
                     )}
+                </div>
+                {/* DEBUG SECTION */}
+                <div className="mt-4 p-4 bg-gray-100 rounded text-xs overflow-auto max-h-40">
+                    <p className="font-bold">Debug Info:</p>
+                    <pre>{JSON.stringify(images, null, 2)}</pre>
                 </div>
             </section>
 
@@ -240,7 +297,7 @@ const ExperienceDetailsPage = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {schedule.map((slot, index) => (
                                         <Badge key={index} variant="outline" className="py-2 px-3">
-                                            <Calendar className="w-4 h-4 mr-2" />
+                                            <CalendarIcon className="w-4 h-4 mr-2" />
                                             {slot.day || slot} {slot.time && `at ${slot.time}`}
                                         </Badge>
                                     ))}
@@ -258,22 +315,73 @@ const ExperienceDetailsPage = () => {
                             </div>
 
                             <div className="space-y-4 mb-6">
-                                <div className="border rounded-lg p-3">
-                                    <label className="text-xs font-medium text-muted-foreground">
-                                        DATE
-                                    </label>
-                                    <p className="font-medium">Select a date</p>
-                                </div>
+                                {/* Date Selector */}
+                                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                                    <PopoverTrigger asChild>
+                                        <button className="w-full border rounded-lg p-3 text-left hover:border-foreground transition-colors">
+                                            <label className="text-xs font-medium text-muted-foreground">
+                                                DATE
+                                            </label>
+                                            <p className="font-medium">
+                                                {selectedDate
+                                                    ? format(selectedDate, "MMM d, yyyy")
+                                                    : "Select a date"}
+                                            </p>
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={selectedDate}
+                                            onSelect={(date) => {
+                                                setSelectedDate(date);
+                                                setDateOpen(false);
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+
+                                {/* Guest Selector */}
                                 <div className="border rounded-lg p-3">
                                     <label className="text-xs font-medium text-muted-foreground">
                                         GUESTS
                                     </label>
-                                    <p className="font-medium">1 guest</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-medium">{guestCount} guest{guestCount > 1 ? "s" : ""}</p>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
+                                                disabled={guestCount <= 1}
+                                            >
+                                                <Minus className="w-4 h-4" />
+                                            </Button>
+                                            <span className="w-8 text-center">{guestCount}</span>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => setGuestCount(Math.min(maxGuests, guestCount + 1))}
+                                                disabled={guestCount >= maxGuests}
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <Button className="w-full mb-4" size="lg">
-                                Reserve
+                            <Button
+                                className="w-full mb-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
+                                size="lg"
+                                onClick={handleReserve}
+                                disabled={!selectedDate}
+                            >
+                                {selectedDate ? "Reserve" : "Select a date"}
                             </Button>
 
                             <p className="text-center text-sm text-muted-foreground">
@@ -283,13 +391,13 @@ const ExperienceDetailsPage = () => {
                             <div className="border-t mt-6 pt-6">
                                 <div className="flex justify-between mb-2">
                                     <span className="text-muted-foreground">
-                                        ${pricePerPerson} x 1 guest
+                                        ${pricePerPerson} x {guestCount} guest{guestCount > 1 ? "s" : ""}
                                     </span>
-                                    <span>${pricePerPerson}</span>
+                                    <span>${pricePerPerson * guestCount}</span>
                                 </div>
                                 <div className="flex justify-between font-semibold pt-4 border-t">
                                     <span>Total</span>
-                                    <span>${pricePerPerson}</span>
+                                    <span>${pricePerPerson * guestCount}</span>
                                 </div>
                             </div>
                         </div>

@@ -7,11 +7,20 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    // listing reference
+    // listing reference - optional as it could be a service or experience
     listing: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Listing",
-      required: true,
+    },
+    // service reference
+    service: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Service",
+    },
+    // experience reference
+    experience: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Experience",
     },
     // booking details
     checkInDate: {
@@ -23,9 +32,14 @@ const bookingSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: function (value) {
+          // If it's a Service or Experience, allow same-day end dates
+          if (this.service || this.experience) {
+            return value >= this.checkInDate;
+          }
+          // Default (Listing): Check-out must be strictly after Check-in
           return value > this.checkInDate;
         },
-        message: "Check-out date must be after check-in date",
+        message: "Check-out date must be after check-in date (or same day for services)",
       },
     },
     guestsCount: {

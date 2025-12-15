@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
   try {
-    const { firstName,lastName, email,dob, password } = req.body;
+    const { firstName, lastName, email, dob, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -34,13 +34,13 @@ exports.register = async (req, res) => {
       host: "smtp-relay.brevo.com",
       port: 587,
       auth: {
-        user: process.env.BREVO_SMTP_USER,  
-        pass: process.env.BREVO_SMTP_KEY   
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_KEY
       }
     });
 
     const mailOptions = {
-      from: process.env.BREVO_Email, 
+      from: process.env.BREVO_Email,
       to: email,
       subject: "Verify your account",
       text: `Hello ${firstName},
@@ -63,7 +63,7 @@ Airbnb Team `
 
   } catch (err) {
     res.status(400).json({ message: err.message });
-    console.log("EMAIL ERROR:",err);
+    console.log("EMAIL ERROR:", err);
   }
 };
 
@@ -84,12 +84,12 @@ exports.verifyEmail = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: "production",
-      sameSite: "strict",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
-    res.json({ 
+    res.json({
       message: 'Email verified successfully',
       token
     });
@@ -167,9 +167,9 @@ exports.login = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: "production",
-      sameSite: "strict",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
     res.json({ token });
@@ -185,7 +185,7 @@ exports.logout = async (req, res) => {
 
 exports.becomeHost = async (req, res) => {
   try {
-    const userId = req.user && req.user.userId; 
+    const userId = req.user._id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const user = await User.findById(userId);
@@ -312,6 +312,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 
+
 // (admin فقط)
 exports.getAllUsers = async (req, res) => {
   try {
@@ -339,11 +340,11 @@ exports.updateUser = async (req, res) => {
         user.email = email;
       }
     } else {
-      user.email = user.email; 
+      user.email = user.email;
     }
 
     user.firstName = firstName || user.firstName;
-     user.lastName = lastName || user.lastName;
+    user.lastName = lastName || user.lastName;
     user.phone = phone || user.phone;
 
     if (password) {

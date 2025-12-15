@@ -1,67 +1,98 @@
 const Listing = require("../models/Listing.model");
 const Amenities = require("../models/Amenities.model");
+const { uploadOnCloudinary } = require("../config/cloudinary");
 // Create new listing
 const createListing = async (req, res) => {
   try {
     const hostId = req.user.id;
 
-    // Extract fields from request body
+    // All fields are strings when sent via FormData
     const {
       title,
+      description,
+      propertyType,
       pricePerNight,
       maxGuests,
-      propertyType,
+      cleaningFee,
+      bedrooms,
+      bathrooms,
       amenities,
+      street,
+      city,
+      country,
+      coordinates,
+      availability,
       caption,
-      images,
-      description,
     } = req.body;
 
-    // Basic validation
-    if (!title || !pricePerNight || !maxGuests || !propertyType) {
+    // Required fields check (parse numbers)
+    if (!title || !description || !propertyType || !pricePerNight || !maxGuests) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Convert string fields to correct types
+    const parsedAmenities = amenities ? JSON.parse(amenities) : [];
+    const parsedCoordinates = coordinates ? JSON.parse(coordinates) : {};
+    const parsedAvailability = availability ? JSON.parse(availability) : [];
+
+    const parsedPricePerNight = Number(pricePerNight);
+    const parsedMaxGuests = Number(maxGuests);
+    const parsedCleaningFee = cleaningFee ? Number(cleaningFee) : 0;
+    const parsedBedrooms = bedrooms ? Number(bedrooms) : 1;
+    const parsedBathrooms = bathrooms ? Number(bathrooms) : 1;
+
     // Validate amenities
     let validAmenities = [];
-    if (Array.isArray(amenities) && amenities.length > 0) {
+    if (parsedAmenities.length > 0) {
       validAmenities = await Amenities.find({
-        _id: { $in: amenities },
+        _id: { $in: parsedAmenities },
       });
     }
-
-    // Create listing
-    const newListing = new Listing({
-      title,
-      pricePerNight,
-      maxGuests,
-      propertyType,
-      hostId,
-      description,
-      amenities: validAmenities.map((a) => a._id),
-    });
 
     // Handle images
     const uploadedImages = [];
-
-    for (const file of req.files) {
-      const result = await uploadOnCloudinary(file.path);
-      uploadedImages.push({
-        url: result.secure_url,
-        caption: req.body.caption || "Listing photo",
-      });
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        uploadedImages.push({
+          url: result.secure_url,
+          caption: caption || "Listing photo",
+        });
+      }
     }
 
-    newListing.images = uploadedImages;
+    // Format availability
+    const formattedAvailability = parsedAvailability.map((range) => {
+      if (Array.isArray(range)) {
+        return { startDate: new Date(range[0]), endDate: new Date(range[1]) };
+      }
+      return range;
+    });
 
-    // Save
+    const newListing = new Listing({
+      title,
+      description,
+      propertyType,
+      pricePerNight: parsedPricePerNight,
+      maxGuests: parsedMaxGuests,
+      cleaningFee: parsedCleaningFee,
+      bedrooms: parsedBedrooms,
+      bathrooms: parsedBathrooms,
+      amenities: validAmenities.map((a) => a._id),
+      hostId,
+      images: uploadedImages,
+      address: { street, city, country, coordinates: parsedCoordinates },
+      availability: formattedAvailability,
+    });
+
     await newListing.save();
-
     return res.status(201).json(newListing);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get all listings
 const getListings = async (req, res) => {
@@ -216,6 +247,20 @@ const searchListings = async (req, res) => {
   res.status(200).json({ items: listings });
 };
 
+// Get host listings
+const getHostListings = async (req, res) => {
+  try {
+    const hostId = req.user.id;
+    const listings = await Listing.find({ hostId: hostId }) // Ensure this matches your schema (hostId vs host)
+      .populate("amenities", "name")
+      .populate("reviews");
+
+    res.status(200).json(listings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createListing,
   getListings,
@@ -223,4 +268,5 @@ module.exports = {
   updateListing,
   deleteListing,
   searchListings,
+  getHostListings,
 };

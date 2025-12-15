@@ -5,7 +5,7 @@ const Service = require('../models/Service.model');
 // @access  Private
 const createService = async (req, res) => {
   try {
-    const {
+    let {
       title,
       description,
       serviceCategory,
@@ -15,9 +15,25 @@ const createService = async (req, res) => {
       availability,
       requirements,
       skills,
-      images,
       serviceDetails
     } = req.body;
+
+    // Parse nested objects if they are strings (from FormData)
+    if (typeof location === 'string') location = JSON.parse(location);
+    if (typeof packages === 'string') packages = JSON.parse(packages);
+    if (typeof availability === 'string') availability = JSON.parse(availability);
+    if (typeof requirements === 'string') requirements = JSON.parse(requirements);
+    if (typeof skills === 'string') skills = JSON.parse(skills);
+    if (typeof serviceDetails === 'string') serviceDetails = JSON.parse(serviceDetails);
+
+    // Handle images
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => ({
+        url: `/uploads/${file.filename}`,
+        alt: file.originalname
+      }));
+    }
 
     const service = await Service.create({
       title,
@@ -151,27 +167,35 @@ const updateService = async (req, res) => {
       status
     } = req.body;
 
+    // Handle new images if provided
+    let uploadedImages = service.images;
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(file => ({
+        url: `/uploads/${file.filename}`,
+        alt: file.originalname
+      }));
+      uploadedImages = [...uploadedImages, ...newImages];
+    } else if (req.body.images) {
+      // handle case where images might be sent (e.g. deletion causing a filtered list to be sent back? or just ignore if only adding)
+      // For now, let's assume this handles additions via file upload.
+      // If we want to replace, we check if images is an array of strings/objects.
+      // But commonly with file upload, we append.
+    }
+
+    // Parse nested fields if they are strings (FormData)
+    const updateData = { ...req.body };
+    if (typeof updateData.location === 'string') updateData.location = JSON.parse(updateData.location);
+    if (typeof updateData.packages === 'string') updateData.packages = JSON.parse(updateData.packages);
+    if (typeof updateData.availability === 'string') updateData.availability = JSON.parse(updateData.availability);
+    if (typeof updateData.requirements === 'string') updateData.requirements = JSON.parse(updateData.requirements);
+    if (typeof updateData.skills === 'string') updateData.skills = JSON.parse(updateData.skills);
+    if (typeof updateData.serviceDetails === 'string') updateData.serviceDetails = JSON.parse(updateData.serviceDetails);
+
+    updateData.images = uploadedImages;
+
     service = await Service.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        description,
-        serviceCategory,
-        location: {
-          serviceArea,
-          city,
-          country,
-          coordinates
-        },
-        hourlyRate,
-        packages,
-        availability,
-        requirements,
-        skills,
-        images,
-        serviceDetails,
-        status
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 

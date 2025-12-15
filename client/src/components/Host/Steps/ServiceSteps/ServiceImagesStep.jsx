@@ -20,11 +20,19 @@ export default function ServiceImagesStep({ data, onUpdate }) {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        console.log("Files dropped:", e.dataTransfer.files);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const files = Array.from(e.dataTransfer.files);
+            // Add files to existing images
+            onUpdate({ images: [...(data.images || []), ...files] });
+        }
     };
 
     const handleFileSelect = (e) => {
-        console.log("Files selected:", e.target.files);
+        if (e.target.files && e.target.files[0]) {
+            const files = Array.from(e.target.files);
+            // Add files to existing images
+            onUpdate({ images: [...(data.images || []), ...files] });
+        }
     };
 
     const removeImage = (index) => {
@@ -55,8 +63,8 @@ export default function ServiceImagesStep({ data, onUpdate }) {
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-                            ? "border-primary bg-accent"
-                            : "border-border hover:border-primary/50"
+                        ? "border-primary bg-accent"
+                        : "border-border hover:border-primary/50"
                         }`}
                 >
                     <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -93,7 +101,7 @@ export default function ServiceImagesStep({ data, onUpdate }) {
                                     className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
                                 >
                                     <img
-                                        src={image}
+                                        src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                                         alt={`Portfolio ${index + 1}`}
                                         className="w-full h-full object-cover"
                                     />

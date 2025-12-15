@@ -12,12 +12,15 @@ const auth = require('../middleware/userMiddleware.js');
 
 // Public routes
 router.get('/', getExperiences);
+
+// Protected routes (require authentication)
+router.get('/host/my-experiences', auth, getHostExperiences);
 router.get('/:id', getExperience);
 
 // Protected routes (require authentication)
 router.post('/', auth, createExperience);
 router.put('/:id', auth, updateExperience);
 router.delete('/:id', auth, deleteExperience);
-router.get('/host/my-experiences', auth, getHostExperiences);
+
 
 module.exports = router;

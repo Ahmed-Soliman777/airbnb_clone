@@ -1,6 +1,8 @@
 const Booking = require("../models/Booking.model.js");
 const User = require("../models/User.model.js");
 const Listing = require("../models/Listing.model.js");
+const Service = require("../models/Service.model.js");
+const Experience = require("../models/Experience.model.js");
 
 // create booking
 const createBooking = async (req, res) => {
@@ -59,13 +61,13 @@ const getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const booking = await Booking.findById(id).populate("user listing");
+    const booking = await Booking.findById(id).populate("user listing service experience");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     // check authorization
     if (
       req.user.role === "guest" &&
-      booking.user._id.toString() !== req.user.id
+      booking.user._id.toString() !== req.user._id.toString()
     ) {
       return res
         .status(403)
@@ -83,8 +85,8 @@ const getBookingsForUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // check authorization
-    if (req.user.role === "guest" && req.user.id !== userId) {
+    // check authorization - allow users to view their own bookings, admins can view any
+    if (req.user.role !== "admin" && req.user._id.toString() !== userId) {
       return res
         .status(403)
         .json({ message: "Not authorized to view other users' bookings" });
@@ -92,7 +94,9 @@ const getBookingsForUser = async (req, res) => {
 
     const bookings = await Booking.find({ user: userId })
       .sort({ createdAt: -1 })
-      .populate("listing");
+      .populate("listing")
+      .populate("service")
+      .populate("experience");
 
     res.json({ success: true, data: bookings });
   } catch (error) {
@@ -112,7 +116,7 @@ const getBookingsForListing = async (req, res) => {
     //check authorization
     if (
       req.user.role === "host" &&
-      existingListing.host.toString() !== req.user.id
+      existingListing.host.toString() !== req.user._id.toString()
     ) {
       return res
         .status(403)
@@ -138,13 +142,16 @@ const updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const booking = await Booking.findById(id).populate("user listing");
+    const booking = await Booking.findById(id).populate("user listing service experience");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Determine the item (listing, service, or experience)
+    const item = booking.listing || booking.service || booking.experience;
 
     // check authorization
     if (
       req.user.role === "host" &&
-      booking.listing.host.toString() !== req.user.id
+      item?.host.toString() !== req.user._id.toString()
     ) {
       return res
         .status(403)
@@ -168,30 +175,60 @@ const deleteBooking = async (req, res) => {
     const booking = await Booking.findById(id).populate("listing");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // guest can delte booking if pending
-    if (req.user.role === "guest") {
-      if (
-        booking.user.toString() !== req.user.id ||
-        booking.status !== "pending"
-      ) {
+    // Users can delete their own pending bookings
+    if (req.user.role !== "admin") {
+      // For non-admin users, check ownership and status
+      if (booking.user.toString() !== req.user._id.toString()) {
         return res
           .status(403)
           .json({ message: "Not authorized to delete this booking" });
       }
-    }
 
-    // host can delete his listing only
-    if (
-      req.user.role === "host" &&
-      booking.listing.host.toString() !== req.user.id
-    ) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this booking" });
+      // Only pending bookings can be cancelled by users
+      if (booking.status !== "pending") {
+        return res
+          .status(403)
+          .json({ message: "Only pending bookings can be cancelled" });
+      }
     }
 
     await booking.deleteOne();
     res.json({ success: true, message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// get all bookings for host
+const getAllBookingsForHost = async (req, res) => {
+  try {
+    const hostId = req.user._id;
+
+    // Find all listings, services, and experiences owned by this host
+    const hostListings = await Listing.find({ hostId: hostId }).select("_id");
+    const hostServices = await Service.find({ host: hostId }).select("_id");
+    const hostExperiences = await Experience.find({ host: hostId }).select("_id");
+
+    // Get IDs arrays
+    const listingIds = hostListings.map(l => l._id);
+    const serviceIds = hostServices.map(s => s._id);
+    const experienceIds = hostExperiences.map(e => e._id);
+
+    // Find bookings for any of these listings, services, or experiences
+    const bookings = await Booking.find({
+      $or: [
+        { listing: { $in: listingIds } },
+        { service: { $in: serviceIds } },
+        { experience: { $in: experienceIds } }
+      ]
+    })
+      .populate("user", "firstName lastName email phone profilePhoto")
+      .populate("listing", "title hostId")
+      .populate("service", "title host")
+      .populate("experience", "title host")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: bookings });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -204,4 +241,5 @@ module.exports = {
   getBookingsForListing,
   updateBookingStatus,
   deleteBooking,
+  getAllBookingsForHost
 };

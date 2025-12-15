@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 import Footer from "@/components/Footer/Footer";
 import { Outlet, useLocation } from "react-router";
 import GlobalModal from "@/components/GlobalModal/GlobalModal";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchCurrentUser } from "@/store/Slices/authslice";
 
 export default function Layout() {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { direction } = useSelector((state) => state.lang);
 
   const [showGlobalModal, setShowGlobalModal] = useState(false);
@@ -14,7 +16,12 @@ export default function Layout() {
   const toggleTranslateModal = () => setShowGlobalModal((prev) => !prev);
   const closeModal = () => setShowGlobalModal(false);
 
-  const hideHeaderFooter = location.pathname === "/not-found";
+  const hideHeaderFooter = location.pathname === "/not-found" || location.pathname === "/";
+
+  // Fetch current user on app load
+  useEffect(() => {
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
 
   // update HTML direction whenever language changes
   useEffect(() => {

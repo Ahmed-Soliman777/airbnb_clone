@@ -1,17 +1,28 @@
 import { SearchIcon } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { Calendar } from '../ui/calendar'
-import i18n from '@/utils/i18n'
+import i18n from '../../utils/i18n'
 import { useTranslation } from "react-i18next";
 import './SearchBar.css'
 import GuestCount from '../GuestCount/GuestCount'
 import SearchCity from '../SearchCity/SearchCity'
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 export default function SearchBar() {
 
     const { t } = useTranslation()
+    const location = useLocation();
+
+    // Determine search type based on current page
+    const getSearchType = () => {
+        if (location.pathname.startsWith('/experiences')) return 'experience';
+        if (location.pathname.startsWith('/services')) return 'service';
+        return 'home';
+    };
+
+    const searchType = getSearchType();
+    const isHomeSearch = searchType === 'home';
 
     // update language state 
     const lang = useSelector(state => state.lang.default_language);
@@ -22,9 +33,9 @@ export default function SearchBar() {
     }, [lang]);
 
     // add calendarRef if mouse is clicked outside the calendar
-    // const calendarRef = useRef(null)
     const checkInRef = useRef(null)
     const checkOutRef = useRef(null)
+    const dateRef = useRef(null)
 
     const guestRef = useRef(null);
 
@@ -32,10 +43,10 @@ export default function SearchBar() {
 
     const [whereInput, setWhereInput] = useState("");
 
-    // add state for caledar
-    // const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    // add state for calendar
     const [isCheckinOpen, setIsCheckinOpen] = useState(false)
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+    const [isDateOpen, setIsDateOpen] = useState(false)
 
     const [isGuestOpen, setIsGuestOpen] = useState(false);
 
@@ -49,7 +60,10 @@ export default function SearchBar() {
         to: null,
     })
 
-    // add useEffect to controll the initial state of calendar and to be false when page is rerendered
+    // Single date for experiences/services
+    const [selectedDate, setSelectedDate] = useState(null);
+
+    // add useEffect to control the initial state of calendar and to be false when page is rerendered
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -64,21 +78,22 @@ export default function SearchBar() {
             ) {
                 setIsCheckoutOpen(false)
             }
+            if (
+                dateRef.current &&
+                !dateRef.current.contains(event.target)
+            ) {
+                setIsDateOpen(false)
+            }
         }
 
-        if (isCheckinOpen) {
-            document.addEventListener('mousedown', handleClickOutside)
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-        if (isCheckoutOpen) {
+        if (isCheckinOpen || isCheckoutOpen || isDateOpen) {
             document.addEventListener('mousedown', handleClickOutside)
         } else {
             document.removeEventListener('mousedown', handleClickOutside)
         }
 
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isCheckinOpen, isCheckoutOpen])
+    }, [isCheckinOpen, isCheckoutOpen, isDateOpen])
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -128,28 +143,45 @@ export default function SearchBar() {
 
     const handleSearch = () => {
         const city = whereInput?.trim() || "";
-
-        const checkIn = dateRange?.from
-            ? new Date(dateRange.from).toISOString()
-            : "";
-
-        const checkOut = dateRange?.to
-            ? new Date(dateRange.to).toISOString()
-            : "";
-
         const guests = guestSummary?.trim() || "";
 
-        const queryParams = new URLSearchParams({
-            city,
-            checkIn,
-            checkOut,
-            guests,
-        }).toString();
+        if (isHomeSearch) {
+            const checkIn = dateRange?.from
+                ? new Date(dateRange.from).toISOString()
+                : "";
 
-        navigate(`/search?${queryParams}`);
+            const checkOut = dateRange?.to
+                ? new Date(dateRange.to).toISOString()
+                : "";
+
+            const queryParams = new URLSearchParams({
+                city,
+                checkIn,
+                checkOut,
+                guests,
+            }).toString();
+
+            navigate(`/search?${queryParams}`);
+        } else {
+            const date = selectedDate
+                ? new Date(selectedDate).toISOString()
+                : "";
+
+            const queryParams = new URLSearchParams({
+                city,
+                date,
+                guests,
+            }).toString();
+
+            if (searchType === 'experience') {
+                navigate(`/experiences/search?${queryParams}`);
+            } else {
+                navigate(`/services/search?${queryParams}`);
+            }
+        }
     };
 
-    // Calendar handler
+    // Calendar handler for home (range)
     const handleDateSelect = (selectedRange) => {
         if (!selectedRange) return;
 
@@ -174,6 +206,25 @@ export default function SearchBar() {
                 setIsCheckoutOpen(false);
             }
         }
+    };
+
+    // Single date handler for experiences/services
+    const handleSingleDateSelect = (date) => {
+        setSelectedDate(date);
+        setIsDateOpen(false);
+    };
+
+    // Get labels based on search type
+    const getDateLabel = () => {
+        if (searchType === 'experience') return t("searchBar.date") || "Date";
+        if (searchType === 'service') return t("searchBar.date") || "Date";
+        return t("searchBar.checkin");
+    };
+
+    const getGuestLabel = () => {
+        if (searchType === 'experience') return t("searchBar.guests") || "Guests";
+        if (searchType === 'service') return t("searchBar.guests") || "Guests";
+        return t("searchBar.who");
     };
 
 
@@ -223,88 +274,101 @@ export default function SearchBar() {
                     )}
                 </div>
 
+                {/* Date inputs - conditional based on search type */}
+                {isHomeSearch ? (
+                    <>
+                        {/* check in date input container */}
+                        <div className="relative w-full sm:flex-1 min-w-0">
+                            <div
+                                className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                                onClick={() => {
+                                    setIsCheckinOpen(true);
+                                    setIsCheckoutOpen(false);
+                                }}
 
-                {/* check in date input container */}
+                            >
+                                <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkin")}</label>
+                                <input
+                                    readOnly
+                                    className="text-sm bg-transparent truncate"
+                                    placeholder={t("searchBar.add_dates")}
+                                    value={formatDate(dateRange.from)}
+                                />
+                            </div>
 
-                {/* <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
-                    <label className='pointer-events-none text-xs sm:text-sm font-medium'>{t("searchBar.checkin")}</label>
-                    <input type="text" placeholder={t("searchBar.add_dates")} readOnly className='pointer-events-none text-sm bg-transparent truncate' value={formatDate(dateRange.from)} />
-                    {isCalendarOpen && <div className="absolute top-full mt-2 sm:top-17 left-0 sm:left-auto z-50" ref={calendarRef}>  <Calendar
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={2}
-                        className="rounded-lg border shadow-sm"
-                    /></div>}
-                </div> */}
-                <div className="relative w-full sm:flex-1 min-w-0">
-                    <div
-                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
-                        onClick={() => {
-                            setIsCheckinOpen(true);
-                            setIsCheckoutOpen(false);
-                        }}
+                            {isCheckinOpen && (
+                                <div ref={checkInRef} className="absolute top-full mt-2 z-50">
+                                    <Calendar
+                                        mode="range"
+                                        selected={dateRange}
+                                        onSelect={handleDateSelect}
+                                        numberOfMonths={2}
+                                        className="rounded-lg border shadow-sm bg-white pointer-events-auto"
+                                    />
+                                </div>
+                            )}
+                        </div>
 
-                    >
-                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkin")}</label>
-                        <input
-                            readOnly
-                            className="text-sm bg-transparent truncate"
-                            placeholder={t("searchBar.add_dates")}
-                            value={formatDate(dateRange.from)}
-                        />
-                    </div>
+                        {/* check out date input container */}
+                        <div className="relative w-full sm:flex-1 min-w-0">
+                            <div
+                                className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                                onClick={() => {
+                                    setIsCheckoutOpen(true);
+                                    setIsCheckinOpen(false);
+                                }}
 
-                    {isCheckinOpen && (
-                        <div ref={checkInRef} className="absolute top-full mt-2 z-50">
-                            <Calendar
-                                mode="range"
-                                selected={dateRange}
-                                onSelect={handleDateSelect}
-                                numberOfMonths={2}
-                                className="rounded-lg border shadow-sm bg-white"
+                            >
+                                <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkout")}</label>
+                                <input
+                                    readOnly
+                                    className="text-sm bg-transparent truncate"
+                                    placeholder={t("searchBar.add_dates")}
+                                    value={formatDate(dateRange.to)}
+                                />
+                            </div>
+
+                            {isCheckoutOpen && (
+                                <div ref={checkOutRef} className="absolute top-full mt-2 z-50">
+                                    <Calendar
+                                        mode="range"
+                                        selected={dateRange}
+                                        onSelect={handleDateSelect}
+                                        numberOfMonths={2}
+                                        className="rounded-lg border shadow-sm bg-white pointer-events-auto"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    /* Single date input for experiences/services */
+                    <div className="relative w-full sm:flex-1 min-w-0" ref={dateRef}>
+                        <div
+                            className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
+                            onClick={() => setIsDateOpen(true)}
+                        >
+                            <label className="text-xs sm:text-sm font-medium">{getDateLabel()}</label>
+                            <input
+                                readOnly
+                                className="text-sm bg-transparent truncate"
+                                placeholder={t("searchBar.add_dates") || "Add date"}
+                                value={formatDate(selectedDate)}
                             />
                         </div>
-                    )}
-                </div>
 
-                {/* check out date input container */}
-
-                {/* <div onClick={() => setIsCalendarOpen(prev => !prev)} className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer relative w-full sm:flex-1 min-w-0">
-                    <label className='pointer-events-none text-xs sm:text-sm font-medium'>{t("searchBar.checkout")}</label>
-                    <input type="text" placeholder={t("searchBar.add_dates")} readOnly className='pointer-events-none text-sm bg-transparent truncate' value={formatDate(dateRange.to)} />
-                </div> */}
-                <div className="relative w-full sm:flex-1 min-w-0">
-                    <div
-                        className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
-                        onClick={() => {
-                            setIsCheckoutOpen(true);
-                            setIsCheckinOpen(false);
-                        }}
-
-                    >
-                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.checkout")}</label>
-                        <input
-                            readOnly
-                            className="text-sm bg-transparent truncate"
-                            placeholder={t("searchBar.add_dates")}
-                            value={formatDate(dateRange.to)}
-                        />
+                        {isDateOpen && (
+                            <div className="absolute top-full mt-2 z-50">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={handleSingleDateSelect}
+                                    className="rounded-lg border shadow-sm bg-white pointer-events-auto"
+                                />
+                            </div>
+                        )}
                     </div>
-
-                    {isCheckoutOpen && (
-                        <div ref={checkOutRef} className="absolute top-full mt-2 z-50">
-                            <Calendar
-                                mode="range"
-                                selected={dateRange}
-                                onSelect={handleDateSelect}
-                                numberOfMonths={2}
-                                className="rounded-lg border shadow-sm bg-white"
-                            />
-                        </div>
-                    )}
-                </div>
+                )}
 
                 {/* add guests input container */}
 
@@ -313,7 +377,7 @@ export default function SearchBar() {
                         className="flex flex-col rounded-lg sm:rounded-full hover:bg-gray-100 px-4 sm:px-5 py-2 sm:py-1 cursor-pointer"
                         onClick={() => setIsGuestOpen(true)}
                     >
-                        <label className="text-xs sm:text-sm font-medium">{t("searchBar.who")}</label>
+                        <label className="text-xs sm:text-sm font-medium">{getGuestLabel()}</label>
                         <input
                             type="text"
                             readOnly

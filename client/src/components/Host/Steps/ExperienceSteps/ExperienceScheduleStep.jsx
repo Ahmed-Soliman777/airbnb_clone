@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Plus, X } from "lucide-react";
 
 export default function ExperienceScheduleStep({ data, onUpdate }) {
-  const [newSchedule, setNewSchedule] = useState({ day: "", time: "" });
+  const [newSchedule, setNewSchedule] = useState({ day: "", startTime: "", endTime: "" });
 
   const addSchedule = () => {
-    if (newSchedule.day && newSchedule.time) {
+    if (newSchedule.day && newSchedule.startTime && newSchedule.endTime) {
       onUpdate({
         schedule: [...(data.schedule || []), newSchedule],
       });
-      setNewSchedule({ day: "", time: "" });
+      setNewSchedule({ day: "", startTime: "", endTime: "" });
     }
   };
 
@@ -47,7 +47,7 @@ export default function ExperienceScheduleStep({ data, onUpdate }) {
 
       <div className="space-y-6 max-w-xl mx-auto">
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="day">Day of Week</Label>
               <select
@@ -66,12 +66,23 @@ export default function ExperienceScheduleStep({ data, onUpdate }) {
             </div>
 
             <div>
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="startTime">Start Time</Label>
               <Input
-                id="time"
+                id="startTime"
                 type="time"
-                value={newSchedule.time}
-                onChange={(e) => setNewSchedule({ ...newSchedule, time: e.target.value })}
+                value={newSchedule.startTime}
+                onChange={(e) => setNewSchedule({ ...newSchedule, startTime: e.target.value })}
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="endTime">End Time</Label>
+              <Input
+                id="endTime"
+                type="time"
+                value={newSchedule.endTime}
+                onChange={(e) => setNewSchedule({ ...newSchedule, endTime: e.target.value })}
                 className="mt-1.5"
               />
             </div>
@@ -99,7 +110,9 @@ export default function ExperienceScheduleStep({ data, onUpdate }) {
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">{slot.day}</p>
-                    <p className="text-sm text-muted-foreground">{slot.time}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {slot.startTime} - {slot.endTime}
+                    </p>
                   </div>
                   <Button
                     type="button"

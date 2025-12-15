@@ -16,6 +16,29 @@ export const getAllServices = createAsyncThunk(
   }
 );
 
+export const searchServices = createAsyncThunk(
+  "service/searchServices",
+  async ({ city, date, guests, page = 1, limit = 10, priceRange, categories, minRating }, { rejectWithValue }) => {
+    try {
+      const params = new URLSearchParams();
+      if (city) params.append('city', city);
+      if (date) params.append('date', date);
+      if (guests) params.append('guests', guests);
+      params.append('page', page);
+      params.append('limit', limit);
+
+      if (priceRange) params.append('priceRange', JSON.stringify(priceRange));
+      if (categories && categories.length > 0) params.append('categories', JSON.stringify(categories));
+      if (minRating) params.append('minRating', minRating);
+
+      const response = await axios.get(`${API_URL}?${params.toString()}`);
+      return { ...response.data, page };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const getServiceById = createAsyncThunk(
   "service/getServiceById",
   async (id, { rejectWithValue }) => {
@@ -46,9 +69,15 @@ export const updateService = createAsyncThunk(
   "service/updateService",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/${id}`, data, {
+      const config = {
         withCredentials: true,
-      });
+      };
+
+      if (data instanceof FormData) {
+        config.headers = { "Content-Type": "multipart/form-data" };
+      }
+
+      const response = await axios.put(`${API_URL}/${id}`, data, config);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -91,6 +120,11 @@ const serviceSlice = createSlice({
     services: [],
     service: null,
     hostServices: [],
+    searchResults: [],
+    searchStatus: "active",
+    searchTotal: 0,
+    searchTotalPages: 0,
+    searchCurrentPage: 1,
     status: "active",
     error: null,
   },
@@ -100,6 +134,12 @@ const serviceSlice = createSlice({
     },
     clearCurrentService: (state) => {
       state.service = null;
+    },
+    clearSearchResults: (state) => {
+      state.searchResults = [];
+      state.searchTotal = 0;
+      state.searchTotalPages = 0;
+      state.searchCurrentPage = 1;
     },
   },
   extraReducers: (builder) => {
@@ -114,6 +154,24 @@ const serviceSlice = createSlice({
       })
       .addCase(getAllServices.rejected, (state, action) => {
         state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(searchServices.fulfilled, (state, action) => {
+        state.searchStatus = "succeeded";
+        const { data, total, totalPages, currentPage, page } = action.payload.data;
+
+        // If it's page 1, replace results. Otherwise, append.
+        if (page === 1) {
+          state.searchResults = data || [];
+        } else {
+          state.searchResults = [...state.searchResults, ...(data || [])];
+        }
+        state.searchTotal = total || 0;
+        state.searchTotalPages = totalPages || 0;
+        state.searchCurrentPage = currentPage || page;
+      })
+      .addCase(searchServices.rejected, (state, action) => {
+        state.searchStatus = "failed";
         state.error = action.payload;
       })
       // Get service by ID
@@ -154,11 +212,19 @@ const serviceSlice = createSlice({
         );
       })
       // Get host services
+      .addCase(getHostServices.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(getHostServices.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.hostServices = action.payload.data;
+      })
+      .addCase(getHostServices.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearServiceError, clearCurrentService } = serviceSlice.actions;
+export const { clearServiceError, clearCurrentService, clearSearchResults } = serviceSlice.actions;
 export default serviceSlice.reducer;
