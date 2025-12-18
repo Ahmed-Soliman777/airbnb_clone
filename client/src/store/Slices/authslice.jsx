@@ -150,139 +150,140 @@ export const resetPassword = createAsyncThunk(
 
 //profil get data 
 export const fetchUserProfile = createAsyncThunk(
-    'auth/fetchUserProfile',
-    async (_, { rejectWithValue }) => { 
-        try {
-            const res = await fetch('/api/profile', {
-                method: 'GET',
-            });
-            
-            const data = await res.json();
-            
-            if (!res.ok) {
-                return rejectWithValue(data.message || 'Failed to fetch profile.');
-            }
-            
-            return data; 
-        } catch (error) {
-            return rejectWithValue(error.message);
-        }
+  'auth/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'GET',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return rejectWithValue(data.message || 'Failed to fetch profile.');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
+  }
 );
 
 //profile edit data
 const EDITABLE_FIELDS = [
-    'profilePhoto', 
-    'jobTitle', 
-    'school', 
-    'travelCities', 
-    'interests', 
-    'preferredLanguages', 
-    'aboutMe',
-    'location',
+  'profilePhoto',
+  'jobTitle',
+  'school',
+  'travelCities',
+  'interests',
+  'preferredLanguages',
+  'aboutMe',
+  'location',
 ];
 
 
 export const updateProfile = createAsyncThunk(
-    'auth/updateProfile',
-    async (profileData, { rejectWithValue }) => {
-        try {
-            const updatesToSend = {};
-            for (const key of EDITABLE_FIELDS) {
-                if (Object.hasOwn(profileData, key)) {
-                    updatesToSend[key] = profileData[key];
-                }
-            }
-
-            if (Object.keys(updatesToSend).length === 0) {
-                 return rejectWithValue('No valid fields provided for update.');
-            }
-
-            const res = await fetch('/api/profile', {
-                method: 'PATCH',
-                headers: { 
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatesToSend),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                return rejectWithValue(data.message || 'Failed to update profile.');
-            }
-            
-            return data; 
-        } catch (error) {
-            console.error("Update Profile Error:", error);
-            return rejectWithValue(error.message);
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const updatesToSend = {};
+      for (const key of EDITABLE_FIELDS) {
+        if (Object.hasOwn(profileData, key)) {
+          updatesToSend[key] = profileData[key];
         }
+      }
+
+      if (Object.keys(updatesToSend).length === 0) {
+        return rejectWithValue('No valid fields provided for update.');
+      }
+
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatesToSend),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return rejectWithValue(data.message || 'Failed to update profile.');
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Update Profile Error:", error);
+      return rejectWithValue(error.message);
     }
+  }
 );
- 
+
 //photo 
 const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file); 
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
 };
 
 //photo
 export const uploadProfilePhoto = createAsyncThunk(
-    'auth/uploadProfilePhoto',
-    async (file, { rejectWithValue }) => { 
-        try {
-            const base64String = await convertFileToBase64(file);
+  'auth/uploadProfilePhoto',
+  async (file, { rejectWithValue }) => {
+    try {
+      const base64String = await convertFileToBase64(file);
 
-            const payload = {
-                base64Image: base64String, 
-            };
-            const res = await fetch('/api/profile/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(payload),
-            });
+      const payload = {
+        base64Image: base64String,
+      };
+      const res = await fetch('/api/profile/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-            const data = await res.json();
-            
-            if (!res.ok) {
-                return rejectWithValue(data.message || 'Image upload failed.');
-            }
-            
-            return data.profilePhoto; 
+      const data = await res.json();
 
-        } catch (error) {
-            console.error("Base64 Upload Error:", error);
-            return rejectWithValue(error.message || 'Error during file processing.');
-        }
+      if (!res.ok) {
+        return rejectWithValue(data.message || 'Image upload failed.');
+      }
+
+      return data.profilePhoto;
+
+    } catch (error) {
+      console.error("Base64 Upload Error:", error);
+      return rejectWithValue(error.message || 'Error during file processing.');
     }
+  }
 );
 
 //booking 
 export const fetchUserBookings = createAsyncThunk(
-    'auth/fetchUserBookings',
-    // GetState allows us to access the Redux state
-    async (_, { rejectWithValue, getState }) => { 
-        try {
-            const userId = getState().auth.user.id; 
-            
-            if (!userId) {
-                return rejectWithValue("User ID is missing for fetching bookings.");
-            }
+  'auth/fetchUserBookings',
+  // GetState allows us to access the Redux state
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const userId = getState().auth.user.id;
 
-            // Endpoint  /api/bookings/:userId
-            const response = await axios.get(`/api/bookings/${userId}`); 
-            
-            return response.data.data; 
+      if (!userId) {
+        return rejectWithValue("User ID is missing for fetching bookings.");
+      }
 
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
-        }
+      // Endpoint  /api/bookings/:userId
+      const response = await axios.get(`/api/bookings/${userId}`);
+
+      return response.data.data;
+
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
     }
+  }
+);
 // Fetch current user from token
 export const fetchCurrentUser = createAsyncThunk(
   "auth/fetchCurrentUser",
@@ -326,11 +327,11 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     successMessage: null,
-     resetEmail: "",
-     updateError: null,
-     updateStatus: 'idle',
-     photoUploadStatus: 'idle',
-     photoUploadError: null,
+    resetEmail: "",
+    updateError: null,
+    updateStatus: 'idle',
+    photoUploadStatus: 'idle',
+    photoUploadError: null,
   },
   reducers: {
     logout: (state) => {
@@ -400,93 +401,93 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-    
-       .addCase(sendResetCode.pending, (state) => {
+
+      .addCase(sendResetCode.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
       .addCase(sendResetCode.fulfilled, (state, action) => {
-  state.loading = false;
-  state.successMessage = "Reset code sent to your email.";
-  state.resetEmail = action.meta.arg.email; 
-})
+        state.loading = false;
+        state.successMessage = "Reset code sent to your email.";
+        state.resetEmail = action.meta.arg.email;
+      })
 
       .addCase(sendResetCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
       // VERIFY RESET CODE
-.addCase(verifyResetCode.pending, (state) => {
-  state.loading = true;
-  state.error = null;
-})
-.addCase(verifyResetCode.fulfilled, (state, action) => {
-  state.loading = false;
-  state.successMessage = action.payload.message || "Code verified!";
-})
-.addCase(verifyResetCode.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
-})
+      .addCase(verifyResetCode.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyResetCode.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = action.payload.message || "Code verified!";
+      })
+      .addCase(verifyResetCode.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-.addCase(resetPassword.pending, (state) => {
-  state.loading = true;
-  state.error = null;
-})
-.addCase(resetPassword.fulfilled, (state, action) => {
-  state.loading = false;
-  state.successMessage = action.payload.message;
-  state.resetEmail = ""; // clear after reset
-})
-.addCase(resetPassword.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
-})
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = action.payload.message;
+        state.resetEmail = ""; // clear after reset
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-.addCase(fetchUserProfile.pending, (state) => {
-                state.loading = true; 
-                state.error = null;
-            })
-            .addCase(fetchUserProfile.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload; 
-            })
-            .addCase(fetchUserProfile.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-                state.user = null; 
-            })
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.user = null;
+      })
 
-            //update profile 
+      //update profile 
 
-            .addCase(updateProfile.pending, (state) => {
-                state.updateStatus = 'loading';
-                state.updateError = null;
-            })
-            .addCase(updateProfile.fulfilled, (state, action) => {
-                state.updateStatus = 'fulfilled';
-                state.updateError = null;
-                state.user = { ...state.user, ...action.payload }; 
-            })
-            .addCase(updateProfile.rejected, (state, action) => {
-                state.updateStatus = 'failed';
-                state.updateError = action.payload || 'Failed to update profile.';
-            })
+      .addCase(updateProfile.pending, (state) => {
+        state.updateStatus = 'loading';
+        state.updateError = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.updateStatus = 'fulfilled';
+        state.updateError = null;
+        state.user = { ...state.user, ...action.payload };
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.updateStatus = 'failed';
+        state.updateError = action.payload || 'Failed to update profile.';
+      })
 
 
-  .addCase(uploadProfilePhoto.pending, (state) => {
+      .addCase(uploadProfilePhoto.pending, (state) => {
         state.photoUploadStatus = 'loading';
-    })
-    .addCase(uploadProfilePhoto.fulfilled, (state, action) => {
+      })
+      .addCase(uploadProfilePhoto.fulfilled, (state, action) => {
         state.photoUploadStatus = 'fulfilled';
-        state.user.profilePhoto = action.payload; 
-    })
-    .addCase(uploadProfilePhoto.rejected, (state, action) => {
+        state.user.profilePhoto = action.payload;
+      })
+      .addCase(uploadProfilePhoto.rejected, (state, action) => {
         state.photoUploadStatus = 'failed';
-        state.error = action.payload; 
-    })
-           
+        state.error = action.payload;
+      })
+
 
       // Fetch current user
       .addCase(fetchCurrentUser.pending, (state) => {
