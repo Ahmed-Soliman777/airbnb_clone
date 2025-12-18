@@ -16,6 +16,8 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import ResetPassword from "./Pages/ResetPassword";
+import ProfilePage from "./Pages/Profile";
 import AirbnbLanding from "./Pages/AirbnbLanding"
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
@@ -42,6 +44,12 @@ function App() {
         { index: true, element: <LandingPage /> },
         { path: "homes", element: <Home /> },
         { path: "room/:id", element: <ListingDetails /> },
+        { path: "signup", element: <RegisterStep1 /> },
+        { path: "register", element: <RegisterStep2 /> },
+        { path: "login", element: <Login /> },
+        { path: "forget-password", element: <ForgetPassword /> },
+        { path: "reset-password", element: <ResetPassword /> },
+         { path: "profile", element: <ProfilePage /> },
         {
           path: "signup",
           element: (
