@@ -4,19 +4,63 @@ const router = express.Router();
 const auth = require("../middleware/userMiddleware");
 const authorize = require("../middleware/authUser");
 const {
-  getWishlist,
-  toggleWishlist,
-  deleteWishlist,
+  getWishlists,
+  getCollection,
+  toggleListing,
+  createWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  deleteWishlistList,
+  getListsContainingListing,
 } = require("../controllers/wishlist.controller");
 
-// Guest adds/removes a favorite for themselves
-router.post("/:listingId", auth, authorize(["guest"]), toggleWishlist);
+// toggle listing in wishlist
+router.post("/toggle/:listingId", auth, authorize(["guest"]), toggleListing);
 
-router.delete("/:listingId", auth, authorize(["guest"]), deleteWishlist);
+// get which lists contain a listing
+router.get(
+  "/listing/:listingId",
+  auth,
+  authorize(["guest"]),
+  getListsContainingListing
+);
 
-// Guest views their own wishlist
-router.get("/", auth, authorize(["guest"]), getWishlist);
+// get all wishlist collections
+router.get("/collections", auth, authorize(["guest"]), getWishlists);
 
-// // Admin views wishlist of any user by userId
-// router.get("/user/:userId", auth, authorize(["admin"]), getWishlistByUser);
+// get a specific wishlist collection by ID
+router.get(
+  "/collections/:collectionId",
+  auth,
+  authorize(["guest"]),
+  getCollection
+);
+
+// create a new wishlist collection
+router.post("/collections", auth, authorize(["guest"]), createWishlist);
+
+// add listing to a wishlist collection
+router.post(
+  "/collections/:collectionId/listings/:listingId",
+  auth,
+  authorize(["guest"]),
+  addToWishlist
+);
+
+// remove listing from a wishlist collection
+router.delete(
+  "/collections/:collectionId/listings/:listingId",
+  auth,
+  authorize(["guest"]),
+  removeFromWishlist
+);
+
+// delete an entire wishlist collection
+router.delete(
+  "/collections/:collectionId",
+  auth,
+  authorize(["guest"]),
+  deleteWishlistList
+);
+
 module.exports = router;

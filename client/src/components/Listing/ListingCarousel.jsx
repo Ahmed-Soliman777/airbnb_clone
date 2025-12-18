@@ -7,8 +7,11 @@ import {
 } from "@/components/ui/carousel";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { fetchWishlist } from "@/store/Slices/wishlistSlice";
-import ListingCard from "./ListingCard";
+
+import {
+  fetchWishlistCollections,
+  toggleListing,
+} from "@/store/Slices/wishlistSlice";
 
 export default function PopularHomesCarousel({ listings = [] }) {
   const dispatch = useDispatch();
@@ -37,14 +40,20 @@ export default function PopularHomesCarousel({ listings = [] }) {
 
         <CarouselContent className="-ml-2 md:-ml-4 gap-0">
           {/*---------------- Start of Carousel Item ---------------- */}
-          {listings.map((listing) => (
-            <CarouselItem
-              key={listing._id || listing.id}
-              className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
-            >
-              <ListingCard listing={listing} />
-            </CarouselItem>
-          ))}
+
+          {listings.map((listing) => {
+            const listingId = listing._id || listing.id;
+            const isFav = savedListings[listingId]?.isSaved || false;
+            return (
+              <CarouselItem
+                key={listing._id || listing.id}
+                className="basis-1/2 max-w-1/2 md:basis-[25%] md:max-w-[25%] lg:basis-[14.285%] lg:max-w-[14.285%] shrink-0"
+              >
+                <ListingCard listing={listing} />
+              </CarouselItem>
+            );
+          })}
+
           {/*---------------- End of Carousel Item ---------------- */}
         </CarouselContent>
       </Carousel>

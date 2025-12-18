@@ -2,21 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Grip, Heart, Share } from "lucide-react";
 import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
-import { useState } from "react";
-import ShareModal from "./ShareModal";
-import PhotoGalleryModal from "./PhotoGalleryModal";
 
-const ListingGallery = ({ title, images = [], description }) => {
+import {
+  fetchWishlistCollections,
+  toggleListing,
+} from "@/store/Slices/wishlistSlice";
+import { useNavigate } from "react-router";
+import { useEffect } from "react";
+const ListingGallery = ({ title, images = [] }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist.items);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const listingUrl = window.location.href;
+  const { savedListings } = useSelector((state) => state.wishlist);
+  const { token } = useSelector((state) => state.auth);
 
-  const isFav = wishlistItems.includes(id);
+  const isFav = savedListings[id]?.isSaved || false;
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchWishlistCollections());
+    }
+  }, [dispatch, token]);
+
   const urls = images
     .map((img) => (typeof img === "string" ? img : img?.url))
     .filter(Boolean);
@@ -27,6 +34,13 @@ const ListingGallery = ({ title, images = [], description }) => {
     urls[3] || "https://placehold.co/600x400?text=Photo+4",
     urls[4] || "https://placehold.co/600x400?text=Photo+5",
   ];
+  const handleHeartClick = () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    dispatch(toggleListing(id));
+  };
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* Header */}
@@ -47,7 +61,7 @@ const ListingGallery = ({ title, images = [], description }) => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-            onClick={() => dispatch(toggleWishlistItem(id))}
+            onClick={handleHeartClick}
           >
             <Heart
               size={20}
