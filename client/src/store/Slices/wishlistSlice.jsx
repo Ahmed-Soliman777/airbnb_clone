@@ -13,9 +13,38 @@ export const fetchWishlistCollections = createAsyncThunk(
         },
       });
 
-      // If unauthorized, return empty array (user not logged in)
       if (response.status === 401) {
         return [];
+      }
+
+      const data = await response.json();
+      return data.collections || [];
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//  Toggle listing in wishlist
+export const toggleListing = createAsyncThunk(
+  "wishlist/toggleListing",
+  async (listingId, { rejectWithValue, getState }) => {
+    try {
+      const { auth } = getState();
+      const response = await fetch(`/api/wishlist/toggle/${listingId}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        const err = await response
+          .json()
+          .catch(() => ({ message: response.statusText }));
+        return rejectWithValue(err.message || "Failed to toggle listing");
       }
 
       const data = await response.json();
@@ -26,7 +55,7 @@ export const fetchWishlistCollections = createAsyncThunk(
   }
 );
 
-//  Create a new collection with a listing
+// Create a new collection with a listing
 export const createCollectionWithListing = createAsyncThunk(
   "wishlist/createCollection",
   async ({ name, listingId }, { rejectWithValue, getState }) => {
@@ -52,7 +81,7 @@ export const createCollectionWithListing = createAsyncThunk(
   }
 );
 
-//  Add to existing collection
+// Add to existing collection
 export const addToExistingCollection = createAsyncThunk(
   "wishlist/addToCollection",
   async ({ collectionId, listingId }, { rejectWithValue, getState }) => {
@@ -79,7 +108,7 @@ export const addToExistingCollection = createAsyncThunk(
   }
 );
 
-//  Delete a collection
+// Delete a collection
 export const deleteCollection = createAsyncThunk(
   "wishlist/deleteCollection",
   async (collectionId, { rejectWithValue, getState }) => {
@@ -105,7 +134,7 @@ export const deleteCollection = createAsyncThunk(
   }
 );
 
-//  Fetch a single collection with details
+// Fetch a single collection with details
 export const fetchSingleCollection = createAsyncThunk(
   "wishlist/fetchSingleCollection",
   async (collectionId, { rejectWithValue, getState }) => {
@@ -131,7 +160,7 @@ export const fetchSingleCollection = createAsyncThunk(
   }
 );
 
-//  Remove listing from collection
+// Remove listing from collection
 export const removeFromCollection = createAsyncThunk(
   "wishlist/removeFromCollection",
   async ({ collectionId, listingId }, { rejectWithValue, getState }) => {
@@ -156,52 +185,45 @@ export const removeFromCollection = createAsyncThunk(
     }
   }
 );
-//  The Slice
+
+// The Slice
 const wishlistSlice = createSlice({
   name: "wishlist",
   initialState: {
-    collections: [], // All collections
-    currentCollection: null, // The currently opened collection
+    collections: [],
+    currentCollection: null,
     savedListings: {},
-    status: "idle", // loading, succeeded, failed
+    status: "idle",
+    collectionStatus: "idle",
     error: null,
-
-    // For the popup
-    showCreateDialog: false, // Whether to open the popup or not
-    currentListingId: null, // The listing to add
-    availableCollections: [], // Available collections to choose from
+    showCreateDialog: false,
+    currentListingId: null,
+    availableCollections: [],
   },
   reducers: {
-    // Open the popup
     openCreateDialog: (state, action) => {
       state.showCreateDialog = true;
       state.currentListingId = action.payload.listingId;
       state.availableCollections = action.payload.collections || [];
     },
-
-    // Close the popup
     closeCreateDialog: (state) => {
       state.showCreateDialog = false;
       state.currentListingId = null;
       state.availableCollections = [];
     },
-
-    // Clear the error
     clearError: (state) => {
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      //  Fetch all collections
+      // Fetch all collections
       .addCase(fetchWishlistCollections.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchWishlistCollections.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.collections = action.payload;
-
-        // Update savedListings (for coloring hearts)
         state.savedListings = {};
         action.payload.forEach((collection) => {
           collection.listings.forEach((listing) => {
@@ -224,43 +246,36 @@ const wishlistSlice = createSlice({
         state.error = action.payload;
       })
 
-      //  Toggle Listing
+      // ⭐ Toggle Listing - بدون تغيير status
       .addCase(toggleListing.fulfilled, (state, action) => {
         const { listingId, action: actionType, collections } = action.payload;
-
         if (actionType === "needCollection") {
-          // Open popup with available collections
           state.showCreateDialog = true;
           state.currentListingId = listingId;
           state.availableCollections = collections || [];
         } else if (actionType === "removed") {
-          // The listing was removed → update savedListings
           state.savedListings[listingId] = {
             isSaved: false,
             collections: [],
           };
-
-          // Remove the listing from all collections in the state
           state.collections.forEach((collection) => {
             collection.listings = collection.listings.filter((id) => {
               const idString = typeof id === "string" ? id : id._id;
               return idString !== listingId;
             });
           });
+          state.showCreateDialog = false;
         }
       })
+      .addCase(toggleListing.rejected, (state, action) => {
+        state.error = action.payload;
+      })
 
-      //  Create a new collection
+      // Create collection
       .addCase(createCollectionWithListing.fulfilled, (state, action) => {
         const { collection } = action.payload;
-
-        // Add the new collection to collections
         state.collections.push(collection);
-
-        // Close the popup
         state.showCreateDialog = false;
-
-        // Update savedListings
         const listingId = collection.listings[0];
         state.savedListings[listingId] = {
           isSaved: true,
@@ -268,22 +283,16 @@ const wishlistSlice = createSlice({
         };
       })
 
-      //  Add to existing collection
+      // Add to existing collection
       .addCase(addToExistingCollection.fulfilled, (state, action) => {
         const { collection } = action.payload;
-
-        // Update the collection in the state
         const index = state.collections.findIndex(
           (c) => c._id === collection._id
         );
         if (index !== -1) {
           state.collections[index] = collection;
         }
-
-        // Close the popup
         state.showCreateDialog = false;
-
-        // Update savedListings
         collection.listings.forEach((listing) => {
           const listingId = listing._id || listing;
           if (!state.savedListings[listingId]) {
@@ -292,8 +301,6 @@ const wishlistSlice = createSlice({
               collections: [],
             };
           }
-
-          // Make sure the collection is not already present
           const exists = state.savedListings[listingId].collections.some(
             (c) => c._id === collection._id
           );
@@ -306,44 +313,38 @@ const wishlistSlice = createSlice({
         });
       })
 
-      //  Delete a collection
+      // Delete collection
       .addCase(deleteCollection.fulfilled, (state, action) => {
         const collectionId = action.payload;
-
-        // Remove the collection from collections
         state.collections = state.collections.filter(
           (c) => c._id !== collectionId
         );
-
-        // Update savedListings
         Object.keys(state.savedListings).forEach((listingId) => {
-          // Remove the collection from collections
           state.savedListings[listingId].collections = state.savedListings[
             listingId
           ].collections.filter((c) => c._id !== collectionId);
-
-          // If there are no other collections, the listing is not saved
           if (state.savedListings[listingId].collections.length === 0) {
             state.savedListings[listingId].isSaved = false;
           }
         });
       })
 
-      //  Fetch a single collection
+      //  Fetch single collection - use collectionStatus
       .addCase(fetchSingleCollection.pending, (state) => {
-        state.status = "loading";
+        state.collectionStatus = "loading";
       })
       .addCase(fetchSingleCollection.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.currentCollection = action.payload; // Current collection
+        state.collectionStatus = "succeeded";
+        state.currentCollection = action.payload;
       })
       .addCase(fetchSingleCollection.rejected, (state, action) => {
-        state.status = "failed";
+        state.collectionStatus = "failed";
         state.error = action.payload;
-      }) // Remove from collection
+      })
+
+      // Remove from collection
       .addCase(removeFromCollection.fulfilled, (state, action) => {
         const { listingId } = action.payload;
-        // Update savedListings
         if (state.savedListings[listingId]) {
           state.savedListings[listingId].isSaved = false;
           state.savedListings[listingId].collections = [];

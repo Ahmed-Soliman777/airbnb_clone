@@ -20,27 +20,21 @@ export default function Wishlists() {
   const navigate = useNavigate();
 
   const { collections, status } = useSelector((state) => state.wishlist);
-  const { token } = useSelector((state) => state.auth);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
 
   useEffect(() => {
-    if (token) {
-      dispatch(fetchWishlistCollections());
-    } else {
-      navigate("/login");
-    }
-  }, [dispatch, token, navigate]);
+    // ✅ AuthGuard بيتعامل مع authentication
+    dispatch(fetchWishlistCollections());
+  }, [dispatch]);
 
-  // open confirmation dialog
   const handleDeleteClick = (e, collection) => {
     e.stopPropagation();
     setCollectionToDelete(collection);
     setShowDeleteDialog(true);
   };
 
-  // confirm delete
   const confirmDelete = async () => {
     if (collectionToDelete) {
       await dispatch(deleteCollection(collectionToDelete._id));
@@ -49,7 +43,6 @@ export default function Wishlists() {
     }
   };
 
-  // cancel delete
   const cancelDelete = () => {
     setShowDeleteDialog(false);
     setCollectionToDelete(null);
@@ -57,9 +50,9 @@ export default function Wishlists() {
 
   const handleCardClick = (collectionId) => {
     navigate(`/wishlists/${collectionId}`);
+    console.log("Navigating to collection:", collectionId);
   };
 
-  // if loading
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -68,7 +61,7 @@ export default function Wishlists() {
     );
   }
 
-  if (collections.length === 0) {
+  if (collections.length === 0 && status === "succeeded") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center max-w-md">
@@ -88,16 +81,13 @@ export default function Wishlists() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Wishlists</h1>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {collections.map((collection) => {
-            // number of listings in the collection
             const listingsCount = collection.listings?.length || 0;
-            // cover image for the collection
             const coverImage =
               collection.listings?.[0]?.images?.[0]?.url ||
               collection.listings?.[0]?.images?.[0] ||
@@ -107,7 +97,7 @@ export default function Wishlists() {
               <div
                 key={collection._id}
                 onClick={() => handleCardClick(collection._id)}
-                className="group relative bg-transparent  cursor-pointer"
+                className="group relative bg-transparent cursor-pointer"
               >
                 <div className="relative aspect-4/3 overflow-hidden">
                   <img
@@ -115,8 +105,6 @@ export default function Wishlists() {
                     alt={collection.name}
                     className="w-full h-full object-cover rounded-3xl"
                   />
-
-                  {/* Delete button */}
                   <button
                     onClick={(e) => handleDeleteClick(e, collection)}
                     className="absolute top-3 left-3 bg-white/90 hover:bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-md cursor-pointer"
@@ -125,16 +113,11 @@ export default function Wishlists() {
                     <X size={18} className="text-gray-700" />
                   </button>
                 </div>
-
-                {/* list info */}
                 <div className="py-2">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
                     {collection.name}
                   </h3>
-
-                  <p className="text-sm text-gray-500">
-                    {listingsCount} {listingsCount === 1 ? "saved" : "saved"}
-                  </p>
+                  <p className="text-sm text-gray-500">{listingsCount} saved</p>
                 </div>
               </div>
             );
@@ -142,7 +125,6 @@ export default function Wishlists() {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog*/}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md p-0 gap-0">
           <div className="px-6 py-6">
@@ -158,8 +140,6 @@ export default function Wishlists() {
               </DialogDescription>
             </DialogHeader>
           </div>
-
-          {/* Footer with buttons */}
           <div className="px-6 pb-6 flex gap-3 justify-end">
             <Button
               onClick={cancelDelete}
