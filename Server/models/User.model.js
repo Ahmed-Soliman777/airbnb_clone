@@ -53,17 +53,26 @@ const userSchema = new mongoose.Schema({
     sparse: true,
     unique: true
   },
+resetPasswordCode: { type: String },
+resetPasswordExpire: { type: Date },
 
   role: { type: String, enum: ['guest', 'host', 'admin', "main-host"], default: 'guest' },
 
   passwordHash: { type: String, required: true },
-
+school: {type : String},
   travelCities: [{ type: String }],
   interests: [{ type: String }],
   preferredLanguages: [{ type: String }],
   jobTitle: { type: String, trim: true },
   aboutMe: { type: String, trim: true, maxlength: 1000 },
-
+location: {
+        type: {
+            address: { type: String, trim: true, default: '' }, 
+            latitude: { type: Number, default: null },
+            longitude: { type: Number, default: null }
+        },
+        default: {}
+    },
   salt: { type: String },
 
   listings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }],

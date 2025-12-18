@@ -168,4 +168,25 @@ route.get("/cancel", (req, res) => {
   res.send("Payment is cancelled");
 });
 
+/**
+ * @swagger
+ * /payment/host:
+ *   get:
+ *     summary: Get host payments/profits from bookings
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of host payments/profits
+ *       401:
+ *         description: Unauthorized
+ */
+route.get(
+  "/payment/host",
+  token,
+  paymentAuthentication(["host", "admin"]),
+  paymentCtrl.getHostPayments
+);
+
 module.exports = route;

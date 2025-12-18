@@ -16,8 +16,14 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+<<<<<<< HEAD
 import SearchListing from "./Pages/SearchListing";
 import AirbnbLanding from "./Pages/AirbnbLanding";
+=======
+import ResetPassword from "./Pages/ResetPassword";
+import ProfilePage from "./Pages/Profile";
+import AirbnbLanding from "./Pages/AirbnbLanding"
+>>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
@@ -28,6 +34,11 @@ import PaymentSuccessPage from "./Pages/PaymentSuccessPage";
 import PaymentCancelPage from "./Pages/PaymentCancelPage";
 import ReservationsPage from "./Pages/ReservationsPage";
 import MessagesPage from "./Pages/MessagesPage"
+import EditExperiencePage from "./Pages/EditExperiencePage";
+import EditServicePage from "./Pages/EditServicePage";
+import LandingPage from "./Pages/AirbnbLanding";
+import HostWalletPage from "./Pages/HostWalletPage";
+import HostGuestsPage from "./Pages/HostGuestsPage";
 
 function App() {
   const routes = createBrowserRouter([
@@ -35,11 +46,16 @@ function App() {
       path: "/",
       element: <Layout />,
       children: [
-        { index: true, element: <Home /> },
+        { index: true, element: <LandingPage /> },
         { path: "homes", element: <Home /> },
         { path: "search", element: <SearchListing /> },
         { path: "room/:id", element: <ListingDetails /> },
-
+        { path: "signup", element: <RegisterStep1 /> },
+        { path: "register", element: <RegisterStep2 /> },
+        { path: "login", element: <Login /> },
+        { path: "forget-password", element: <ForgetPassword /> },
+        { path: "reset-password", element: <ResetPassword /> },
+         { path: "profile", element: <ProfilePage /> },
         {
           path: "signup",
           element: (
@@ -100,6 +116,22 @@ function App() {
           ),
         },
         {
+          path: "host/experiences/edit/:id",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <EditExperiencePage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/services/edit/:id",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <EditServicePage />
+            </AuthGuard>
+          )
+        },
+        {
           path: "messages",
           element: (
             <AuthGuard requireAuth={true}>
@@ -120,6 +152,22 @@ function App() {
           element: (
             <AuthGuard requireAuth={true}>
               <ReservationsPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/guests",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <HostGuestsPage />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "host/wallet",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <HostWalletPage />
             </AuthGuard>
           )
         },

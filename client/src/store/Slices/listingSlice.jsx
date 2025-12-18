@@ -20,6 +20,21 @@ export const GetListingById = createAsyncThunk(
   }
 );
 
+// ------------- 6. Get Host Listings --------------
+export const getHostListings = createAsyncThunk(
+  "listing/getHostListings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/listings/host/my-listings", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 // ------------- 3. Create a new listing --------------
 export const createListing = createAsyncThunk(
   "listing/createListing",
@@ -54,9 +69,17 @@ export const createListing = createAsyncThunk(
 export const updateListing = createAsyncThunk(
   "listing/updateListing",
   async (updatedListing) => {
+    const isFormData = updatedListing instanceof FormData;
+    const id = isFormData ? updatedListing.get('id') : updatedListing.id;
+
+    const config = {
+      headers: isFormData ? { "Content-Type": "multipart/form-data" } : {}
+    };
+
     const response = await axios.put(
-      `/api/listings/${updatedListing.id}`,
-      updatedListing
+      `/api/listings/${id}`,
+      updatedListing,
+      config
     );
     return response.data;
   }
@@ -86,6 +109,7 @@ const listingSlice = createSlice({
   name: "listingSlice",
   initialState: {
     listings: [],
+    hostListings: [],
     listing: null,
     searchResults: [],
     searchMetadata: null,
@@ -134,6 +158,7 @@ const listingSlice = createSlice({
       // ------------- 5. Delete a listing --------------
       .addCase(deleteListing.fulfilled, (state, action) => {
         state.listings = state.listings.filter((l) => l.id !== action.payload);
+<<<<<<< HEAD
       })
 
       // ------------- 6. Search listings --------------
@@ -148,6 +173,22 @@ const listingSlice = createSlice({
       .addCase(searchListings.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
+=======
+        state.hostListings = state.hostListings.filter((l) => l._id !== action.payload.toString()); // Update host listings too
+      })
+
+      // ------------- 6. Get Host Listings --------------
+      .addCase(getHostListings.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(getHostListings.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.hostListings = action.payload; // populate only hostListings
+      })
+      .addCase(getHostListings.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+>>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
       });
   },
 });

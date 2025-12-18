@@ -8,28 +8,32 @@ import {
   addToExistingCollection,
 } from "@/store/Slices/wishlistSlice";
 import { Button } from "@/components/ui/button";
+import { isAuthenticated } from "@/utils/cookies";
 
 const CollectionDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { collectionId } = useParams();
 
-  const { currentCollection, status } = useSelector((state) => state.wishlist);
-  const { token } = useSelector((state) => state.auth);
+  const { currentCollection, collectionStatus } = useSelector(
+    (state) => state.wishlist
+  );
 
   const [hoveredCard, setHoveredCard] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [removedListings, setRemovedListings] = useState(new Set());
+  const [removedListings, setRemovedListings] = useState(new Set()); // ⭐ رجعناه بس للـ UI بس
 
   useEffect(() => {
-    if (token && collectionId) {
-      dispatch(fetchSingleCollection(collectionId));
-    } else if (!token) {
+    if (!isAuthenticated()) {
       navigate("/login");
+      return;
     }
-  }, [dispatch, token, collectionId, navigate]);
 
-  // Handle toggle wishlist
+    if (collectionId) {
+      dispatch(fetchSingleCollection(collectionId));
+    }
+  }, [dispatch, collectionId, navigate]);
+
   const handleToggleWishlist = async (listingId) => {
     const isRemoved = removedListings.has(listingId);
 
@@ -58,7 +62,6 @@ const CollectionDetail = () => {
     }
   };
 
-  // Handle image navigation
   const handlePrevImage = (e, listingId, imagesLength) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => ({
@@ -75,7 +78,7 @@ const CollectionDetail = () => {
     }));
   };
 
-  if (status === "loading") {
+  if (collectionStatus === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg text-gray-600">Loading collection...</div>
@@ -111,7 +114,7 @@ const CollectionDetail = () => {
 
         {/* if no listings */}
         {listings.length === 0 && (
-          <div className=" flex flex-col items-center justify-center px-4">
+          <div className="flex flex-col items-center justify-center px-4">
             <div className="text-center max-w-md">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 No Saves yet
@@ -120,18 +123,18 @@ const CollectionDetail = () => {
                 As you search, click the heart icon to save your favorite places
                 and Experiences to a wishlist.
               </p>
-              <Button onClick={() => navigate("/")}>Start Exploring </Button>
+              <Button onClick={() => navigate("/")}>Start Exploring</Button>
             </div>
           </div>
         )}
+
         {/* Listings */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {listings.map((item) => {
-            const listing = item.listing || item;
+          {listings.map((listing) => {
             const listingId = listing._id;
             const images = listing.images || [];
             const currentIndex = currentImageIndex[listingId] || 0;
-            const isRemoved = removedListings.has(listingId);
+            const isRemoved = removedListings.has(listingId); // ⭐ لو true = فاضي، لو false = أحمر
 
             return (
               <div
@@ -161,7 +164,7 @@ const CollectionDetail = () => {
                     ))}
                   </div>
 
-                  {/* Heart Icon */}
+                  {/* Heart Icon - toggle */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

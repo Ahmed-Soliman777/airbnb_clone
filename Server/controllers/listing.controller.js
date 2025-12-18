@@ -395,6 +395,20 @@ const getListingReviews = async (req, res) => {
   }
 };
 
+// Get host listings
+const getHostListings = async (req, res) => {
+  try {
+    const hostId = req.user.id;
+    const listings = await Listing.find({ hostId: hostId }) // Ensure this matches your schema (hostId vs host)
+      .populate("amenities", "name")
+      .populate("reviews");
+
+    res.status(200).json(listings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createListing,
   getListings,
@@ -403,4 +417,5 @@ module.exports = {
   deleteListing,
   searchListings,
   getListingReviews,
+  getHostListings,
 };

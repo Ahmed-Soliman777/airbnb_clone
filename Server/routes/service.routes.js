@@ -20,7 +20,7 @@ router.get('/:id', getService);
 
 // Protected routes (require authentication)
 router.post('/', auth, upload.array('images', 10), createService);
-router.put('/:id', auth, updateService);
+router.put('/:id', auth, upload.array('images', 10), updateService);
 router.delete('/:id', auth, deleteService);
 
 

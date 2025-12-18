@@ -1,70 +1,76 @@
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { forgetPassword } from "../store/Slices/authslice";
+import { sendResetCode, verifyResetCode } from "../store/Slices/authslice";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import VerifyCodePopup from "../components/User/VerifyCodePopup";
 
 export default function ForgetPassword() {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, successMessage } = useSelector((state) => state.auth);
+  const [openVerifyPopup, setOpenVerifyPopup] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    dispatch(forgetPassword(data));
+  const onSubmit = async (data) => {
+    dispatch(verifyResetCode(data.email));
+
+    const res = await dispatch(sendResetCode({ email: data.email }));
+
+    if (res.meta.requestStatus === "fulfilled") {
+      setOpenVerifyPopup(true);
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-2xl border border-[#717171] w-full max-w-lg">
+        
         <h2 className="text-2xl font-semibold text-center mb-6">Forgot Password?</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* email field */}
+          
+          {/* Email */}
           <div>
-            <span className="text-xs">Enter the email address associated with your account, and we’ll email you a link to reset your password.</span>
-           
+            <span className="text-xs">Enter your email to receive reset code.</span>
+
             <input
               type="email"
               {...register("email", {
                 required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter a valid email address",
-                },
               })}
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-               placeholder="Enter your email"
+              className="w-full p-2 border rounded-md"
+              placeholder="Enter your email"
             />
+
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
 
-          {/*  error Message from Server */}
+          {/* Server Error */}
           {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
-          {/* Success Message */}
-          {isSubmitSuccessful && !error && (
-            <p className="text-green-600 text-sm text-center">
-              If the email exists, a reset link has been sent.
-            </p>
+          {/* Success */}
+          {successMessage && (
+            <p className="text-green-600 text-sm text-center">{successMessage}</p>
           )}
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black hover:bg-[#e61e4d] text-white py-2 rounded-md transition duration-200 disabled:opacity-50"
+            className="w-full bg-black text-white py-2 rounded-md"
           >
-            {loading ? "Sending.." : "Send Reset Link"}
+            {loading ? "Sending..." : "Send Reset Code"}
           </button>
         </form>
 
-        {/* Links */}
+        {/* Login Link */}
         <div className="text-sm text-center mt-4">
           <p>
             Remember your password?{" "}
@@ -74,6 +80,11 @@ export default function ForgetPassword() {
           </p>
         </div>
       </div>
+
+      {openVerifyPopup && (
+        <VerifyCodePopup onClose={() => setOpenVerifyPopup(false)} />
+      )}
+      
     </div>
   );
 }
