@@ -11,13 +11,11 @@ import DateSelector from "./DateSelector";
 import GuestSelector from "./GuestSelector";
 import { useSelector } from "react-redux";
 
-function BookingHome({ listing }) {
+function BookingHome({ listing, date, setDate }) {
   const { loading, error } = useSelector((state) => state.payment);
 
   const [openGuests, setOpenGuests] = useState(false);
   const [open, setOpen] = useState(false);
-
-  const [date, setDate] = useState({ from: undefined, to: undefined });
   const [guests, setGuests] = useState({
     adults: 1,
     children: 0,

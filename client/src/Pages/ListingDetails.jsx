@@ -42,9 +42,24 @@ const ListingDetails = () => {
   const user = useSelector((state) => state.auth.user);
 
   // Shared date state for calendar and booking component
-  const [date, setDate] = useState({
-    from: undefined,
-    to: undefined,
+  const [date, setDate] = useState(() => {
+    // Load date from cookies on initial render
+    const savedDate = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("listingDate="));
+    
+    if (savedDate) {
+      try {
+        const dateValue = JSON.parse(decodeURIComponent(savedDate.split("=")[1]));
+        return {
+          from: dateValue.from ? new Date(dateValue.from) : undefined,
+          to: dateValue.to ? new Date(dateValue.to) : undefined,
+        };
+      } catch (e) {
+        return { from: undefined, to: undefined };
+      }
+    }
+    return { from: undefined, to: undefined };
   });
 
   // Sticky navbar state
@@ -64,6 +79,8 @@ const ListingDetails = () => {
   const handleSelect = useCallback((range) => {
     if (!range?.from) {
       setDate({ from: undefined, to: undefined });
+      // Clear cookie
+      document.cookie = "listingDate=; path=/; max-age=0";
       return;
     }
 
@@ -72,9 +89,21 @@ const ListingDetails = () => {
       isSameDay(range.from, range.to) ||
       isBefore(range.to, range.from)
     ) {
-      setDate({ from: range.from, to: undefined });
+      const newDate = { from: range.from, to: undefined };
+      setDate(newDate);
+      // Save to cookie
+      document.cookie = `listingDate=${encodeURIComponent(
+        JSON.stringify({ from: range.from.toISOString(), to: undefined })
+      )}; path=/; max-age=86400`;
     } else {
       setDate(range);
+      // Save to cookie (expires in 1 day)
+      document.cookie = `listingDate=${encodeURIComponent(
+        JSON.stringify({ 
+          from: range.from.toISOString(), 
+          to: range.to.toISOString() 
+        })
+      )}; path=/; max-age=86400`;
     }
   }, []);
 
@@ -378,7 +407,11 @@ const ListingDetails = () => {
 
                 <div
                   className="text-md cursor-pointer underline mt-2 hover:bg-gray-100 w-max p-2 rounded-md text-align-left"
-                  onClick={() => setDate(null)}
+                  onClick={() => {
+                    setDate(null);
+                    // Clear cookie
+                    document.cookie = "listingDate=; path=/; max-age=0";
+                  }}
                 >
                   Clear dates
                 </div>
@@ -389,7 +422,7 @@ const ListingDetails = () => {
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome listing={listing} />
+              <BookingHome listing={listing} date={date} setDate={setDate} />
               <div
                 className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center hover:text-gray-700 transition-colors"
                 onClick={() => setShowReportDialog(true)}
