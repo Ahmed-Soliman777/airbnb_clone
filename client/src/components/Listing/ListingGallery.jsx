@@ -2,16 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Grip, Heart, Share } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchWishlistCollections,
   toggleListing,
   openCreateDialog,
 } from "@/store/Slices/wishlistSlice";
 import WishlistDialog from "@/components/Wishlist/WishlistDialog";
+import ShareModal from "./ShareModal";
 import { isAuthenticated } from "@/utils/cookies";
 
-const ListingGallery = ({ title, images = [] }) => {
+const ListingGallery = ({ title, images = [], description }) => {
   // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -24,6 +25,9 @@ const ListingGallery = ({ title, images = [] }) => {
   const showCreateDialog = useSelector(
     (state) => state.wishlist.showCreateDialog
   );
+
+  // State for share modal
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Check if listing is saved
   const isFav = savedListings[id]?.isSaved || false;
@@ -75,6 +79,7 @@ const ListingGallery = ({ title, images = [] }) => {
             <Button
               variant="ghost"
               className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+              onClick={() => setIsShareModalOpen(true)}
             >
               <Share size={18} />
               <div className="underline">Share</div>
@@ -138,6 +143,16 @@ const ListingGallery = ({ title, images = [] }) => {
       </div>
       {/* Wishlist Dialog */}
       {showCreateDialog && <WishlistDialog />}
+      
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        listingTitle={title || "Listing"}
+        listingUrl={window.location.href}
+        listingImage={urls[0]}
+        listingDescription={description}
+      />
     </>
   );
 };
