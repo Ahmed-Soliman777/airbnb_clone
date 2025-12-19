@@ -69,6 +69,14 @@ export default function MenuList() {
                         <DropdownMenuSeparator />
                     </DropdownMenuGroup>
                 )}
+                {isLoggedIn && (
+                    <DropdownMenuGroup>
+                        <Link to='/wishlists'>
+                            <DropdownMenuItem>Wishlist</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                    </DropdownMenuGroup>
+                )}
                 <Link to='/help'>
                     <DropdownMenuItem>Support</DropdownMenuItem>
                 </Link>
