@@ -318,53 +318,25 @@ router.post("/reset-password", userController.resetPassword);
 /**
  * @swagger
  * /users/profile:
- * get:
- * summary: Get current authenticated user profile
- * description: |
- * Retrieves the profile data for the authenticated user based on the ID
- * available in the request object (req.user._id) after passing through
- * the authentication middleware. It selects specific fields (FIELDS_TO_RETURN)
- * and populates the 'reviews' field.
- * tags: [User]
- * security:
- * - bearerAuth: []  # Requires an Authentication Token
- * responses:
- * 200:
- * description: User profile successfully retrieved
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * _id:
- * type: string
- * example: "60c72b1d1f0d440001a1b1c1"
- * email:
- * type: string
- * format: email
- * example: "user@example.com"
- * reviews:
- * type: array
- * items:
- * type: object
- * properties:
- * rating:
- * type: number
- * comment:
- * type: string
- * author:
- * type: string
- * # Note: Add other fields like firstName, lastName, etc., as needed based on FIELDS_TO_RETURN
- * 401:
- * description: Unauthorized (Missing or invalid token)
- * 404:
- * description: Profile data not found for the authenticated user ID
- * 500:
- * description: Server error while fetching profile
+ *   get:
+ *     summary: Get current authenticated user profile
+ *     description: |
+ *       Retrieves the profile data for the authenticated user based on the ID
+ *       available in the request object (req.user._id) after passing through
+ *       the authentication middleware. It selects specific fields (FIELDS_TO_RETURN)
+ *       and populates the 'reviews' field.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile successfully retrieved
  */
+
+
 router.get("/profile", auth, userController.getProfile);
 
-router.patch('/profile', auth , userController.updateProfile);
+router.patch('/profile', auth, userController.updateProfile);
 
 router.post('/profile/upload', auth, userController.uploadProfilePhoto);
 
@@ -372,29 +344,29 @@ router.post('/logout', auth, userController.logout);
 
 
 // here is profile for host no guest profile
-router.get('/profile', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id).select('-passwordHash -salt');
+// router.get('/profile', auth, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.user._id).select('-passwordHash -salt');
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'User not found'
+//             });
+//         }
 
-        res.status(200).json({
-            success: true,
-            data: user
-        });
-    } catch (error) {
-        console.error('Get profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+//         res.status(200).json({
+//             success: true,
+//             data: user
+//         });
+//     } catch (error) {
+//         console.error('Get profile error:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// });
 
 
 module.exports = router;

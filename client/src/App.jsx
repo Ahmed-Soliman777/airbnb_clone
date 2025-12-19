@@ -50,12 +50,14 @@ function App() {
         { path: "homes", element: <Home /> },
         { path: "search", element: <SearchListing /> },
         { path: "room/:id", element: <ListingDetails /> },
-        { path: "signup", element: <RegisterStep1 /> },
-        { path: "register", element: <RegisterStep2 /> },
-        { path: "login", element: <Login /> },
-        { path: "forget-password", element: <ForgetPassword /> },
         { path: "reset-password", element: <ResetPassword /> },
-         { path: "profile", element: <ProfilePage /> },
+        {
+          path: "profile", element: (
+            <AuthGuard requireAuth={true}>
+              <ProfilePage />
+            </AuthGuard>
+          )
+        },
         {
           path: "signup",
           element: (
