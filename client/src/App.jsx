@@ -34,6 +34,8 @@ import EditServicePage from "./Pages/EditServicePage";
 import LandingPage from "./Pages/AirbnbLanding";
 import HostWalletPage from "./Pages/HostWalletPage";
 import HostGuestsPage from "./Pages/HostGuestsPage";
+import WishlistPage from "./Pages/Wishlists";
+import CollectionDetail from "./Pages/CollectionDetail";
 
 function App() {
   const routes = createBrowserRouter([
@@ -53,9 +55,17 @@ function App() {
           )
         },
         {
+          path: "wishlists",
+          element: (
+            <AuthGuard requireAuth={true} redirectTo="/login">
+              <WishlistPage />
+            </AuthGuard>
+          )
+        },
+        {
           path: "signup",
           element: (
-            <AuthGuard requireAuth={false} redirectTo="/">
+            <AuthGuard requireAuth={false} redirectTo="/homes">
               <RegisterStep1 />
             </AuthGuard>
           )
@@ -63,7 +73,7 @@ function App() {
         {
           path: "register",
           element: (
-            <AuthGuard requireAuth={false} redirectTo="/">
+            <AuthGuard requireAuth={false} redirectTo="/homes">
               <RegisterStep2 />
             </AuthGuard>
           )
@@ -71,7 +81,7 @@ function App() {
         {
           path: "login",
           element: (
-            <AuthGuard requireAuth={false} redirectTo="/">
+            <AuthGuard requireAuth={false} redirectTo="/homes">
               <Login />
             </AuthGuard>
           )
@@ -79,7 +89,7 @@ function App() {
         {
           path: "forget-password",
           element: (
-            <AuthGuard requireAuth={false} redirectTo="/">
+            <AuthGuard requireAuth={false} redirectTo="/homes">
               <ForgetPassword />
             </AuthGuard>
           )
@@ -92,6 +102,14 @@ function App() {
           element: (
             <AuthGuard requireAuth={true}>
               <Host />
+            </AuthGuard>
+          )
+        },
+        {
+          path: "wishlists/:id",
+          element: (
+            <AuthGuard requireAuth={true} redirectTo="/login">
+              <CollectionDetail />
             </AuthGuard>
           )
         },
