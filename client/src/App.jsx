@@ -16,14 +16,10 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
-<<<<<<< HEAD
 import SearchListing from "./Pages/SearchListing";
-import AirbnbLanding from "./Pages/AirbnbLanding";
-=======
 import ResetPassword from "./Pages/ResetPassword";
 import ProfilePage from "./Pages/Profile";
-import AirbnbLanding from "./Pages/AirbnbLanding"
->>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
+import AirbnbLanding from "./Pages/AirbnbLanding";
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";

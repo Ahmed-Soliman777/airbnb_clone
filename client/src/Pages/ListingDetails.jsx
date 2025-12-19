@@ -119,9 +119,11 @@ const ListingDetails = () => {
       amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
       propertyType: listing.propertyType || "place",
       description: listing.description,
-      highlightFeatures: Array.isArray(listing.highlightFeatures) && listing.highlightFeatures.length > 0
-        ? listing.highlightFeatures
-        : FALLBACK_HIGHLIGHTS,
+      highlightFeatures:
+        Array.isArray(listing.highlightFeatures) &&
+        listing.highlightFeatures.length > 0
+          ? listing.highlightFeatures
+          : FALLBACK_HIGHLIGHTS,
     };
   }, [listing]);
 
@@ -168,7 +170,6 @@ const ListingDetails = () => {
             {/* Title & Info */}
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
-<<<<<<< HEAD
                 {listingData.city && listingData.country
                   ? `Entire ${listingData.propertyType} in ${listingData.city}, ${listingData.country}`
                   : `Entire ${listingData.propertyType}`}
@@ -182,22 +183,6 @@ const ListingDetails = () => {
                     `${listingData.bathroomsCount} bathroom${
                       listingData.bathroomsCount > 1 ? "s" : ""
                     }`,
-=======
-                {city && country
-                  ? `Entire ${
-                      listing?.propertyType || "place"
-                  } in ${city}, ${country}`
-                  : `Entire ${listing?.propertyType || "place"}`}
-              </h2>
-              <p className="text-sm sm:text-base text-gray-600">
-                {[
-                  maxGuests ? `${maxGuests} guests` : null,
-                  bedroomsCount ? `${bedroomsCount} bedrooms` : null,
-                  bathroomsCount
-                    ? `${bathroomsCount} bathroom${bathroomsCount > 1 ? "s" : ""
-                    }`
-                    : null,
->>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -257,18 +242,20 @@ const ListingDetails = () => {
 
             {/* Amenities */}
             <div className="space-y-4">
-              {listingData.highlightFeatures.map(({ icon, title, description }) => {
-                const Icon = ICON_MAP[icon] || Info;
-                return (
-                  <div key={title} className="flex items-start gap-3">
-                    <Icon className="text-gray-700 mt-1" />
-                    <div>
-                      <p className="font-semibold">{title}</p>
-                      <p className="text-sm text-gray-600">{description}</p>
+              {listingData.highlightFeatures.map(
+                ({ icon, title, description }) => {
+                  const Icon = ICON_MAP[icon] || Info;
+                  return (
+                    <div key={title} className="flex items-start gap-3">
+                      <Icon className="text-gray-700 mt-1" />
+                      <div>
+                        <p className="font-semibold">{title}</p>
+                        <p className="text-sm text-gray-600">{description}</p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
 
             <hr />
@@ -370,15 +357,11 @@ const ListingDetails = () => {
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-<<<<<<< HEAD
               <BookingHome
                 date={date}
                 setDate={setDate}
                 handleSelect={handleSelect}
               />
-=======
-              <BookingHome listing={listing} />
->>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
               <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">

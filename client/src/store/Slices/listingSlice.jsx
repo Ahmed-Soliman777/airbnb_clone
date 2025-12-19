@@ -158,7 +158,7 @@ const listingSlice = createSlice({
       // ------------- 5. Delete a listing --------------
       .addCase(deleteListing.fulfilled, (state, action) => {
         state.listings = state.listings.filter((l) => l.id !== action.payload);
-<<<<<<< HEAD
+        state.hostListings = state.hostListings.filter((l) => l._id !== action.payload.toString()); // Update host listings too
       })
 
       // ------------- 6. Search listings --------------
@@ -173,11 +173,9 @@ const listingSlice = createSlice({
       .addCase(searchListings.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
-=======
-        state.hostListings = state.hostListings.filter((l) => l._id !== action.payload.toString()); // Update host listings too
       })
 
-      // ------------- 6. Get Host Listings --------------
+      // ------------- 7. Get Host Listings --------------
       .addCase(getHostListings.pending, (state) => {
         state.status = "loading";
       })
@@ -188,7 +186,6 @@ const listingSlice = createSlice({
       .addCase(getHostListings.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
->>>>>>> 03ed4663785aba8e6e442815a9a7eaadb40efedc
       });
   },
 });
