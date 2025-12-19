@@ -1,22 +1,32 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { differenceInDays, format, isBefore, isSameDay, subDays } from "date-fns";
+import {
+  differenceInDays,
+  format,
+  isBefore,
+  isSameDay,
+  subDays,
+} from "date-fns";
 import DateSelector from "./DateSelector";
 import GuestSelector from "./GuestSelector";
-import { useDispatch, useSelector } from "react-redux";
-import { handlePayment as handlePaymentAction } from "@/store/Slices/paymentSlice";
+import { useSelector } from "react-redux";
 
 function BookingHome({ listing }) {
-  const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.payment);
 
   const [openGuests, setOpenGuests] = useState(false);
   const [open, setOpen] = useState(false);
 
   const [date, setDate] = useState({ from: undefined, to: undefined });
-  const [guests, setGuests] = useState({ adults: 1, children: 0, infants: 0, pets: 0 });
+  const [guests, setGuests] = useState({
+    adults: 1,
+    children: 0,
+    infants: 0,
+    pets: 0,
+  });
 
-  const nights = date?.from && date?.to ? differenceInDays(date.to, date.from) : 0;
+  const nights =
+    date?.from && date?.to ? differenceInDays(date.to, date.from) : 0;
   const freeCancelDate = date?.from ? subDays(date.from, 5) : undefined;
 
   // Get price per night from listing
@@ -25,10 +35,13 @@ function BookingHome({ listing }) {
 
   const handleSelect = (range) => {
     if (!range?.from) setDate({ from: undefined, to: undefined });
-    else if (range?.from && !range?.to) setDate({ from: range.from, to: undefined });
+    else if (range?.from && !range?.to)
+      setDate({ from: range.from, to: undefined });
     else if (range?.from && range?.to) {
-      if (isSameDay(range.from, range.to)) setDate({ from: range.from, to: undefined });
-      else if (isBefore(range.to, range.from)) setDate({ from: range.from, to: undefined });
+      if (isSameDay(range.from, range.to))
+        setDate({ from: range.from, to: undefined });
+      else if (isBefore(range.to, range.from))
+        setDate({ from: range.from, to: undefined });
       else setDate(range);
     }
   };
@@ -85,7 +98,9 @@ function BookingHome({ listing }) {
       {date?.from && (
         <p className="text-sm text-gray-700 mt-4 text-center">
           Free cancellation before{" "}
-          <span className="font-semibold">{format(freeCancelDate, "MMM dd, yyyy")}</span>
+          <span className="font-semibold">
+            {format(freeCancelDate, "MMM dd, yyyy")}
+          </span>
         </p>
       )}
 
@@ -94,7 +109,11 @@ function BookingHome({ listing }) {
         disabled={loading || !date?.from || !date?.to || !listing}
         className="w-80 rounded-full shadow text-center cursor-pointer text-lg flex justify-center mx-auto my-4 py-3 bg-linear-to-r from-rose-600 to-pink-600 font-semibold text-white disabled:opacity-50"
       >
-        {loading ? "Processing..." : date?.from && date?.to ? `Reserve • $${totalPrice}` : "Check availability"}
+        {loading
+          ? "Processing..."
+          : date?.from && date?.to
+          ? `Reserve • $${totalPrice}`
+          : "Check availability"}
       </button>
 
       {error && (
@@ -102,7 +121,9 @@ function BookingHome({ listing }) {
       )}
 
       {date?.from && date?.to && (
-        <p className="text-sm text-gray-600 text-center">You won't be charged yet</p>
+        <p className="text-sm text-gray-600 text-center">
+          You won't be charged yet
+        </p>
       )}
     </div>
   );

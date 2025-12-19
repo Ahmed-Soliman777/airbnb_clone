@@ -389,11 +389,7 @@ const ListingDetails = () => {
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome
-                date={date}
-                setDate={setDate}
-                handleSelect={handleSelect}
-              />
+              <BookingHome listing={listing} />
               <div
                 className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center hover:text-gray-700 transition-colors"
                 onClick={() => setShowReportDialog(true)}
