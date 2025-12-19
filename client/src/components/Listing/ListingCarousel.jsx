@@ -18,7 +18,7 @@ import { isAuthenticated } from "@/utils/cookies";
 export default function PopularHomesCarousel({ listings = [] }) {
   const dispatch = useDispatch();
   const savedListings = useSelector((state) => state.wishlist.savedListings);
-  const collections = useSelector((state) => state.wishlist.collections); // ⭐ جيب القوائم من Redux
+  const collections = useSelector((state) => state.wishlist.collections);
   const user = useSelector((state) => state.auth.user);
   const showCreateDialog = useSelector(
     (state) => state.wishlist.showCreateDialog
