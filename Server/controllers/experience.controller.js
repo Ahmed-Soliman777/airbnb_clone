@@ -35,7 +35,7 @@ const createExperience = async (req, res) => {
 
     // Handle file uploads from multer
     if (req.files && req.files.length > 0) {
-      uploadedImages = await Promise.all(
+      const newUploadedImages = await Promise.all(
         req.files.map(async (file) => {
           try {
             return await uploadOnCloudinary(file.path);
@@ -45,7 +45,15 @@ const createExperience = async (req, res) => {
           }
         })
       );
-      uploadedImages = uploadedImages.filter(Boolean);
+      uploadedImages = newUploadedImages.filter(Boolean);
+    }
+
+    // Validate required location fields
+    if (!city || !country) {
+      return res.status(400).json({
+        success: false,
+        message: "City and country are required",
+      });
     }
 
     const experience = await Experience.create({
@@ -189,12 +197,10 @@ const updateExperience = async (req, res) => {
         .json({ success: false, message: "Experience not found" });
 
     if (experience.host.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Not authorized to update this experience",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this experience",
+      });
     }
 
     const {

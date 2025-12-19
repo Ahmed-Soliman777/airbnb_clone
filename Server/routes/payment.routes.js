@@ -115,6 +115,33 @@ route.post("/checkout", token, paymentCtrl.handlePayment);
 
 /**
  * @swagger
+ * /payment/verify/{sessionId}:
+ *   get:
+ *     summary: Verify Stripe payment session and update booking status
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Stripe checkout session ID
+ *     responses:
+ *       200:
+ *         description: Payment verification result
+ *       400:
+ *         description: Missing session ID
+ *       404:
+ *         description: Session or booking not found
+ *       401:
+ *         description: Unauthorized
+ */
+route.get("/payment/verify/:sessionId", paymentCtrl.verifyPayment);
+
+/**
+ * @swagger
  * /complete:
  *   get:
  *     summary: Payment completed page
@@ -140,5 +167,26 @@ route.get("/complete", (req, res) => {
 route.get("/cancel", (req, res) => {
   res.send("Payment is cancelled");
 });
+
+/**
+ * @swagger
+ * /payment/host:
+ *   get:
+ *     summary: Get host payments/profits from bookings
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of host payments/profits
+ *       401:
+ *         description: Unauthorized
+ */
+route.get(
+  "/payment/host",
+  token,
+  paymentAuthentication(["host", "admin"]),
+  paymentCtrl.getHostPayments
+);
 
 module.exports = route;

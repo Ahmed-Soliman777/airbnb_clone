@@ -1,28 +1,33 @@
 const mongoose = require("mongoose");
 
-const wishListSchema = new mongoose.Schema(
+const wishlistCollectionSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    listing: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Listing",
+
+    name: {
+      type: String,
       required: true,
+      trim: true,
+      maxlength: 50,
     },
+
+    listings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Listing",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-// compound unique index to prevent duplicates
-wishListSchema.index({ user: 1, listing: 1 }, { unique: true });
-
-// optional: index on user for faster queries (covered by compound index already)
-wishListSchema.index({ user: 1 });
-
+// wishlistCollectionSchema.index({ user: 1, name: 1 }, { unique: true });
 module.exports =
-  mongoose.models.WishList || mongoose.model("WishList", wishListSchema);
+  mongoose.models.WishlistCollection ||
+  mongoose.model("WishlistCollection", wishlistCollectionSchema);

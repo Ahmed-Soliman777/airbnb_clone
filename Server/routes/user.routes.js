@@ -224,34 +224,149 @@ router.post('/become-host', auth, userController.becomeHost);
  *         description: User not found
  */
 router.post('/resend-code', userController.resendVerificationCode);
+/**
+ * @swagger
+ * /auth/reset/send-code:
+ *   post:
+ *     summary: Send reset password code to user's email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Reset code sent successfully
+ *       400:
+ *         description: User not found or not verified
+ *       500:
+ *         description: Server error
+ */
+router.post("/reset/send-code", userController.sendResetCode);
+
+/**
+ * @swagger
+ * /auth/reset/verify-code:
+ *   post:
+ *     summary: Verify the reset password code
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               code:
+ *                 type: string
+ *                 example: "ABC123"
+ *     responses:
+ *       200:
+ *         description: Code verified successfully
+ *       400:
+ *         description: Invalid or expired code
+ *       500:
+ *         description: Server error
+ */
+router.post("/reset/verify-code", userController.verifyResetCode);
+
+/**
+ * @swagger
+ * /users/reset-password:
+ *   post:
+ *     summary: Reset user password using a verified code
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               newPassword:
+ *                 type: string
+ *                 example: newStrongPassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Reset process not started or invalid request
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/reset-password", userController.resetPassword);
+
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get current authenticated user profile
+ *     description: |
+ *       Retrieves the profile data for the authenticated user based on the ID
+ *       available in the request object (req.user._id) after passing through
+ *       the authentication middleware. It selects specific fields (FIELDS_TO_RETURN)
+ *       and populates the 'reviews' field.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile successfully retrieved
+ */
+
+
+router.get("/profile", auth, userController.getProfile);
+
+router.patch('/profile', auth, userController.updateProfile);
+
+router.post('/profile/upload', auth, userController.uploadProfilePhoto);
 
 router.post('/logout', auth, userController.logout);
 
 
 // here is profile for host no guest profile
-router.get('/profile', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id).select('-passwordHash -salt');
+// router.get('/profile', auth, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.user._id).select('-passwordHash -salt');
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'User not found'
+//             });
+//         }
 
-        res.status(200).json({
-            success: true,
-            data: user
-        });
-    } catch (error) {
-        console.error('Get profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+//         res.status(200).json({
+//             success: true,
+//             data: user
+//         });
+//     } catch (error) {
+//         console.error('Get profile error:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// });
 
 
 module.exports = router;

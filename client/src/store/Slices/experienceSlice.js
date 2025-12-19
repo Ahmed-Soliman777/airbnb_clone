@@ -183,7 +183,8 @@ const experienceSlice = createSlice({
     searchTotal: 0,
     searchTotalPages: 0,
     searchCurrentPage: 1,
-    status: "avtive",
+    searchCurrentPage: 1,
+    status: "idle",
     error: null,
   },
   reducers: {
@@ -274,8 +275,16 @@ const experienceSlice = createSlice({
         );
       })
       // Get host experiences
+      .addCase(getHostExperiences.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(getHostExperiences.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.hostExperiences = action.payload.data;
+      })
+      .addCase(getHostExperiences.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });

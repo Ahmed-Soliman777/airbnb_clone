@@ -69,9 +69,15 @@ export const updateService = createAsyncThunk(
   "service/updateService",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/${id}`, data, {
+      const config = {
         withCredentials: true,
-      });
+      };
+
+      if (data instanceof FormData) {
+        config.headers = { "Content-Type": "multipart/form-data" };
+      }
+
+      const response = await axios.put(`${API_URL}/${id}`, data, config);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -206,8 +212,16 @@ const serviceSlice = createSlice({
         );
       })
       // Get host services
+      .addCase(getHostServices.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(getHostServices.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.hostServices = action.payload.data;
+      })
+      .addCase(getHostServices.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });

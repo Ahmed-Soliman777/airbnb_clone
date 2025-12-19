@@ -176,6 +176,14 @@ const ListingDetails = () => {
       amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
       propertyType: listing.propertyType || "place",
       description: listing.description,
+<<<<<<< HEAD
+=======
+      highlightFeatures:
+        Array.isArray(listing.highlightFeatures) &&
+        listing.highlightFeatures.length > 0
+          ? listing.highlightFeatures
+          : FALLBACK_HIGHLIGHTS,
+>>>>>>> main
     };
   }, [listing, reviews]);
 
@@ -292,6 +300,29 @@ const ListingDetails = () => {
 
             <hr />
 
+<<<<<<< HEAD
+=======
+            {/* Amenities */}
+            <div className="space-y-4">
+              {listingData.highlightFeatures.map(
+                ({ icon, title, description }) => {
+                  const Icon = ICON_MAP[icon] || Info;
+                  return (
+                    <div key={title} className="flex items-start gap-3">
+                      <Icon className="text-gray-700 mt-1" />
+                      <div>
+                        <p className="font-semibold">{title}</p>
+                        <p className="text-sm text-gray-600">{description}</p>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+
+            <hr />
+
+>>>>>>> main
             {/* Description */}
             {listingData.description && (
               <div className="text-gray-700 leading-relaxed space-y-3">

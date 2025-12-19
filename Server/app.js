@@ -5,6 +5,9 @@ const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const cookieParser = require("cookie-parser");
+const messageRoutes = require("./routes/message.routes");
+const { initializeSocket } = require("./socket");
+const http = require("http");
 
 // Routes
 const userRoute = require("./routes/user.routes");
@@ -20,6 +23,10 @@ const recentlyViewedRoute = require("./routes/recentlyViewed.routes");
 const reportRoute = require("./routes/report.routes");
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = initializeSocket(server);
 const port = process.env.PORT || 3000;
 
 //CORS configuration
@@ -30,10 +37,11 @@ app.use(
   })
 );
 // Middleware
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.set("view engine", "ejs");
+app.set("io", io);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -46,7 +54,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:" + port + "/api/g2",
+        url: "http://localhost:" + port + "/api",
       },
     ],
     components: {
@@ -77,6 +85,9 @@ app.use("/api/experiences", experienceRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/recently-viewed", recentlyViewedRoute);
 app.use("/api/reports", reportRoute);
+app.use("/api/experiences", experienceRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Root route
 app.get("/api", (req, res) => {
@@ -101,7 +112,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
 });

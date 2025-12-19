@@ -27,8 +27,8 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
     const [scrollDirection, setScrollDirection] = useState('up');
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    const isServicePage = ['/', '/experiences', '/services'].includes(location.pathname) || 
-        location.pathname.startsWith('/experiences/search') || 
+    const isServicePage = ['/homes', '/experiences', '/services'].includes(location.pathname) ||
+        location.pathname.startsWith('/experiences/search') ||
         location.pathname.startsWith('/services/search');
 
     // Check authentication status
@@ -96,7 +96,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             `}>
                 {/* Logo */}
                 <Link
-                    to={"/"}
+                    to={"/homes"}
                     className={`
                         w-20 sm:w-24 md:w-28 lg:w-30 shrink-0
                         transition-all duration-500 ease-in-out
@@ -123,7 +123,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
 
                         {/* Homes */}
                         <NavLink
-                            to="/"
+                            to="/homes"
                             className={({ isActive }) => `
                                 flex items-center gap-1 
                                 ${isActive ? "text-black font-semibold" : "text-(--color-dark-gray)"} 

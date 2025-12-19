@@ -2,6 +2,7 @@ const User = require("../models/User.model.js");
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const jwt = require("jsonwebtoken");
+const { uploadOnCloudinary } = require('../config/cloudinary.js');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
@@ -202,6 +203,113 @@ exports.becomeHost = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+//code for forget password
+exports.sendResetCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    if (!user.isVerified)
+      return res.status(400).json({ message: "User is not verified" });
+
+    const resetCode = crypto.randomBytes(3).toString("hex").toUpperCase(); 
+    const expireTime = Date.now() + 30 * 60 * 1000; 
+
+    user.resetPasswordCode = resetCode;
+    user.resetPasswordExpire = expireTime;
+    await user.save();
+
+    // ============================
+    // Brevo email
+    // ============================
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      auth: {
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_KEY
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.BREVO_Email,
+      to: email,
+      subject: "Password Reset Code",
+      text: `Hello ${user.firstName},
+
+Your password reset code is: ${resetCode}
+
+This code is valid for 10 minutes.
+
+If you didn’t request a password reset, ignore this email.
+
+Best regards,
+Airbnb Team`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: "Reset code sent to your email" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(400).json({ message: "User not found" });
+
+    if (
+      user.resetPasswordCode !== code ||
+      !user.resetPasswordExpire ||
+      user.resetPasswordExpire < Date.now()
+    ) {
+      return res.status(400).json({ message: "Invalid or expired code" });
+    }
+
+    res.json({ message: "Code verified, proceed to reset password" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    if (!user.resetPasswordCode || !user.resetPasswordExpire) {
+      return res.status(400).json({ message: "Reset process not started" });
+    }
+
+    if (user.resetPasswordExpire < Date.now()) {
+      return res.status(400).json({ message: "Reset code expired" });
+    }
+
+    user.password = newPassword;
+
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 
 
@@ -263,4 +371,89 @@ exports.deleteUser = async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
+};
+
+
+
+
+const FIELDS_TO_RETURN = [
+    'firstName',  'profilePhoto', 'jobTitle', 'school', 'travelCities', 'interests', 
+    'preferredLanguages', 'aboutMe', 'role', 'reviews', 'location', 
+].join(' '); 
+
+exports.getProfile = async (req, res) => {
+    try {
+        const userId = req.user._id; 
+        const userProfile = await User.findById(userId)
+            .select(FIELDS_TO_RETURN) 
+            .populate('reviews', 'rating comment author');
+
+        if (!userProfile) {
+            return res.status(404).json({ message: "Profile data not found" });
+        }
+
+        return res.status(200).json(userProfile);
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        return res.status(500).json({ message: "Server error while fetching profile" });
+    }
+};
+
+
+const EDITABLE_FIELDS = [
+    'jobTitle', 'school', 'travelCities', 'interests', 
+    'preferredLanguages', 'aboutMe','location',
+];
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const updates = {};
+        
+        for (const key of EDITABLE_FIELDS) {
+            if (req.body.hasOwnProperty(key)) {
+                updates[key] = req.body[key];
+            }
+        }
+        
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: 'No valid fields provided for update.' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $set: updates }, 
+            { new: true, runValidators: true }
+        ).select(FIELDS_TO_RETURN);
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(400).json({ message: error.message || 'Failed to update profile.' });
+    }
+};
+
+exports.uploadProfilePhoto = async (req, res) => {
+    try {
+        const { base64Image } = req.body; 
+        
+        if (!base64Image) {
+            return res.status(400).json({ message: "Base64 image string is required." });
+        }
+
+        const imageUrl = await uploadOnCloudinary(base64Image);
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { profilePhoto: imageUrl },
+            { new: true }
+        ).select('profilePhoto'); 
+
+        res.status(200).json({ 
+            profilePhoto: imageUrl, 
+            message: "Profile photo updated successfully." 
+        });
+
+    } catch (error) {
+        console.error("Error during Base64 upload process:", error);
+        res.status(500).json({ message: "Server error during image upload." });
+    }
 };
