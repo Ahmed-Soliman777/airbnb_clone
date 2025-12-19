@@ -35,10 +35,8 @@ const ReservationsPage = () => {
     const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        if (user?._id) {
-            dispatch(fetchUserBookings(user._id));
-        }
-    }, [dispatch, user]);
+        dispatch(fetchUserBookings());
+    }, [dispatch]);
 
     const handleCancelBooking = async (bookingId) => {
         try {

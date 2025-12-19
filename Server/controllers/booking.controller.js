@@ -83,13 +83,13 @@ const getBookingById = async (req, res) => {
 // get Bookings For User
 const getBookingsForUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user._id;
 
     // check authorization - allow users to view their own bookings, admins can view any
-    if (req.user.role !== "admin" && req.user._id.toString() !== userId) {
+    if (req.user._id.toString() !== userId.toString()) {
       return res
         .status(403)
-        .json({ message: "Not authorized to view other users' bookings" });
+        .json({ message: "Not authorized to view other users' bookings from getBookingsForUser ", userId });
     }
 
     const bookings = await Booking.find({ user: userId })

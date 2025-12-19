@@ -9,7 +9,7 @@ export const fetchWishlistCollections = createAsyncThunk(
       const response = await fetch("/api/wishlist/collections", {
         credentials: "include",
         headers: {
-          ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
         },
       });
 
@@ -36,7 +36,7 @@ export const toggleListing = createAsyncThunk(
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
         },
       });
 
@@ -65,7 +65,7 @@ export const createCollectionWithListing = createAsyncThunk(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
         },
         credentials: "include",
         body: JSON.stringify({ name, listingId }),
@@ -93,7 +93,7 @@ export const addToExistingCollection = createAsyncThunk(
           method: "POST",
           credentials: "include",
           headers: {
-            ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
           },
         }
       );
@@ -120,7 +120,7 @@ export const deleteCollection = createAsyncThunk(
           method: "DELETE",
           credentials: "include",
           headers: {
-            ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
           },
         }
       );
@@ -145,7 +145,7 @@ export const fetchSingleCollection = createAsyncThunk(
         {
           credentials: "include",
           headers: {
-            ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
           },
         }
       );
@@ -172,7 +172,7 @@ export const removeFromCollection = createAsyncThunk(
           method: "DELETE",
           credentials: "include",
           headers: {
-            ...(auth.token && { Authorization: `Bearer ${auth.token}` }),
+
           },
         }
       );
@@ -203,8 +203,8 @@ const wishlistSlice = createSlice({
   reducers: {
     openCreateDialog: (state, action) => {
       state.showCreateDialog = true;
-      state.currentListingId = action.payload.listingId;
-      state.availableCollections = action.payload.collections || [];
+      state.currentListingId = action.payload.listingId; // true
+      state.availableCollections = action.payload.collections || []; // []
     },
     closeCreateDialog: (state) => {
       state.showCreateDialog = false;
