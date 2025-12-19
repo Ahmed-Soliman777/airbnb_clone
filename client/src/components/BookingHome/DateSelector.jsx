@@ -56,20 +56,6 @@ function DateSelector({ open, onOpenChange, date, handleSelect, setDate }) {
             </div>
           </div>
 
-          <Calendar
-            mode="range"
-            numberOfMonths={2}
-            selected={date}
-            onSelect={handleSelect}
-            disabled={(day) =>
-              date?.from
-                ? isBefore(day, date.from) ||
-                  isSameDay(day, addDays(date.from, 1))
-                : false
-            }
-            initialFocus
-          />
-
           <div className="flex justify-end mt-4 space-x-2">
             <button
               className="border-none underline cursor-pointer hover:bg-stone-50 p-2 rounded-lg"
