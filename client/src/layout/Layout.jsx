@@ -16,17 +16,14 @@ export default function Layout() {
   const toggleTranslateModal = () => setShowGlobalModal((prev) => !prev);
   const closeModal = () => setShowGlobalModal(false);
 
-<<<<<<< HEAD
-  const hideHeaderFooter = location.pathname === "/not-found";
   const isListingDetailsPage = location.pathname.startsWith("/room/");
-=======
-  const hideHeaderFooter = location.pathname === "/not-found" || location.pathname === "/";
+  const hideHeaderFooter =
+    location.pathname === "/not-found" || location.pathname === "/";
 
   // Fetch current user on app load
   useEffect(() => {
     dispatch(fetchCurrentUser());
   }, [dispatch]);
->>>>>>> main
 
   // update HTML direction whenever language changes
   useEffect(() => {

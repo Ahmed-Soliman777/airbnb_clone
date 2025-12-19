@@ -2,15 +2,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
+import { toggleListing } from "@/store/Slices/wishlistSlice";
 
 export default function ListingCard({ listing, size = "small" }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const savedListings = useSelector((state) => state.wishlist.savedListings);
 
   const listingId = listing._id || listing.id;
-  const isFav = wishlistItems.includes(listingId);
+  const isFav = savedListings[listingId]?.isSaved || false;
 
   // Define image sizes
   const imageSizeClasses = {
@@ -37,7 +37,7 @@ export default function ListingCard({ listing, size = "small" }) {
           className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(toggleWishlistItem(listingId));
+            dispatch(toggleListing(listingId));
           }}
         >
           <Heart

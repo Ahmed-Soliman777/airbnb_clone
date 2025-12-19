@@ -22,19 +22,6 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
     }
   };
 
-<<<<<<< HEAD
-  const processFiles = (files) => {
-    const fileArray = Array.from(files);
-    const validFiles = fileArray.filter((file) =>
-      file.type.startsWith("image/")
-    );
-
-    if (validFiles.length > 0) {
-      // Store the actual File objects instead of base64
-      onUpdate({ images: [...(data.images || []), ...validFiles] });
-      dispatch(addExperienceImage(validFiles));
-    }
-=======
   // Compress image helper
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -42,7 +29,7 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
+          const canvas = document.createElement("canvas");
           let width = img.width;
           let height = img.height;
           const MAX_WIDTH = 1200;
@@ -62,30 +49,31 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
 
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
           // Compress to JPEG with 0.7 quality
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           resolve(dataUrl);
         };
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
->>>>>>> main
   };
 
   const processFiles = async (files) => {
     const fileArray = Array.from(files);
 
     // Process only images
-    const imageFiles = fileArray.filter(file => file.type.startsWith("image/"));
+    const imageFiles = fileArray.filter((file) =>
+      file.type.startsWith("image/")
+    );
 
     if (imageFiles.length > 0) {
       // Compress all images in parallel
       const compressedImages = await Promise.all(
-        imageFiles.map(file => compressImage(file))
+        imageFiles.map((file) => compressImage(file))
       );
 
       onUpdate({ images: [...(data.images || []), ...compressedImages] });
@@ -136,18 +124,11 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-<<<<<<< HEAD
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             dragActive
               ? "border-primary bg-accent"
               : "border-border hover:border-primary/50"
           }`}
-=======
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-            ? "border-primary bg-accent"
-            : "border-border hover:border-primary/50"
-            }`}
->>>>>>> main
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">

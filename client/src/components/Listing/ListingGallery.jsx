@@ -1,20 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Grip, Heart, Share } from "lucide-react";
-import { useParams, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-
-<<<<<<< HEAD
-const ListingGallery = ({ title, images = [], description }) => {
-  // Get listing ID from URL params
-  const { id } = useParams();
-  const dispatch = useDispatch();
-  // Get wishlist items from Redux store
-  const wishlistItems = useSelector((state) => state.wishlist.items);
-
-  // Local state for modals
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isPhotoGalleryOpen, setIsPhotoGalleryOpen] = useState(false);
-=======
+import { useParams, useNavigate } from "react-router";
+import { useEffect } from "react";
 import {
   fetchWishlistCollections,
   toggleListing,
@@ -22,18 +10,24 @@ import {
 } from "@/store/Slices/wishlistSlice";
 import WishlistDialog from "@/components/Wishlist/WishlistDialog";
 import { isAuthenticated } from "@/utils/cookies";
-import { useEffect } from "react";
+
 const ListingGallery = ({ title, images = [] }) => {
+  // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { savedListings, collections, showCreateDialog } = useSelector(
-    (state) => state.wishlist
-  );
-  const user = useSelector((state) => state.auth.user);
->>>>>>> main
 
+  // Get wishlist data from Redux store
+  const savedListings = useSelector((state) => state.wishlist.savedListings);
+  const collections = useSelector((state) => state.wishlist.collections);
+  const user = useSelector((state) => state.auth.user);
+  const showCreateDialog = useSelector(
+    (state) => state.wishlist.showCreateDialog
+  );
+
+  // Check if listing is saved
   const isFav = savedListings[id]?.isSaved || false;
+
   useEffect(() => {
     if (user) {
       dispatch(fetchWishlistCollections());

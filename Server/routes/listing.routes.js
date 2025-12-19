@@ -416,4 +416,3 @@ router.delete(
 router.get("/listings/:id/reviews", getListingReviews);
 
 module.exports = router;
-`

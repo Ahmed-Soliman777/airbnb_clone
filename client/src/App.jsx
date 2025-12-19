@@ -16,7 +16,7 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
-import SearchListing from "./Pages/SearchListing";
+import SearchListing from "./Pages/ListingSearch";
 import ResetPassword from "./Pages/ResetPassword";
 import ProfilePage from "./Pages/Profile";
 import AirbnbLanding from "./Pages/AirbnbLanding";
@@ -29,7 +29,7 @@ import CheckoutPage from "./Pages/CheckoutPage";
 import PaymentSuccessPage from "./Pages/PaymentSuccessPage";
 import PaymentCancelPage from "./Pages/PaymentCancelPage";
 import ReservationsPage from "./Pages/ReservationsPage";
-import MessagesPage from "./Pages/MessagesPage"
+import MessagesPage from "./Pages/MessagesPage";
 import EditExperiencePage from "./Pages/EditExperiencePage";
 import EditServicePage from "./Pages/EditServicePage";
 import LandingPage from "./Pages/AirbnbLanding";
@@ -48,11 +48,12 @@ function App() {
         { path: "room/:id", element: <ListingDetails /> },
         { path: "reset-password", element: <ResetPassword /> },
         {
-          path: "profile", element: (
+          path: "profile",
+          element: (
             <AuthGuard requireAuth={true}>
               <ProfilePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "signup",
@@ -119,7 +120,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <EditExperiencePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/services/edit/:id",
@@ -127,7 +128,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <EditServicePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "messages",
@@ -135,7 +136,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <MessagesPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "checkout",
@@ -143,7 +144,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <CheckoutPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "reservations",
@@ -151,7 +152,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <ReservationsPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/guests",
@@ -159,7 +160,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostGuestsPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/wallet",
@@ -167,7 +168,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostWalletPage />
             </AuthGuard>
-          )
+          ),
         },
         { path: "payment/success", element: <PaymentSuccessPage /> },
         { path: "payment/cancel", element: <PaymentCancelPage /> },
