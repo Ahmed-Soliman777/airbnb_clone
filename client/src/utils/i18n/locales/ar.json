@@ -49,6 +49,12 @@
     "Gift cards": "بطاقات الهدايا",
     "Airbnb.org emergency stays": "Airbnb.org للطوارئ"
   },
+  "home": {
+    "recentlyViewed": "المشاهدة مؤخراً",
+    "popularHomes": "منازل رائجة في القاهرة",
+    "loadingListings": "جاري تحميل القوائم...",
+    "error": "خطأ"
+  },
   "help": {
     "Hi, how can we help?": "مرحبًا، كيف يمكننا مساعدتك؟",
     "Search":"بحث",

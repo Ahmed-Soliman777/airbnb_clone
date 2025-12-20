@@ -52,6 +52,12 @@
     "Gift cards": "Gift cards",
     "Airbnb.org emergency stays": "Airbnb.org emergency stays"
   },
+  "home": {
+    "recentlyViewed": "Recently Viewed",
+    "popularHomes": "Popular homes in Cairo",
+    "loadingListings": "Loading listings...",
+    "error": "Error"
+  },
   "help":{
   "Hi, how can we help?": " Hi, how can we help ?",
   "Search": "Search",
