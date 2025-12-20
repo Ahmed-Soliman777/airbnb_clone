@@ -8,26 +8,15 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-<<<<<<< HEAD
 import ListingCard from "./ListingCard";
 import { fetchWishlistCollections } from "@/store/Slices/wishlistSlice";
 import WishlistDialog from "../Wishlist/WishlistDialog";
-=======
-import { useNavigate } from "react-router-dom";
-import { Heart } from "lucide-react";
->>>>>>> main
 
 export default function PopularHomesCarousel({
   listings = [],
   cardSize = "small",
 }) {
   const dispatch = useDispatch();
-<<<<<<< HEAD
-=======
-  const navigate = useNavigate();
-  const savedListings = useSelector((state) => state.wishlist.savedListings);
-  const collections = useSelector((state) => state.wishlist.collections);
->>>>>>> main
   const user = useSelector((state) => state.auth.user);
   const showCreateDialog = useSelector(
     (state) => state.wishlist.showCreateDialog
