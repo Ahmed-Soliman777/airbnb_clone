@@ -1,25 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Grip, Heart, Share } from "lucide-react";
-import { useParams, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import {
   fetchWishlistCollections,
   toggleListing,
   openCreateDialog,
 } from "@/store/Slices/wishlistSlice";
 import WishlistDialog from "@/components/Wishlist/WishlistDialog";
+import ShareModal from "./ShareModal";
+import PhotoGalleryModal from "./PhotoGalleryModal";
 import { isAuthenticated } from "@/utils/cookies";
-import { useEffect } from "react";
-const ListingGallery = ({ title, images = [] }) => {
+
+const ListingGallery = ({ title, images = [], description }) => {
+  // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { savedListings, collections, showCreateDialog } = useSelector(
-    (state) => state.wishlist
-  );
-  const user = useSelector((state) => state.auth.user);
 
+  // Get wishlist data from Redux store
+  const savedListings = useSelector((state) => state.wishlist.savedListings);
+  const collections = useSelector((state) => state.wishlist.collections);
+  const user = useSelector((state) => state.auth.user);
+  const showCreateDialog = useSelector(
+    (state) => state.wishlist.showCreateDialog
+  );
+
+  // State for share modal
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // State for photo gallery modal
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  // Check if listing is saved
   const isFav = savedListings[id]?.isSaved || false;
+
   useEffect(() => {
     if (user) {
       dispatch(fetchWishlistCollections());
@@ -67,6 +82,7 @@ const ListingGallery = ({ title, images = [] }) => {
             <Button
               variant="ghost"
               className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+              onClick={() => setIsShareModalOpen(true)}
             >
               <Share size={18} />
               <div className="underline">Share</div>
@@ -121,7 +137,10 @@ const ListingGallery = ({ title, images = [] }) => {
               alt="Photo 5"
               className="w-full h-full object-cover"
             />
-            <button className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2">
+            <button 
+              onClick={() => setIsGalleryOpen(true)}
+              className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2"
+            >
               <Grip size={16} />
               Show all photos
             </button>
@@ -130,6 +149,25 @@ const ListingGallery = ({ title, images = [] }) => {
       </div>
       {/* Wishlist Dialog */}
       {showCreateDialog && <WishlistDialog />}
+      
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        listingTitle={title || "Listing"}
+        listingUrl={window.location.href}
+        listingImage={urls[0]}
+        listingDescription={description}
+      />
+
+      {/* Photo Gallery Modal */}
+      <PhotoGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        images={images}
+        title={title}
+        id={id}
+      />
     </>
   );
 };

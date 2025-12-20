@@ -3,7 +3,10 @@ import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { addExperienceImage, removeExperienceImage } from "@/store/Slices/experienceFormSlice";
+import {
+  addExperienceImage,
+  removeExperienceImage,
+} from "@/store/Slices/experienceFormSlice";
 
 export default function ExperienceImagesStep({ data, onUpdate }) {
   const dispatch = useDispatch();
@@ -26,7 +29,7 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
+          const canvas = document.createElement("canvas");
           let width = img.width;
           let height = img.height;
           const MAX_WIDTH = 1200;
@@ -46,11 +49,11 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
 
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
           // Compress to JPEG with 0.7 quality
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           resolve(dataUrl);
         };
         img.src = event.target.result;
@@ -63,12 +66,14 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
     const fileArray = Array.from(files);
 
     // Process only images
-    const imageFiles = fileArray.filter(file => file.type.startsWith("image/"));
+    const imageFiles = fileArray.filter((file) =>
+      file.type.startsWith("image/")
+    );
 
     if (imageFiles.length > 0) {
       // Compress all images in parallel
       const compressedImages = await Promise.all(
-        imageFiles.map(file => compressImage(file))
+        imageFiles.map((file) => compressImage(file))
       );
 
       onUpdate({ images: [...(data.images || []), ...compressedImages] });
@@ -119,10 +124,11 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-            ? "border-primary bg-accent"
-            : "border-border hover:border-primary/50"
-            }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            dragActive
+              ? "border-primary bg-accent"
+              : "border-border hover:border-primary/50"
+          }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">
@@ -158,7 +164,9 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
                   className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
                 >
                   <img
-                    src={image}
+                    src={
+                      image instanceof File ? URL.createObjectURL(image) : image
+                    }
                     alt={`Experience ${index + 1}`}
                     className="w-full h-full object-cover"
                   />

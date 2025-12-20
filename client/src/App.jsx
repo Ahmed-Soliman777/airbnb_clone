@@ -16,9 +16,10 @@ import ExperiencesPage from "./Pages/ExperiencePage";
 import ExperienceDetailsPage from "./Pages/ExperienceDetailsPage";
 import ServicesPage from "./Pages/ServicesPage";
 import ServiceDetailsPage from "./Pages/ServiceDetailsPage";
+import SearchListing from "./Pages/ListingSearch";
 import ResetPassword from "./Pages/ResetPassword";
 import ProfilePage from "./Pages/Profile";
-import AirbnbLanding from "./Pages/AirbnbLanding"
+import AirbnbLanding from "./Pages/AirbnbLanding";
 import AuthGuard from "./components/guards/AuthGuard";
 import ExperienceSearchPage from "./Pages/ExperienceSearchPage";
 import ServiceSearchPage from "./Pages/ServiceSearchPage";
@@ -28,7 +29,7 @@ import CheckoutPage from "./Pages/CheckoutPage";
 import PaymentSuccessPage from "./Pages/PaymentSuccessPage";
 import PaymentCancelPage from "./Pages/PaymentCancelPage";
 import ReservationsPage from "./Pages/ReservationsPage";
-import MessagesPage from "./Pages/MessagesPage"
+import MessagesPage from "./Pages/MessagesPage";
 import EditExperiencePage from "./Pages/EditExperiencePage";
 import EditServicePage from "./Pages/EditServicePage";
 import LandingPage from "./Pages/AirbnbLanding";
@@ -45,14 +46,16 @@ function App() {
       children: [
         { index: true, element: <LandingPage /> },
         { path: "homes", element: <Home /> },
+        { path: "search", element: <SearchListing /> },
         { path: "room/:id", element: <ListingDetails /> },
         { path: "reset-password", element: <ResetPassword /> },
         {
-          path: "profile", element: (
+          path: "profile",
+          element: (
             <AuthGuard requireAuth={true}>
               <ProfilePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "wishlists",
@@ -68,7 +71,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/homes">
               <RegisterStep1 />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "register",
@@ -76,7 +79,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/homes">
               <RegisterStep2 />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "login",
@@ -84,7 +87,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/homes">
               <Login />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "forget-password",
@@ -92,7 +95,7 @@ function App() {
             <AuthGuard requireAuth={false} redirectTo="/homes">
               <ForgetPassword />
             </AuthGuard>
-          )
+          ),
         },
 
         { path: "help", element: <Help /> },
@@ -103,7 +106,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <Host />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "wishlists/:id",
@@ -119,7 +122,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostWelcomePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/dashboard",
@@ -127,7 +130,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostDashboardPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/experiences/edit/:id",
@@ -135,7 +138,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <EditExperiencePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/services/edit/:id",
@@ -143,7 +146,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <EditServicePage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "messages",
@@ -151,7 +154,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <MessagesPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "checkout",
@@ -159,7 +162,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <CheckoutPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "reservations",
@@ -167,7 +170,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <ReservationsPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/guests",
@@ -175,7 +178,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostGuestsPage />
             </AuthGuard>
-          )
+          ),
         },
         {
           path: "host/wallet",
@@ -183,7 +186,7 @@ function App() {
             <AuthGuard requireAuth={true}>
               <HostWalletPage />
             </AuthGuard>
-          )
+          ),
         },
         { path: "payment/success", element: <PaymentSuccessPage /> },
         { path: "payment/cancel", element: <PaymentCancelPage /> },

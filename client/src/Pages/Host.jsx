@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ServiceTypeSelection from "@/components/host/ServiceTypeSelection";
 import HomeListingForm from "@/components/host/HomeListingForm";
 import ExperienceListingForm from "@/components/host/ExperienceListingForm";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, LayoutDashboard } from "lucide-react";
 
 const Host = () => {
-    const navigate = useNavigate();
+
     const [selectedService, setSelectedService] = useState(null);
     const [isHost, setIsHost] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +53,7 @@ const Host = () => {
 
     if (!isHost) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
                 <div className="max-w-2xl w-full bg-background rounded-2xl shadow-2xl p-8 md:p-12 text-center space-y-6">
                     <div className="space-y-3">
                         <h1 className="text-3xl md:text-4xl font-bold text-foreground">

@@ -16,7 +16,9 @@ export default function Layout() {
   const toggleTranslateModal = () => setShowGlobalModal((prev) => !prev);
   const closeModal = () => setShowGlobalModal(false);
 
-  const hideHeaderFooter = location.pathname === "/not-found" || location.pathname === "/";
+  const isListingDetailsPage = location.pathname.startsWith("/room/");
+  const hideHeaderFooter =
+    location.pathname === "/not-found" || location.pathname === "/";
 
   // Fetch current user on app load
   useEffect(() => {
@@ -31,7 +33,10 @@ export default function Layout() {
   return (
     <>
       {!hideHeaderFooter && (
-        <Navbar toggleTranslateModal={toggleTranslateModal} />
+        <Navbar
+          toggleTranslateModal={toggleTranslateModal}
+          isSticky={!isListingDetailsPage}
+        />
       )}
 
       <Outlet />

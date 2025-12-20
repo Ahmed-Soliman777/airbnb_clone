@@ -1,27 +1,212 @@
 import BookingHome from "@/components/BookingHome/BookingHome";
 import Amenity from "@/components/Listing/Amenity";
+import AverageRating from "@/components/Listing/AverageRating";
 import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
 import ListingGallery from "@/components/Listing/ListingGallery";
-import ListingRate from "@/components/Listing/ListingRate";
-import ListingReviews from "@/components/Listing/ListingReviews";
-import { Card } from "@/components/ui/card";
+import ListingHost from "@/components/Listing/ListingHost";
+import ListingLocation from "@/components/Listing/ListingLocation";
+import ReviewsList from "@/components/Listing/ReviewsList";
+import StickyNavbar from "@/components/Listing/StickyNavbar";
+import ReportListingDialog from "@/components/Listing/ReportListingDialog";
+import { Calendar } from "@/components/ui/calendar";
 import { GetListingById } from "@/store/Slices/listingSlice";
+import { getReviewsByListing } from "@/store/Slices/reviewSlice";
+import { addRecentlyViewed } from "@/store/Slices/recentlyViewedSlice";
+import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 
-const placeholderBedroomImg =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80";
+// const ICON_MAP = {
+//   Info,
+//   MapPin,
+//   Users,
+//   Home: Info,
+//   Star: Info,
+//   Heart: Info,
+//   Key: Info,
+//   Wifi: Info,
+//   Car: Info,
+//   Shield: Info,
+// };
 
 const ListingDetails = () => {
+  // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { listing, status, error } = useSelector((state) => state.listing);
 
+  // Get listing and reviews state from Redux store
+  const { listing, status } = useSelector((state) => state.listing);
+  const { reviews, statistics } = useSelector((state) => state.review);
+  const user = useSelector((state) => state.auth.user);
+
+  // Shared date state for calendar and booking component
+  const [date, setDate] = useState(() => {
+    // Load date from cookies on initial render
+    const savedDate = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("listingDate="));
+    
+    if (savedDate) {
+      try {
+        const dateValue = JSON.parse(decodeURIComponent(savedDate.split("=")[1]));
+        return {
+          from: dateValue.from ? new Date(dateValue.from) : undefined,
+          to: dateValue.to ? new Date(dateValue.to) : undefined,
+        };
+      } catch (e) {
+        return { from: undefined, to: undefined };
+      }
+    }
+    return { from: undefined, to: undefined };
+  });
+
+  // Sticky navbar state
+  const [showStickyNav, setShowStickyNav] = useState(false);
+  const [activeSection, setActiveSection] = useState("photos");
+  const galleryRef = useRef(null);
+  const photosRef = useRef(null);
+  const amenitiesRef = useRef(null);
+  const availabilityRef = useRef(null);
+  const reviewsRef = useRef(null);
+  const locationRef = useRef(null);
+
+  // Report dialog state
+  const [showReportDialog, setShowReportDialog] = useState(false);
+
+  // Handle date selection from calendar
+  const handleSelect = useCallback((range) => {
+    if (!range?.from) {
+      setDate({ from: undefined, to: undefined });
+      // Clear cookie
+      document.cookie = "listingDate=; path=/; max-age=0";
+      return;
+    }
+
+    if (
+      !range.to ||
+      isSameDay(range.from, range.to) ||
+      isBefore(range.to, range.from)
+    ) {
+      const newDate = { from: range.from, to: undefined };
+      setDate(newDate);
+      // Save to cookie
+      document.cookie = `listingDate=${encodeURIComponent(
+        JSON.stringify({ from: range.from.toISOString(), to: undefined })
+      )}; path=/; max-age=86400`;
+    } else {
+      setDate(range);
+      // Save to cookie (expires in 1 day)
+      document.cookie = `listingDate=${encodeURIComponent(
+        JSON.stringify({ 
+          from: range.from.toISOString(), 
+          to: range.to.toISOString() 
+        })
+      )}; path=/; max-age=86400`;
+    }
+  }, []);
+
+  // Calculate number of nights
+  const nights = useMemo(
+    () => (date?.from && date?.to ? differenceInDays(date.to, date.from) : 0),
+    [date?.from, date?.to]
+  );
+
+  // Fetch listing and reviews on component mount
   useEffect(() => {
-    if (id) dispatch(GetListingById(id));
+    if (!id) return;
+    dispatch(GetListingById(id));
+    dispatch(getReviewsByListing(id));
   }, [id, dispatch]);
+
+  // Track recently viewed listings (only for logged-in users)
+  useEffect(() => {
+    if (!id || !listing || !user) return;
+
+    // User is logged in - save to database
+    dispatch(addRecentlyViewed(id));
+  }, [id, listing, user, dispatch]);
+
+  // Handle scroll for sticky navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (galleryRef.current) {
+        const galleryBottom = galleryRef.current.getBoundingClientRect().bottom;
+        setShowStickyNav(galleryBottom < 0);
+      }
+
+      // Determine active section based on scroll position
+      const sections = [
+        { ref: photosRef, name: "photos" },
+        { ref: amenitiesRef, name: "amenities" },
+        { ref: availabilityRef, name: "availability" },
+        { ref: reviewsRef, name: "reviews" },
+        { ref: locationRef, name: "location" },
+      ];
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.ref.current) {
+          const rect = section.ref.current.getBoundingClientRect();
+          if (rect.top <= 150) {
+            setActiveSection(section.name);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to section
+  const scrollToSection = (sectionId) => {
+    const refMap = {
+      photos: photosRef,
+      amenities: amenitiesRef,
+      availability: availabilityRef,
+      reviews: reviewsRef,
+      location: locationRef,
+    };
+    const ref = refMap[sectionId];
+    if (ref?.current) {
+      const yOffset = -100;
+      const y =
+        ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  // Memoize derived data to prevent recalculation on every render
+  const listingData = useMemo(() => {
+    if (!listing) return null;
+
+    return {
+      title: listing.title || "Listing",
+      images: listing.images || [],
+      city: listing.address?.city,
+      country: listing.address?.country,
+      maxGuests: listing.maxGuests,
+      bedroomsCount: listing.bedrooms,
+      bathroomsCount: listing.bathrooms,
+      rating: listing.ratingAvg || 0,
+      reviewsCount: Array.isArray(reviews) ? reviews.length : 0,
+      hostName: listing.hostId?.firstName
+        ? `${listing.hostId.firstName} ${listing.hostId.lastName || ""}`.trim()
+        : listing.host?.name || "Host",
+      hostAvatar:
+        listing.hostId?.avatar ||
+        listing.host?.avatar ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          listing.hostId?.firstName || listing.host?.name || "H"
+        )}&background=random`,
+      amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
+      propertyType: listing.propertyType || "place",
+      description: listing.description,
+    };
+  }, [listing, reviews]);
 
   // Show loading state
   if (status === "loading") {
@@ -32,55 +217,53 @@ const ListingDetails = () => {
     );
   }
 
-  const title = listing?.title || "Listing";
-  const images = listing?.images || [];
-  const city = listing?.address?.city;
-  const country = listing?.address?.country;
-  const maxGuests = listing?.maxGuests;
-  const bedroomsCount = listing?.bedrooms;
-  const bathroomsCount = listing?.bathrooms;
-  const rating = listing?.ratingAvg || 0;
-  const reviewsCount = Array.isArray(listing?.reviews)
-    ? listing.reviews.length
-    : 0;
-  const hostName = listing?.hostId?.firstName
-    ? `${listing.hostId.firstName} ${listing.hostId.lastName || ""}`.trim()
-    : listing?.host?.name || "Host";
-  const amenities = Array.isArray(listing?.amenities) ? listing.amenities : [];
-
-  const bedroomsArr = Array.from({ length: bedroomsCount || 0 }).map(
-    (_, i) => ({
-      id: i + 1,
-      title: `Bedroom ${i + 1}`,
-      subtitle: "Comfortable bed",
-      img: placeholderBedroomImg,
-    })
-  );
+  // Show error state if no listing data
+  if (!listingData) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+        <p className="text-xl text-gray-600">Listing not found.</p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <ListingGallery title={title} images={images} />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+      <StickyNavbar
+        show={showStickyNav}
+        activeSection={activeSection}
+        onNavigate={scrollToSection}
+      />
+
+      <div ref={galleryRef}>
+        <ListingGallery
+          title={listingData.title}
+          images={listingData.images}
+          description={listingData.description}
+        />
+      </div>
+      <div
+        ref={photosRef}
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 relative">
-          {/*============= Left Side ================== */}
+          {/* Left Side: listing details */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Title & Info */}
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                {city && country
-                  ? `Entire ${
-                      listing?.propertyType || "place"
-                  } in ${city}, ${country}`
-                  : `Entire ${listing?.propertyType || "place"}`}
+                {listingData.city && listingData.country
+                  ? `Entire ${listingData.propertyType} in ${listingData.city}, ${listingData.country}`
+                  : `Entire ${listingData.propertyType}`}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 {[
-                  maxGuests ? `${maxGuests} guests` : null,
-                  bedroomsCount ? `${bedroomsCount} bedrooms` : null,
-                  bathroomsCount
-                    ? `${bathroomsCount} bathroom${bathroomsCount > 1 ? "s" : ""
-                    }`
-                    : null,
+                  listingData.maxGuests && `${listingData.maxGuests} guests`,
+                  listingData.bedroomsCount &&
+                    `${listingData.bedroomsCount} bedrooms`,
+                  listingData.bathroomsCount &&
+                    `${listingData.bathroomsCount} bathroom${
+                      listingData.bathroomsCount > 1 ? "s" : ""
+                    }`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -107,7 +290,7 @@ const ListingDetails = () => {
               {/* ----------- rating -------------  */}
               <div className="text-center hidden sm:block">
                 <p className="font-semibold text-gray-800 text-sm">
-                  {rating.toFixed(1)} ★
+                  {listingData.rating.toFixed(1)} ★
                 </p>
               </div>
               {/*---------- vertical line ------- */}
@@ -115,7 +298,7 @@ const ListingDetails = () => {
               {/* ----------- Reviews -------------  */}
               <div className="text-center hidden sm:block">
                 <p className="font-semibold text-gray-800 text-sm">
-                  {reviewsCount}{" "}
+                  {listingData.reviewsCount}
                 </p>
                 <p>Reviews</p>
               </div>
@@ -124,17 +307,13 @@ const ListingDetails = () => {
             {/* Host info */}
             <div className="flex items-center gap-3 sm:gap-4">
               <img
-                src={
-                  listing?.hostId?.avatar ||
-                  listing?.host?.avatar ||
-                  "https://randomuser.me/api/portraits/women/55.jpg"
-                }
+                src={listingData.hostAvatar}
                 alt="Host"
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border"
               />
               <div>
                 <p className="text-sm sm:text-base font-semibold">
-                  Hosted by {hostName}
+                  Hosted by {listingData.hostName}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">Superhost</p>
               </div>
@@ -142,50 +321,16 @@ const ListingDetails = () => {
 
             <hr />
 
-            {/* Amenities */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Info className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Outdoor entertainment</p>
-                  <p className="text-sm text-gray-600">
-                    The firepit, alfresco dining, BBQ area and outdoor seating
-                    are great for summer trips.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Mountain and garden views</p>
-                  <p className="text-sm text-gray-600">
-                    Soak up the views during your stay.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Users className="text-gray-700 mt-1" />
-                <div>
-                  <p className="font-semibold">Park for free</p>
-                  <p className="text-sm text-gray-600">
-                    This is one of the few places in the area with free parking.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <hr />
-
             {/* Description */}
-            <div className="text-gray-700 leading-relaxed space-y-3">
-              <p>{listing?.description}</p>
-            </div>
+            {listingData.description && (
+              <div className="text-gray-700 leading-relaxed space-y-3">
+                <p>{listingData.description}</p>
+              </div>
+            )}
 
             <div className="max-w-6xl mx-auto px-0 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
               {/* Where you'll sleep */}
-              <section>
+              {/* <section>
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
                   Where you'll sleep
                 </h3>
@@ -221,29 +366,67 @@ const ListingDetails = () => {
                     </p>
                   )}
                 </div>
-              </section>
+              </section> */}
 
               <hr />
 
               {/* What this place offers */}
-              <section>
-                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
-                  What this place offers
-                </h3>
-                <Amenity amenities={amenities} />
-              </section>
+              {listingData.amenities.length > 0 && (
+                <section ref={amenitiesRef}>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
+                    What this place offers
+                  </h3>
+                  <Amenity amenities={listingData.amenities} />
+                </section>
+              )}
 
               <hr />
-              {/* repeat calendar date picker here */}
-              {/* <DateSelector /> */}
+              {/* repeat calendar date picker */}
+              <section ref={availabilityRef}>
+                <h3 className="text-lg sm:text-xl font-semibold mb-4">
+                  {nights > 0
+                    ? `${nights} night${nights > 1 ? "s" : ""}`
+                    : "Select checkout date"}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Minimum stay: 2 nights
+                </p>
+                <Calendar
+                  mode="range"
+                  numberOfMonths={2}
+                  selected={date}
+                  onSelect={handleSelect}
+                  disabled={(day) =>
+                    date?.from
+                      ? isBefore(day, date.from) ||
+                        isSameDay(day, addDays(date.from, 1))
+                      : false
+                  }
+                  className="rounded-lg w-[80%]"
+                />
+
+                <div
+                  className="text-md cursor-pointer underline mt-2 hover:bg-gray-100 w-max p-2 rounded-md text-align-left"
+                  onClick={() => {
+                    setDate(null);
+                    // Clear cookie
+                    document.cookie = "listingDate=; path=/; max-age=0";
+                  }}
+                >
+                  Clear dates
+                </div>
+              </section>
             </div>
           </div>
 
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome listing={listing} />
-              <div className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center">
+              <BookingHome listing={listing} date={date} setDate={setDate} />
+              <div
+                className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center hover:text-gray-700 transition-colors"
+                onClick={() => setShowReportDialog(true)}
+              >
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">
                   Report this listing
@@ -254,13 +437,40 @@ const ListingDetails = () => {
         </div>
 
         {/*================= Rating and Reviews Sections ================= */}
-        <div>
-          <ListingRate />
-          <ListingReviews />
+        <div ref={reviewsRef} className="max-w-5xl mt-12">
+          <hr className="mb-8" />
+          {reviews && reviews.length > 0 ? (
+            <>
+              <AverageRating reviews={reviews} statistics={statistics} />
+              <ReviewsList reviews={reviews} />
+            </>
+          ) : (
+            <div className="py-8">
+              <h2 className="text-2xl font-semibold mb-4">No reviews yet</h2>
+              <p className="text-gray-600">
+                This listing doesn't have any reviews yet. Be the first to leave
+                a review!
+              </p>
+            </div>
+          )}
         </div>
         {/*================= Location Section ================= */}
-        <div className="listing-location"> location details here</div>
+        <div ref={locationRef} className="max-w-5xl">
+          <ListingLocation listing={listing} />
+        </div>
+        {/*================= Host Section ================= */}
+        <div className="max-w-5xl mb-40">
+          <ListingHost listing={listing} />
+        </div>
       </div>
+
+      {/* Report Listing Dialog */}
+      <ReportListingDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        listingId={id}
+        listingTitle={listingData?.title}
+      />
     </>
   );
 };

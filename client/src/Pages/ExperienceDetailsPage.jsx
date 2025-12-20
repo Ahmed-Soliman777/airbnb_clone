@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getExperienceById, clearCurrentExperience } from "@/store/Slices/experienceSlice";
+import {
+  getExperienceById,
+  clearCurrentExperience,
+} from "@/store/Slices/experienceSlice";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -36,30 +39,30 @@ const ExperienceDetailsPage = () => {
     const [guestCount, setGuestCount] = useState(1);
     const [dateOpen, setDateOpen] = useState(false);
 
-    useEffect(() => {
-        dispatch(getExperienceById(id));
-        return () => {
-            dispatch(clearCurrentExperience());
-        };
-    }, [dispatch, id]);
+  useEffect(() => {
+    dispatch(getExperienceById(id));
+    return () => {
+      dispatch(clearCurrentExperience());
+    };
+  }, [dispatch, id]);
 
-    if (status === "loading" || !experience) {
-        return (
-            <div className="min-h-screen bg-background">
-                <div className="container max-w-6xl mx-auto px-4 py-8">
-                    <Skeleton className="h-8 w-32 mb-6" />
-                    <Skeleton className="aspect-[16/9] rounded-xl mb-8" />
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-6">
-                            <Skeleton className="h-10 w-3/4" />
-                            <Skeleton className="h-24 w-full" />
-                        </div>
-                        <Skeleton className="h-96 rounded-xl" />
-                    </div>
-                </div>
+  if (status === "loading" || !experience) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container max-w-6xl mx-auto px-4 py-8">
+          <Skeleton className="h-8 w-32 mb-6" />
+          <Skeleton className="aspect-video rounded-xl mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-24 w-full" />
             </div>
-        );
-    }
+            <Skeleton className="h-96 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
     const {
         title,
@@ -175,113 +178,122 @@ const ExperienceDetailsPage = () => {
                 </div>
             </section>
 
-            {/* Content */}
-            <main className="container max-w-6xl mx-auto px-4 py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Title Section */}
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="secondary">{experienceType || "Experience"}</Badge>
-                                <div className="flex items-center gap-1">
-                                    <Star className="w-4 h-4 fill-foreground text-foreground" />
-                                    <span className="font-medium">{rating}</span>
-                                    {reviewCount > 0 && (
-                                        <span className="text-muted-foreground">
-                                            ({reviewCount} reviews)
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
-                            <div className="flex items-center gap-4 text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>{[street, city, country].filter(Boolean).join(", ")}</span>
-                                </div>
-                            </div>
-                        </div>
+      {/* Content */}
+      <main className="container max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Title Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="secondary">
+                  {experienceType || "Experience"}
+                </Badge>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-foreground text-foreground" />
+                  <span className="font-medium">{rating}</span>
+                  {reviewCount > 0 && (
+                    <span className="text-muted-foreground">
+                      ({reviewCount} reviews)
+                    </span>
+                  )}
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                {title}
+              </h1>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    {[street, city, country].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-                        {/* Quick Info */}
-                        <div className="flex flex-wrap gap-6 py-6 border-y">
-                            {duration && (
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="font-medium">{duration}</p>
-                                        <p className="text-sm text-muted-foreground">Duration</p>
-                                    </div>
-                                </div>
-                            )}
-                            {groupSize && (
-                                <div className="flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="font-medium">
-                                            {groupSize.min}-{groupSize.max} guests
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">Group size</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+            {/* Quick Info */}
+            <div className="flex flex-wrap gap-6 py-6 border-y">
+              {duration && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">{duration}</p>
+                    <p className="text-sm text-muted-foreground">Duration</p>
+                  </div>
+                </div>
+              )}
+              {groupSize && (
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">
+                      {groupSize.min}-{groupSize.max} guests
+                    </p>
+                    <p className="text-sm text-muted-foreground">Group size</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
-                        {/* Description */}
-                        <div>
-                            <h2 className="text-xl font-semibold text-foreground mb-4">
-                                About this experience
-                            </h2>
-                            <p className="text-muted-foreground whitespace-pre-line">
-                                {description || "No description provided."}
-                            </p>
-                        </div>
+            {/* Description */}
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                About this experience
+              </h2>
+              <p className="text-muted-foreground whitespace-pre-line">
+                {description || "No description provided."}
+              </p>
+            </div>
 
-                        {/* What's Included */}
-                        {inclusions && inclusions.length > 0 && (
-                            <div>
-                                <h2 className="text-xl font-semibold text-foreground mb-4">
-                                    What's included
-                                </h2>
-                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {inclusions.map((item, index) => (
-                                        <li key={index} className="flex items-center gap-2">
-                                            <Check className="w-5 h-5 text-primary" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+            {/* What's Included */}
+            {inclusions && inclusions.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  What's included
+                </h2>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {inclusions.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <Check className="w-5 h-5 text-primary" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-                        {/* Requirements */}
-                        {(ageRequirement || fitnessLevel || (requirements && requirements.length > 0)) && (
-                            <div>
-                                <h2 className="text-xl font-semibold text-foreground mb-4">
-                                    Guest requirements
-                                </h2>
-                                <div className="space-y-3">
-                                    {ageRequirement && (
-                                        <div className="flex items-center gap-2">
-                                            <Shield className="w-5 h-5 text-muted-foreground" />
-                                            <span>Age: {ageRequirement}</span>
-                                        </div>
-                                    )}
-                                    {fitnessLevel && (
-                                        <div className="flex items-center gap-2">
-                                            <Shield className="w-5 h-5 text-muted-foreground" />
-                                            <span>Fitness level: {fitnessLevel}</span>
-                                        </div>
-                                    )}
-                                    {requirements && requirements.map((req, index) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <Shield className="w-5 h-5 text-muted-foreground" />
-                                            <span>{req}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+            {/* Requirements */}
+            {(ageRequirement ||
+              fitnessLevel ||
+              (requirements && requirements.length > 0)) && (
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  Guest requirements
+                </h2>
+                <div className="space-y-3">
+                  {ageRequirement && (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-muted-foreground" />
+                      <span>Age: {ageRequirement}</span>
+                    </div>
+                  )}
+                  {fitnessLevel && (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-muted-foreground" />
+                      <span>Fitness level: {fitnessLevel}</span>
+                    </div>
+                  )}
+                  {requirements &&
+                    requirements.map((req, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-muted-foreground" />
+                        <span>{req}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
                         {/* Schedule */}
                         {schedule && schedule.length > 0 && (
@@ -301,13 +313,13 @@ const ExperienceDetailsPage = () => {
                         )}
                     </div>
 
-                    {/* Right Column - Booking Card */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-24 bg-card border rounded-xl p-6 shadow-lg">
-                            <div className="flex items-baseline gap-1 mb-6">
-                                <span className="text-2xl font-bold">${pricePerPerson}</span>
-                                <span className="text-muted-foreground">/ person</span>
-                            </div>
+          {/* Right Column - Booking Card */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 bg-card border rounded-xl p-6 shadow-lg">
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-2xl font-bold">${pricePerPerson}</span>
+                <span className="text-muted-foreground">/ person</span>
+              </div>
 
                             <div className="space-y-4 mb-6">
                                 {/* Date Selector */}
@@ -379,9 +391,9 @@ const ExperienceDetailsPage = () => {
                                 {selectedDate ? "Reserve" : "Select a date"}
                             </Button>
 
-                            <p className="text-center text-sm text-muted-foreground">
-                                You won't be charged yet
-                            </p>
+              <p className="text-center text-sm text-muted-foreground">
+                You won't be charged yet
+              </p>
 
                             <div className="border-t mt-6 pt-6">
                                 <div className="flex justify-between mb-2">

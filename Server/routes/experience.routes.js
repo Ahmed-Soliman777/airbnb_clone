@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
-    createExperience,
-    getExperiences,
-    getExperience,
-    updateExperience,
-    deleteExperience,
-    getHostExperiences
-} = require('../controllers/experience.controller.js');
-const auth = require('../middleware/userMiddleware.js');
+  createExperience,
+  getExperiences,
+  getExperience,
+  updateExperience,
+  deleteExperience,
+  getHostExperiences,
+} = require("../controllers/experience.controller.js");
+const auth = require("../middleware/userMiddleware.js");
 
 // Public routes
 router.get('/', getExperiences);

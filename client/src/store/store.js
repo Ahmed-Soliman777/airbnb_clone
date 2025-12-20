@@ -2,14 +2,17 @@ import { configureStore } from "@reduxjs/toolkit";
 import listingReducer from "./Slices/listingSlice";
 import amenityReducer from "./Slices/amenitySlice";
 import authReducer from "./Slices/authslice";
-import languageReducer from './Slices/languageSlice';
-import paymentReducer from './Slices/paymentSlice';
-import experienceReducer from './Slices/experienceSlice';
-import serviceReducer from './Slices/serviceSlice';
-import experienceFormReducer from './Slices/experienceFormSlice';
-import serviceFormReducer from './Slices/serviceFormSlice';
-import homeFormReducer from './Slices/homeFormSlice';
-import wishlistReducer from './Slices/wishlistSlice';
+import languageReducer from "./Slices/languageSlice";
+import paymentReducer from "./Slices/paymentSlice";
+import experienceReducer from "./Slices/experienceSlice";
+import serviceReducer from "./Slices/serviceSlice";
+import experienceFormReducer from "./Slices/experienceFormSlice";
+import serviceFormReducer from "./Slices/serviceFormSlice";
+import homeFormReducer from "./Slices/homeFormSlice";
+import wishlistReducer from "./Slices/wishlistSlice";
+import reviewReducer from "./Slices/reviewSlice";
+import recentlyViewedReducer from "./Slices/recentlyViewedSlice";
+import reportReducer from "./Slices/reportSlice";
 import messagesReducer from './Slices/messagesSlice';
 import bookingReducer from "./Slices/bookingSlice";
 
@@ -26,6 +29,9 @@ const store = configureStore({
     experienceForm: experienceFormReducer,
     serviceForm: serviceFormReducer,
     homeForm: homeFormReducer,
+    review: reviewReducer,
+    recentlyViewed: recentlyViewedReducer,
+    report: reportReducer,
     messages: messagesReducer,
     booking: bookingReducer,
   },

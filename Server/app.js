@@ -5,9 +5,9 @@ const mongoose = require("mongoose");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const cookieParser = require("cookie-parser");
-const messageRoutes = require('./routes/message.routes');
-const { initializeSocket } = require('./socket');
-const http = require('http');
+const messageRoutes = require("./routes/message.routes");
+const { initializeSocket } = require("./socket");
+const http = require("http");
 
 // Routes
 const userRoute = require("./routes/user.routes");
@@ -17,8 +17,10 @@ const bookingRoute = require("./routes/booking.routes");
 const paymentRoute = require("./routes/payment.routes");
 const amenityRoute = require("./routes/amenity.routes");
 const wishlistRoute = require("./routes/wishlist.routes");
-const experienceRoutes = require('./routes/experience.routes');
-const serviceRoutes = require('./routes/service.routes');
+const experienceRoutes = require("./routes/experience.routes");
+const serviceRoutes = require("./routes/service.routes");
+const recentlyViewedRoute = require("./routes/recentlyViewed.routes");
+const reportRoute = require("./routes/report.routes");
 
 const app = express();
 const server = http.createServer(app);
@@ -31,15 +33,15 @@ const port = process.env.PORT || 3000;
 app.use(
   cors({
     origin: "http://localhost:5173", // frontend origin
-    credentials: true,               // allow cookies
+    credentials: true, // allow cookies
   })
 );
 // Middleware
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.set("view engine", "ejs");
-app.set('io', io);
+app.set("io", io);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -79,9 +81,13 @@ app.use("/api", bookingRoute);
 app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
 app.use("/api/wishlist", wishlistRoute);
-app.use('/api/experiences', experienceRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/messages', messageRoutes);
+app.use("/api/experiences", experienceRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/recently-viewed", recentlyViewedRoute);
+app.use("/api/reports", reportRoute);
+app.use("/api/experiences", experienceRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Root route
 app.get("/api", (req, res) => {

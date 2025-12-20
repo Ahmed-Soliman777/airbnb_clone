@@ -1,12 +1,10 @@
-import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { getAllServices } from "@/store/Slices/serviceSlice";
 import ServiceCard from "@/components/cards/ServiceCard";
 import CityCarouselSection from "@/components/sections/CityCarouselSection";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ArrowLeft } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { getAllServices } from "@/store/Slices/serviceSlice";
+import { useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const ServicesPage = () => {
   const dispatch = useDispatch();
