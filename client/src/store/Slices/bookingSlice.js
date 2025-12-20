@@ -6,9 +6,9 @@ const API_URL = "http://localhost:3000/api";
 // Fetch user's bookings/reservations
 export const fetchUserBookings = createAsyncThunk(
     "booking/fetchUserBookings",
-    async (userId, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}/booking/user/${userId}`, {
+            const response = await axios.get(`${API_URL}/booking/user`, {
                 withCredentials: true
             });
             return response.data.data;

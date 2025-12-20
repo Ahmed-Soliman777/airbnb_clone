@@ -66,8 +66,6 @@ async function handlePayment(req, res) {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const userId = decoded.userId;
-  console.log("Decoded token:", decoded);
-  console.log("User ID:", userId);
 
   try {
     const { listing, service, experience, checkInDate, checkOutDate, guestsCount, totalPrice } =

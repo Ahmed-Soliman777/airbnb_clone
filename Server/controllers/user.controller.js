@@ -63,7 +63,6 @@ Airbnb Team `
 
   } catch (err) {
     res.status(400).json({ message: err.message });
-    console.log("EMAIL ERROR:", err);
   }
 };
 
@@ -147,7 +146,6 @@ Airbnb Team `
 
   } catch (err) {
     res.status(400).json({ message: err.message });
-    console.log("RESEND EMAIL ERROR:", err);
   }
 };
 
@@ -214,8 +212,8 @@ exports.sendResetCode = async (req, res) => {
     if (!user.isVerified)
       return res.status(400).json({ message: "User is not verified" });
 
-    const resetCode = crypto.randomBytes(3).toString("hex").toUpperCase(); 
-    const expireTime = Date.now() + 30 * 60 * 1000; 
+    const resetCode = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const expireTime = Date.now() + 30 * 60 * 1000;
 
     user.resetPasswordCode = resetCode;
     user.resetPasswordExpire = expireTime;
@@ -377,83 +375,83 @@ exports.deleteUser = async (req, res) => {
 
 
 const FIELDS_TO_RETURN = [
-    'firstName',  'profilePhoto', 'jobTitle', 'school', 'travelCities', 'interests', 
-    'preferredLanguages', 'aboutMe', 'role', 'reviews', 'location', 
-].join(' '); 
+  'firstName', 'profilePhoto', 'jobTitle', 'school', 'travelCities', 'interests',
+  'preferredLanguages', 'aboutMe', 'role', 'reviews', 'location',
+].join(' ');
 
 exports.getProfile = async (req, res) => {
-    try {
-        const userId = req.user._id; 
-        const userProfile = await User.findById(userId)
-            .select(FIELDS_TO_RETURN) 
-            .populate('reviews', 'rating comment author');
+  try {
+    const userId = req.user._id;
+    const userProfile = await User.findById(userId)
+      .select(FIELDS_TO_RETURN)
+      .populate('reviews', 'rating comment author');
 
-        if (!userProfile) {
-            return res.status(404).json({ message: "Profile data not found" });
-        }
-
-        return res.status(200).json(userProfile);
-
-    } catch (error) {
-        console.error("Error fetching profile:", error);
-        return res.status(500).json({ message: "Server error while fetching profile" });
+    if (!userProfile) {
+      return res.status(404).json({ message: "Profile data not found" });
     }
+
+    return res.status(200).json(userProfile);
+
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return res.status(500).json({ message: "Server error while fetching profile" });
+  }
 };
 
 
 const EDITABLE_FIELDS = [
-    'jobTitle', 'school', 'travelCities', 'interests', 
-    'preferredLanguages', 'aboutMe','location',
+  'jobTitle', 'school', 'travelCities', 'interests',
+  'preferredLanguages', 'aboutMe', 'location',
 ];
 
 exports.updateProfile = async (req, res) => {
-    try {
-        const updates = {};
-        
-        for (const key of EDITABLE_FIELDS) {
-            if (req.body.hasOwnProperty(key)) {
-                updates[key] = req.body[key];
-            }
-        }
-        
-        if (Object.keys(updates).length === 0) {
-            return res.status(400).json({ message: 'No valid fields provided for update.' });
-        }
+  try {
+    const updates = {};
 
-        const updatedUser = await User.findByIdAndUpdate(
-            req.user._id,
-            { $set: updates }, 
-            { new: true, runValidators: true }
-        ).select(FIELDS_TO_RETURN);
-
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(400).json({ message: error.message || 'Failed to update profile.' });
+    for (const key of EDITABLE_FIELDS) {
+      if (req.body.hasOwnProperty(key)) {
+        updates[key] = req.body[key];
+      }
     }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'No valid fields provided for update.' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select(FIELDS_TO_RETURN);
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message || 'Failed to update profile.' });
+  }
 };
 
 exports.uploadProfilePhoto = async (req, res) => {
-    try {
-        const { base64Image } = req.body; 
-        
-        if (!base64Image) {
-            return res.status(400).json({ message: "Base64 image string is required." });
-        }
+  try {
+    const { base64Image } = req.body;
 
-        const imageUrl = await uploadOnCloudinary(base64Image);
-        const updatedUser = await User.findByIdAndUpdate(
-            req.user._id,
-            { profilePhoto: imageUrl },
-            { new: true }
-        ).select('profilePhoto'); 
-
-        res.status(200).json({ 
-            profilePhoto: imageUrl, 
-            message: "Profile photo updated successfully." 
-        });
-
-    } catch (error) {
-        console.error("Error during Base64 upload process:", error);
-        res.status(500).json({ message: "Server error during image upload." });
+    if (!base64Image) {
+      return res.status(400).json({ message: "Base64 image string is required." });
     }
+
+    const imageUrl = await uploadOnCloudinary(base64Image);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePhoto: imageUrl },
+      { new: true }
+    ).select('profilePhoto');
+
+    res.status(200).json({
+      profilePhoto: imageUrl,
+      message: "Profile photo updated successfully."
+    });
+
+  } catch (error) {
+    console.error("Error during Base64 upload process:", error);
+    res.status(500).json({ message: "Server error during image upload." });
+  }
 };

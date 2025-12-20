@@ -173,11 +173,6 @@ const ExperienceDetailsPage = () => {
                         </div>
                     )}
                 </div>
-                {/* DEBUG SECTION */}
-                <div className="mt-4 p-4 bg-gray-100 rounded text-xs overflow-auto max-h-40">
-                    <p className="font-bold">Debug Info:</p>
-                    <pre>{JSON.stringify(images, null, 2)}</pre>
-                </div>
             </section>
 
             {/* Content */}

@@ -46,23 +46,23 @@ const RegisterStep2 = () => {
   });
 
   const onSubmit = (data) => {
-  const fullData = {
-    email: savedEmail,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    dob: data.dob,
-    password: data.password,
+    const fullData = {
+      email: savedEmail,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      dob: data.dob,
+      password: data.password,
+    };
+
+    dispatch(registerUser(fullData))
+      .unwrap()
+      .then(() => {
+
+        setShowVerify(true);
+
+      })
+      .catch(() => { });
   };
-
-  dispatch(registerUser(fullData))
-    .unwrap()
-    .then(() => {
-     
-      setShowVerify(true);
-
-    })
-    .catch(() => {});
-};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
@@ -72,41 +72,41 @@ const RegisterStep2 = () => {
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <h3>Legal name</h3>
-         {/* Group Container for First Name and Last Name */}
-<div className="space-y-0">
-    
-    {/* First Name*/}
-    <div className="mb-0">
-        <input
-            type="text"
-            {...register("firstName")}
-            className="w-full px-3 py-2 border border-b-0 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter first name"
-        />
-        {errors.firstName && (
-            <p className="text-red-500 text-sm mt-1">
-                {errors.firstName.message}
-            </p>
-        )}
-    </div>
+          <h3>Legal name</h3>
+          {/* Group Container for First Name and Last Name */}
+          <div className="space-y-0">
 
-    {/* Last Name*/}
-    <div className="mb-0">
-        <input
-            type="text"
-            {...register("lastName")}
-            className="w-full px-3 py-2 border rounded-b-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter last name"
-        />
-        {errors.lastName && (
-            <p className="text-red-500 text-sm mt-1">
-                {errors.lastName.message}
-            </p>
-        )}
-    </div>
-    <span className="text-xs">Make sure this matches the name on your government ID. If you go by another name, you can add a preferred first name.</span>
-</div>
+            {/* First Name*/}
+            <div className="mb-0">
+              <input
+                type="text"
+                {...register("firstName")}
+                className="w-full px-3 py-2 border border-b-0 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter first name"
+              />
+              {errors.firstName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.firstName.message}
+                </p>
+              )}
+            </div>
+
+            {/* Last Name*/}
+            <div className="mb-0">
+              <input
+                type="text"
+                {...register("lastName")}
+                className="w-full px-3 py-2 border rounded-b-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter last name"
+              />
+              {errors.lastName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.lastName.message}
+                </p>
+              )}
+            </div>
+            <span className="text-xs">Make sure this matches the name on your government ID. If you go by another name, you can add a preferred first name.</span>
+          </div>
 
           {/* DOB */}
           <div>
@@ -166,34 +166,28 @@ const RegisterStep2 = () => {
             )}
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <p className="text-red-500 text-center text-sm mt-2">{error}</p>
-          )}
-
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full text-white py-2 rounded-lg transition duration-200 ${
-              loading
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-[#ff385c] hover:bg-[#e61e4d]"
-            }`}
+            className={`w-full text-white py-2 rounded-lg transition duration-200 ${loading
+              ? "bg-blue-300 cursor-not-allowed"
+              : "bg-[#ff385c] hover:bg-[#e61e4d]"
+              }`}
           >
             {loading ? "Creating account..." : "Agree & Continue"}
           </button>
         </form>
-         {/* Show VerifyEmail Popup */}
-      {showVerify && (
-        <VerifyEmail 
-          isOpen={true}
-          onClose={() => setShowVerify(false)} 
-        />
-      )}
+        {/* Show VerifyEmail Popup */}
+        {showVerify && (
+          <VerifyEmail
+            isOpen={true}
+            onClose={() => setShowVerify(false)}
+          />
+        )}
       </div>
     </div>
-    
+
   );
 };
 

@@ -26,7 +26,7 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await fetch(`api/login`, {
+      const res = await fetch(`/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -95,6 +95,7 @@ export const sendResetCode = createAsyncThunk(
       const res = await fetch(`/api/reset/send-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
       });
 
@@ -115,6 +116,7 @@ export const verifyResetCode = createAsyncThunk(
       const res = await fetch(`/api/reset/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, code }),
       });
 
@@ -135,6 +137,7 @@ export const resetPassword = createAsyncThunk(
       const res = await fetch(`/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, newPassword }),
       });
 
@@ -155,6 +158,7 @@ export const fetchUserProfile = createAsyncThunk(
     try {
       const res = await fetch('/api/profile', {
         method: 'GET',
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -203,6 +207,7 @@ export const updateProfile = createAsyncThunk(
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: "include",
         body: JSON.stringify(updatesToSend),
       });
 
@@ -244,6 +249,7 @@ export const uploadProfilePhoto = createAsyncThunk(
       const res = await fetch('/api/profile/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
@@ -263,27 +269,27 @@ export const uploadProfilePhoto = createAsyncThunk(
 );
 
 //booking 
-export const fetchUserBookings = createAsyncThunk(
-  'auth/fetchUserBookings',
-  // GetState allows us to access the Redux state
-  async (_, { rejectWithValue, getState }) => {
-    try {
-      const userId = getState().auth.user.id;
+// export const fetchUserBookings = createAsyncThunk(
+//   'auth/fetchUserBookings',
+//   // GetState allows us to access the Redux state
+//   async (_, { rejectWithValue, getState }) => {
+//     try {
+//       const userId = getState().auth.user.id;
 
-      if (!userId) {
-        return rejectWithValue("User ID is missing for fetching bookings.");
-      }
+//       if (!userId) {
+//         return rejectWithValue("User ID is missing for fetching bookings.");
+//       }
 
-      // Endpoint  /api/bookings/:userId
-      const response = await axios.get(`/api/bookings/${userId}`);
+//       // Endpoint  /api/bookings/:userId
+//       const response = await axios.get(`/api/bookings/${userId}`);
 
-      return response.data.data;
+//       return response.data.data;
 
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
-    }
-  }
-);
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
+//     }
+//   }
+// );
 // Fetch current user from token
 export const fetchCurrentUser = createAsyncThunk(
   "auth/fetchCurrentUser",
