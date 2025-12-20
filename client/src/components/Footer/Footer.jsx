@@ -10,16 +10,26 @@ export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-[#f7f7f7] text-gray-700 py-6 px-12">
+    <footer className="bg-[#f7f7f7] text-gray-700 py-6 px-4 sm:px-6 md:px-12">
 
       {/* ===== Top Section ===== */}
       <div className="max-w-12xl mx-auto gap-12 py-6">
-        <h3 className="font-semibold flex justify-start mb-4 w-100 text-xl text-black ">
+        <h3 className="font-semibold flex justify-start mb-4 text-lg sm:text-xl text-black">
           {t("footer.Support")}
         </h3>
 
-        <div className="flex justify-between text-sm w-[900px] text-[#222222]">
+        <div className="hidden lg:flex justify-between text-sm max-w-[900px] text-[#222222]">
           <div className="cursor-pointer hover:underline ">{t("footer.Popular")}</div>
+          <div className="cursor-pointer hover:underline">{t("footer.Arts & culture")}</div>
+          <div className="cursor-pointer hover:underline">{t("footer.Beach")}</div>
+          <div className="cursor-pointer hover:underline">{t("footer.Mountains")}</div>
+          <div className="cursor-pointer hover:underline">{t("footer.Outdoors")}</div>
+          <div className="cursor-pointer hover:underline">{t("footer.Things to do")}</div>
+          <div className="cursor-pointer hover:underline">Travel tips & inspiration</div>
+          <div className="cursor-pointer hover:underline">Airbnb-friendly apartments</div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:hidden gap-3 text-sm text-[#222222]">
+          <div className="cursor-pointer hover:underline">{t("footer.Popular")}</div>
           <div className="cursor-pointer hover:underline">{t("footer.Arts & culture")}</div>
           <div className="cursor-pointer hover:underline">{t("footer.Beach")}</div>
           <div className="cursor-pointer hover:underline">{t("footer.Mountains")}</div>
@@ -33,8 +43,8 @@ export default function Footer() {
       <hr />
 
       {/* ===== second section ===== */}
-      <div className="text-[#222222] py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="text-[#222222] py-6 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 
           {/* Support Section */}
           <div>
@@ -87,31 +97,31 @@ export default function Footer() {
 
       {/* ===== Bottom Section with Icons ===== */}
       <div className="text-[#222222] pt-6">
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 
-          <div className="flex items-center gap-6">
-            <span className="text-sm">© 2025 Airbnb, Inc.</span>
-            <span className="text-sm hover:underline cursor-pointer">{t("footer.Privacy")}</span>
-            <span className="text-sm hover:underline cursor-pointer">{t("footer.Terms")}</span>
-            <span className="text-sm hover:underline cursor-pointer">{t("footer.Your Privacy Choices")}</span>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm">
+            <span>© 2025 Airbnb, Inc.</span>
+            <span className="hover:underline cursor-pointer">{t("footer.Privacy")}</span>
+            <span className="hover:underline cursor-pointer">{t("footer.Terms")}</span>
+            <span className="hover:underline cursor-pointer">{t("footer.Your Privacy Choices")}</span>
           </div>
 
           {/* Social Icons */}
-          <div className="flex gap-4">
-            <div className="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
-              <TbWorld />
+          <div className="flex gap-2 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+              <TbWorld className="text-base sm:text-lg" />
             </div>
-            <div className="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
-              <BsCurrencyEuro />
+            <div className="p-2 sm:p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+              <BsCurrencyEuro className="text-base sm:text-lg" />
             </div>
-            <div className="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
-              <MdOutlineFacebook />
+            <div className="p-2 sm:p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+              <MdOutlineFacebook className="text-base sm:text-lg" />
             </div>
-            <div className="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
-              <RiTwitterXFill />
+            <div className="p-2 sm:p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+              <RiTwitterXFill className="text-base sm:text-lg" />
             </div>
-            <div className="p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
-              <IoLogoInstagram />
+            <div className="p-2 sm:p-3 rounded-full hover:bg-gray-200 cursor-pointer transition">
+              <IoLogoInstagram className="text-base sm:text-lg" />
             </div>
           </div>
 
