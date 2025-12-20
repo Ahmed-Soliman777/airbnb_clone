@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
+import { toggleListing } from "@/store/Slices/wishlistSlice";
 
 export default function ListingCard({ listing }) {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function ListingCard({ listing }) {
           className="absolute top-2 right-2 hover:scale-106 transition-transform duration-300"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(toggleWishlistItem(listingId));
+            dispatch(toggleListing(listingId));
           }}
         >
           <Heart

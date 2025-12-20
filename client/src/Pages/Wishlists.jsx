@@ -72,7 +72,7 @@ export default function Wishlists() {
             Start saving your favorite places by clicking the heart icon on any
             listing
           </p>
-          <Button onClick={() => navigate("/")}>Explore listings</Button>
+          <Button onClick={() => navigate("/homes")}>Explore listings</Button>
         </div>
       </div>
     );

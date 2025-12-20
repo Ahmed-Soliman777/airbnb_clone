@@ -5,8 +5,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 import {
   fetchWishlistCollections,
@@ -17,6 +20,7 @@ import WishlistDialog from "@/components/Wishlist/WishlistDialog";
 import { isAuthenticated } from "@/utils/cookies";
 export default function PopularHomesCarousel({ listings = [] }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const savedListings = useSelector((state) => state.wishlist.savedListings);
   const collections = useSelector((state) => state.wishlist.collections);
   const user = useSelector((state) => state.auth.user);

@@ -26,6 +26,8 @@ const getCollection = async (req, res) => {
     const userId = req.user._id;
     const { collectionId } = req.params;
 
+    // console.log(userId);
+
     const collection = await WishlistCollection.findOne({
       _id: collectionId,
       user: userId,

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const auth = require("../middleware/userMiddleware");
-const authorize = require("../middleware/authUser");
 const {
   getWishlists,
   getCollection,
@@ -15,35 +14,35 @@ const {
 } = require("../controllers/wishlist.controller");
 
 // toggle listing in wishlist
-router.post("/toggle/:listingId", auth, authorize(["guest"]), toggleListing);
+router.post("/toggle/:listingId", auth, toggleListing);
 
 // get which lists contain a listing
 router.get(
   "/listing/:listingId",
   auth,
-  authorize(["guest"]),
+
   getListsContainingListing
 );
 
 // get all wishlist collections
-router.get("/collections", auth, authorize(["guest"]), getWishlists);
+router.get("/collections", auth, getWishlists);
 
 // get a specific wishlist collection by ID
 router.get(
   "/collections/:collectionId",
   auth,
-  authorize(["guest"]),
+
   getCollection
 );
 
 // create a new wishlist collection
-router.post("/collections", auth, authorize(["guest"]), createWishlist);
+router.post("/collections", auth, createWishlist);
 
 // add listing to a wishlist collection
 router.post(
   "/collections/:collectionId/listings/:listingId",
   auth,
-  authorize(["guest"]),
+
   addToWishlist
 );
 
@@ -51,7 +50,7 @@ router.post(
 router.delete(
   "/collections/:collectionId/listings/:listingId",
   auth,
-  authorize(["guest"]),
+
   removeFromWishlist
 );
 
@@ -59,7 +58,7 @@ router.delete(
 router.delete(
   "/collections/:collectionId",
   auth,
-  authorize(["guest"]),
+
   deleteWishlistList
 );
 
