@@ -22,8 +22,8 @@ const Host = () => {
     const checkHostStatus = async () => {
         try {
             const profileData = await getUserProfile();
-            const userRole = profileData.data.role;
-            setIsHost(userRole === 'host' || userRole === 'main-host');
+            const userRole = profileData.role;
+            setIsHost(userRole === 'host');
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
             setIsHost(false);

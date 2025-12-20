@@ -96,6 +96,8 @@ const CollectionDetail = () => {
 
   const listings = currentCollection.listings || [];
 
+  console.log(currentCollection);
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -210,9 +212,8 @@ const CollectionDetail = () => {
                       {images.map((_, idx) => (
                         <div
                           key={idx}
-                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                            idx === currentIndex ? "bg-white" : "bg-white/50"
-                          }`}
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentIndex ? "bg-white" : "bg-white/50"
+                            }`}
                         />
                       ))}
                     </div>

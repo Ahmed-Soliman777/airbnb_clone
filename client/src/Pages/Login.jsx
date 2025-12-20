@@ -69,9 +69,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Error Message from Server */}
-          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
-
           {/* Submit Button */}
           <button
             type="submit"

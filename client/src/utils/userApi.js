@@ -20,6 +20,7 @@ export const becomeHost = async () => {
 export const getUserProfile = async () => {
     try {
         const response = await axios.get(`${API_URL}/profile`, { withCredentials: true });
+        // console.log(response.data.role);
         return response.data;
     } catch (error) {
         throw error.response?.data?.message || error.message;

@@ -16,8 +16,8 @@ const BecomeHostButton = ({ className }) => {
     try {
       // First check if user is already a host
       const profileData = await getUserProfile();
-      
-      if (profileData.data.role === 'host' || profileData.data.role === 'main-host') {
+
+      if (profileData.role === 'host') {
         toast.info("You're already a host!");
         navigate("/host/dashboard");
         return;
@@ -25,7 +25,7 @@ const BecomeHostButton = ({ className }) => {
 
       // Update user role to host
       await becomeHost();
-      
+
       // First time becoming a host - show welcome page
       toast.success("Congratulations! You're now a host!");
       navigate("/host/welcome");

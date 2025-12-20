@@ -220,11 +220,6 @@ const HostDashboardPage = () => {
 
       {/* Content */}
       <main className="container max-w-7xl mx-auto px-4 py-8">
-        {/* DEBUG BANNER - TEMPORARY */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-          <p className="font-bold">Debug Info</p>
-          <p>Logged in as: {useSelector(state => state.auth.user?.email)} (ID: {useSelector(state => state.auth.user?._id)})</p>
-        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md grid-cols-3">

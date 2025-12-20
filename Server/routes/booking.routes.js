@@ -76,6 +76,35 @@ router.post(
 
 /**
  * @swagger
+ * /booking/user/{userId}:
+ *   get:
+ *     summary: Get all bookings for a specific user
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of bookings
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get(
+  "/booking/user",
+  authMiddleware,
+  getBookingsForUser
+);
+
+/**
+ * @swagger
  * /booking/{id}:
  *   get:
  *     summary: Get a booking by ID
@@ -102,35 +131,6 @@ router.get(
   authMiddleware,
   authorization("guest", "host", "admin"),
   getBookingById
-);
-
-/**
- * @swagger
- * /booking/user/{userId}:
- *   get:
- *     summary: Get all bookings for a specific user
- *     tags: [Bookings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: User ID
- *     responses:
- *       200:
- *         description: List of bookings
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- */
-router.get(
-  "/booking/user/:userId",
-  authMiddleware,
-  getBookingsForUser
 );
 
 /**
