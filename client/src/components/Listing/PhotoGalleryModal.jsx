@@ -2,17 +2,17 @@ import { ChevronLeft, Heart, Share, X, ChevronRight } from "lucide-react";
 import ShareModal from "./ShareModal";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleWishlistItem } from "@/store/Slices/wishlistSlice";
+import { toggleListing } from "@/store/Slices/wishlistSlice";
 import { Button } from "@/components/ui/button";
 
 const PhotoGalleryModal = ({ isOpen, onClose, images = [], title, id }) => {
   const dispatch = useDispatch();
   // Get wishlist items from Redux store
-  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const savedListings = useSelector((state) => state.wishlist.savedListings);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const isFav = wishlistItems.includes(id);
+  const isFav = savedListings[id]?.isSaved || false;
   const urls = images
     .map((img) => (typeof img === "string" ? img : img?.url))
     .filter(Boolean);
@@ -83,7 +83,7 @@ const PhotoGalleryModal = ({ isOpen, onClose, images = [], title, id }) => {
             <Button
               variant="ghost"
               className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-              onClick={() => dispatch(toggleWishlistItem(id))}
+              onClick={() => dispatch(toggleListing(id))}
             >
               <Heart
                 size={20}

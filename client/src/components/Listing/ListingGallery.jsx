@@ -10,6 +10,7 @@ import {
 } from "@/store/Slices/wishlistSlice";
 import WishlistDialog from "@/components/Wishlist/WishlistDialog";
 import ShareModal from "./ShareModal";
+import PhotoGalleryModal from "./PhotoGalleryModal";
 import { isAuthenticated } from "@/utils/cookies";
 
 const ListingGallery = ({ title, images = [], description }) => {
@@ -28,6 +29,8 @@ const ListingGallery = ({ title, images = [], description }) => {
 
   // State for share modal
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // State for photo gallery modal
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   // Check if listing is saved
   const isFav = savedListings[id]?.isSaved || false;
@@ -134,7 +137,10 @@ const ListingGallery = ({ title, images = [], description }) => {
               alt="Photo 5"
               className="w-full h-full object-cover"
             />
-            <button className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2">
+            <button 
+              onClick={() => setIsGalleryOpen(true)}
+              className="absolute bottom-3 right-3 w-39 bg-white/90 text-gray-900 text-sm font-medium rounded-md px-3 py-1 shadow-sm hover:bg-white transition flex items-center gap-2"
+            >
               <Grip size={16} />
               Show all photos
             </button>
@@ -152,6 +158,15 @@ const ListingGallery = ({ title, images = [], description }) => {
         listingUrl={window.location.href}
         listingImage={urls[0]}
         listingDescription={description}
+      />
+
+      {/* Photo Gallery Modal */}
+      <PhotoGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        images={images}
+        title={title}
+        id={id}
       />
     </>
   );
