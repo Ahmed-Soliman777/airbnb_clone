@@ -2,17 +2,30 @@ const mongoose = require("mongoose");
 
 const amenitiesSchema = new mongoose.Schema({
   name: {
-    type: String,
-    trim: true,
-    required: true,
+    en: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    ar: {
+      type: String,
+      trim: true,
+      required: true,
+    },
   },
   icon: {
     type: String,
     required: true,
   },
   description: {
-    type: String,
-    trim: true,
+    en: {
+      type: String,
+      trim: true,
+    },
+    ar: {
+      type: String,
+      trim: true,
+    },
   },
 });
 

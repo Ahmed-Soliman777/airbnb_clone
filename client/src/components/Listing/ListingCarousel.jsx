@@ -5,12 +5,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import ListingCard from "./ListingCard";
 import { fetchWishlistCollections } from "@/store/Slices/wishlistSlice";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import WishlistDialog from "../Wishlist/WishlistDialog";
+import ListingCard from "./ListingCard";
 
 export default function PopularHomesCarousel({
   listings = [],
@@ -21,6 +20,8 @@ export default function PopularHomesCarousel({
   const showCreateDialog = useSelector(
     (state) => state.wishlist.showCreateDialog
   );
+  const direction = useSelector((state) => state.lang.direction);
+
   useEffect(() => {
     if (user) {
       dispatch(fetchWishlistCollections());
@@ -45,9 +46,22 @@ export default function PopularHomesCarousel({
         className="w-full relative"
       >
         {/* ----------------Arrows---------------- */}
-        <div className="absolute -top-13 right-0 flex gap-2">
-          <CarouselPrevious className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm bg-gray-100 hover:scale-110 transition-transform duration-300 disabled:cursor-not-allowed" />
-          <CarouselNext className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-100" />
+        <div
+          className={`absolute -top-13 flex gap-2 ${
+            direction === "rtl" ? "left-0" : "right-0"
+          }`}
+        >
+          {direction === "rtl" ? (
+            <>
+              <CarouselNext className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-100" />
+              <CarouselPrevious className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm bg-gray-100 hover:scale-110 transition-transform duration-300 disabled:cursor-not-allowed" />
+            </>
+          ) : (
+            <>
+              <CarouselPrevious className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm bg-gray-100 hover:scale-110 transition-transform duration-300 disabled:cursor-not-allowed" />
+              <CarouselNext className=" static translate-y-0 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-100" />
+            </>
+          )}
         </div>
 
         <CarouselContent className="-ml-2 md:-ml-4 gap-0">
