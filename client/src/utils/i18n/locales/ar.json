@@ -104,5 +104,32 @@
     "World": "العالم",
     "Find amazing places to stay around the globe": "ابحث عن أماكن رائعة للإقامة حول العالم",
     "Travel Now": "سافر الآن"
+  },
+  "listingDetails": {
+    "loadingListingDetails": "جاري تحميل تفاصيل القائمة...",
+    "listingNotFound": "القائمة غير موجودة.",
+    "entirePlace": "{{propertyType}} كامل في {{city}}، {{country}}",
+    "entirePlaceOnly": "{{propertyType}} كامل",
+    "guests": "نزلاء",
+    "bedrooms": "غرف نوم",
+    "bedroom": "غرفة نوم",
+    "bathrooms": "حمامات",
+    "bathroom": "حمام",
+    "guestFavourite": "المفضل لدى الضيوف",
+    "guestFavouriteDesc": "واحد من أكثر المنازل المحبوبة على Airbnb، حسب تقييم الضيوف",
+    "reviews": "التقييمات",
+    "hostedBy": "مستضاف من قبل {{hostName}}",
+    "superhost": "مضيف متميز",
+    "whatThisPlaceOffers": "ما يقدمه هذا المكان",
+    "selectCheckoutDate": "حدد تاريخ المغادرة",
+    "night": "ليلة واحدة",
+    "night_other": "{{count}} ليالي",
+    "minimumStay": "الحد الأدنى للإقامة: ليلتان",
+    "clearDates": "مسح التواريخ",
+    "reportThisListing": "الإبلاغ عن هذه القائمة",
+    "noReviewsYet": "لا توجد تقييمات بعد",
+    "noReviewsDesc": "لا تحتوي هذه القائمة على أي تقييمات حتى الآن. كن أول من يترك تقييمًا!",
+    "whereYoullSleep": "أين ستنام",
+    "bedroomInfo": "معلومات غرفة النوم غير متوفرة."
   }
   }
