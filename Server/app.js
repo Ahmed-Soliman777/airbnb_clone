@@ -32,7 +32,10 @@ const port = process.env.PORT || 3000;
 //CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend origin
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:4200",
+    ], // frontend origin
     credentials: true, // allow cookies
   })
 );
