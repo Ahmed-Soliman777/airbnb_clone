@@ -17,6 +17,7 @@ import { FlagOff, Info, MapPin, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 
 // const ICON_MAP = {
 //   Info,
@@ -32,6 +33,9 @@ import { useParams } from "react-router";
 // };
 
 const ListingDetails = () => {
+  // Translation hook
+  const { t } = useTranslation();
+  
   // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -212,7 +216,7 @@ const ListingDetails = () => {
   if (status === "loading") {
     return (
       <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <p className="text-xl text-gray-600">Loading listing details...</p>
+        <p className="text-xl text-gray-600">{t("listingDetails.loadingListingDetails")}</p>
       </div>
     );
   }
@@ -221,7 +225,7 @@ const ListingDetails = () => {
   if (!listingData) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <p className="text-xl text-gray-600">Listing not found.</p>
+        <p className="text-xl text-gray-600">{t("listingDetails.listingNotFound")}</p>
       </div>
     );
   }
@@ -252,17 +256,29 @@ const ListingDetails = () => {
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 {listingData.city && listingData.country
-                  ? `Entire ${listingData.propertyType} in ${listingData.city}, ${listingData.country}`
-                  : `Entire ${listingData.propertyType}`}
+                  ? t("listingDetails.entirePlace", {
+                      propertyType: listingData.propertyType,
+                      city: listingData.city,
+                      country: listingData.country,
+                    })
+                  : t("listingDetails.entirePlaceOnly", {
+                      propertyType: listingData.propertyType,
+                    })}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 {[
-                  listingData.maxGuests && `${listingData.maxGuests} guests`,
+                  listingData.maxGuests && `${listingData.maxGuests} ${t("listingDetails.guests")}`,
                   listingData.bedroomsCount &&
-                    `${listingData.bedroomsCount} bedrooms`,
+                    `${listingData.bedroomsCount} ${
+                      listingData.bedroomsCount > 1
+                        ? t("listingDetails.bedrooms")
+                        : t("listingDetails.bedroom")
+                    }`,
                   listingData.bathroomsCount &&
-                    `${listingData.bathroomsCount} bathroom${
-                      listingData.bathroomsCount > 1 ? "s" : ""
+                    `${listingData.bathroomsCount} ${
+                      listingData.bathroomsCount > 1
+                        ? t("listingDetails.bathrooms")
+                        : t("listingDetails.bathroom")
                     }`,
                 ]
                   .filter(Boolean)
@@ -276,14 +292,14 @@ const ListingDetails = () => {
                 <div className="flex items-center justify-center gap-3 sm:gap-5">
                   <GuestFavouriteIcon side="left" />
                   <div className="text-center font-semibold text-gray-800 w-12 sm:w-16 text-base sm:text-lg flex flex-col items-center">
-                    <span className="m-0">Guest</span>
-                    <span className="m-0">favourite</span>
+                    <span className="m-0">{t("listingDetails.guestFavourite").split(" ")[0]}</span>
+                    <span className="m-0">{t("listingDetails.guestFavourite").split(" ")[1]}</span>
                   </div>
                   <GuestFavouriteIcon side="right" />
                 </div>
 
                 <div className="text-sm sm:text-base">
-                  One of the most loved homes on Airbnb, according to guests
+                  {t("listingDetails.guestFavouriteDesc")}
                 </div>
               </div>
 
@@ -300,7 +316,7 @@ const ListingDetails = () => {
                 <p className="font-semibold text-gray-800 text-sm">
                   {listingData.reviewsCount}
                 </p>
-                <p>Reviews</p>
+                <p>{t("listingDetails.reviews")}</p>
               </div>
             </div>
 
@@ -313,9 +329,9 @@ const ListingDetails = () => {
               />
               <div>
                 <p className="text-sm sm:text-base font-semibold">
-                  Hosted by {listingData.hostName}
+                  {t("listingDetails.hostedBy", { hostName: listingData.hostName })}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500">Superhost</p>
+                <p className="text-xs sm:text-sm text-gray-500">{t("listingDetails.superhost")}</p>
               </div>
             </div>
 
@@ -374,7 +390,7 @@ const ListingDetails = () => {
               {listingData.amenities.length > 0 && (
                 <section ref={amenitiesRef}>
                   <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
-                    What this place offers
+                    {t("listingDetails.whatThisPlaceOffers")}
                   </h3>
                   <Amenity amenities={listingData.amenities} />
                 </section>
@@ -385,11 +401,11 @@ const ListingDetails = () => {
               <section ref={availabilityRef}>
                 <h3 className="text-lg sm:text-xl font-semibold mb-4">
                   {nights > 0
-                    ? `${nights} night${nights > 1 ? "s" : ""}`
-                    : "Select checkout date"}
+                    ? t("listingDetails.night", { count: nights })
+                    : t("listingDetails.selectCheckoutDate")}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Minimum stay: 2 nights
+                  {t("listingDetails.minimumStay", { count: 2 })}
                 </p>
                 <Calendar
                   mode="range"
@@ -413,7 +429,7 @@ const ListingDetails = () => {
                     document.cookie = "listingDate=; path=/; max-age=0";
                   }}
                 >
-                  Clear dates
+                  {t("listingDetails.clearDates")}
                 </div>
               </section>
             </div>
@@ -429,7 +445,7 @@ const ListingDetails = () => {
               >
                 <FlagOff size={16} className="sm:w-[18px] sm:h-[18px]" />
                 <p className="underline underline-offset-1 font-semibold text-xs sm:text-[0.9rem]">
-                  Report this listing
+                  {t("listingDetails.reportThisListing")}
                 </p>
               </div>
             </div>
@@ -446,10 +462,9 @@ const ListingDetails = () => {
             </>
           ) : (
             <div className="py-8">
-              <h2 className="text-2xl font-semibold mb-4">No reviews yet</h2>
+              <h2 className="text-2xl font-semibold mb-4">{t("listingDetails.noReviewsYet")}</h2>
               <p className="text-gray-600">
-                This listing doesn't have any reviews yet. Be the first to leave
-                a review!
+                {t("listingDetails.noReviewsDesc")}
               </p>
             </div>
           )}

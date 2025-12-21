@@ -2,16 +2,32 @@ const mongoose = require('mongoose');
 
 const serviceSchema = new mongoose.Schema({
     title: {
-        type: String,
-        required: [true, 'Title is required'],
-        trim: true,
-        maxlength: [200, 'Title cannot exceed 200 characters']
+        en: {
+            type: String,
+            required: [true, 'Title is required'],
+            trim: true,
+            maxlength: [200, 'Title cannot exceed 200 characters']
+        },
+        ar: {
+            type: String,
+            required: [true, 'Title is required'],
+            trim: true,
+            maxlength: [200, 'Title cannot exceed 200 characters']
+        },
     },
     description: {
-        type: String,
-        required: [true, 'Description is required'],
-        trim: true,
-        maxlength: [5000, 'Description cannot exceed 5000 characters']
+        en: {
+            type: String,
+            required: [true, 'Description is required'],
+            trim: true,
+            maxlength: [5000, 'Description cannot exceed 5000 characters']
+        },
+        ar: {
+            type: String,
+            required: [true, 'Description is required'],
+            trim: true,
+            maxlength: [5000, 'Description cannot exceed 5000 characters']
+        },
     },
     serviceCategory: {
         type: String,
@@ -51,12 +67,24 @@ const serviceSchema = new mongoose.Schema({
     },
     packages: [{
         name: {
-            type: String,
-            trim: true
+            en: {
+                type: String,
+                trim: true
+            },
+            ar: {
+                type: String,
+                trim: true
+            },
         },
         description: {
-            type: String,
-            trim: true
+            en: {
+                type: String,
+                trim: true
+            },
+            ar: {
+                type: String,
+                trim: true
+            },
         },
         price: {
             type: Number,

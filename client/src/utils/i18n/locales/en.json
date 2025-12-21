@@ -52,6 +52,12 @@
     "Gift cards": "Gift cards",
     "Airbnb.org emergency stays": "Airbnb.org emergency stays"
   },
+  "home": {
+    "recentlyViewed": "Recently Viewed",
+    "popularHomes": "Popular homes in Cairo",
+    "loadingListings": "Loading listings...",
+    "error": "Error"
+  },
   "help":{
   "Hi, how can we help?": " Hi, how can we help ?",
   "Search": "Search",
@@ -105,6 +111,33 @@
     "World": "World",
     "Find amazing places to stay around the globe": "Find amazing places to stay around the globe",
     "Travel Now": "Travel Now"
+  },
+  "listingDetails": {
+    "loadingListingDetails": "Loading listing details...",
+    "listingNotFound": "Listing not found.",
+    "entirePlace": "Entire {{propertyType}} in {{city}}, {{country}}",
+    "entirePlaceOnly": "Entire {{propertyType}}",
+    "guests": "guests",
+    "bedrooms": "bedrooms",
+    "bedroom": "bedroom",
+    "bathrooms": "bathrooms",
+    "bathroom": "bathroom",
+    "guestFavourite": "Guest favourite",
+    "guestFavouriteDesc": "One of the most loved homes on Airbnb, according to guests",
+    "reviews": "Reviews",
+    "hostedBy": "Hosted by {{hostName}}",
+    "superhost": "Superhost",
+    "whatThisPlaceOffers": "What this place offers",
+    "selectCheckoutDate": "Select checkout date",
+    "night": "{{count}} night",
+    "night_other": "{{count}} nights",
+    "minimumStay": "Minimum stay: {{count}} nights",
+    "clearDates": "Clear dates",
+    "reportThisListing": "Report this listing",
+    "noReviewsYet": "No reviews yet",
+    "noReviewsDesc": "This listing doesn't have any reviews yet. Be the first to leave a review!",
+    "whereYoullSleep": "Where you'll sleep",
+    "bedroomInfo": "Bedroom information not provided."
   }
 
 }
