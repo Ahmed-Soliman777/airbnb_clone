@@ -1,0 +1,85 @@
+<aside class="w-64 h-screen bg-white shadow-lg flex flex-col">
+  <!-- Title -->
+  <div class="flex items-center p-6">
+    <div class="bg-[#ffdedf] rounded-full p-1 mr-2 flex items-center justify-center">
+      <img src="airbnb-logo.png" alt="airbnb logo" class="w-6 h-6" />
+    </div>
+    <h1 class="text-lg font-medium text-gray-800">
+      <span class="text-[#ff5c61]">airbnb</span>Admin
+    </h1>
+  </div>
+
+  <!-- -----------------menu section----------------- -->
+  <div class="px-3 space-y-4 flex-1">
+    <!-- Dashboard -->
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">dashboard</mat-icon>
+      <a>Dashboard</a>
+    </div>
+
+    <!-- Users -->
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">group</mat-icon>
+      <a>Users</a>
+    </div>
+
+    <!-- Listings -->
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">home</mat-icon>
+      <a>Listings</a>
+    </div>
+
+    <!-- Bookings -->
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">calendar_month</mat-icon>
+      <a>Bookings</a>
+    </div>
+
+    <!-- transactions -->
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">payments</mat-icon>
+      <a>Transactions</a>
+    </div>
+  </div>
+
+  <!-- settings -->
+  <div class="px-3 mb-4">
+    <div
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">settings</mat-icon>
+      <a>Settings</a>
+    </div>
+  </div>
+
+  <!-- Logout Button -->
+  <div class="p-6">
+    <!-- admin name and avatar -->
+    <div class="flex items-center justify-between mb-4">
+      <!-- admin avatar -->
+      <div class="flex items-center gap-3">
+        <div class="bg-gray-200 rounded-full p-1 flex items-center justify-center">
+          <img src="admin-avatar.png" alt="Admin Avatar" class="w-10 h-10 rounded-full" />
+        </div>
+        <div>
+          <p class="text-gray-800 font-medium">Admin Name</p>
+          <p class="text-sm text-gray-500">Administrator</p>
+        </div>
+      </div>
+      <!-- logout icon -->
+      <button (click)="onLogout()" class="rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </div>
+</aside>

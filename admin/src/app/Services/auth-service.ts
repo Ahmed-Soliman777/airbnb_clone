@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -11,6 +12,7 @@ export class AuthService {
   private apiUrl = 'http://localhost:3000/api';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+  private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) {}
 
@@ -54,10 +56,17 @@ export class AuthService {
   }
 
   setToken(token: string): void {
-    document.cookie = `token=${token}; path=/; SameSite=Lax`;
+    // Ensure this code only runs in the browser by checking the platform
+    if (isPlatformBrowser(this.platformId)) {
+      document.cookie = `token=${token}; path=/; SameSite=Lax`;
+    }
   }
 
   getToken(): string | null {
+    // Ensure this code only runs in the browser by checking the platform
+    if (!isPlatformBrowser(this.platformId)) {
+      return null;
+    }
     const name = 'token=';
     const decodedCookie = decodeURIComponent(document.cookie);
     const cookies = decodedCookie.split(';');
@@ -71,7 +80,9 @@ export class AuthService {
   }
 
   removeToken(): void {
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    if (isPlatformBrowser(this.platformId)) {
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
   }
 
   isLoggedIn(): boolean {
