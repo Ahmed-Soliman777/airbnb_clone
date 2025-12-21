@@ -1,13 +1,16 @@
 <aside class="w-64 h-screen bg-white shadow-lg flex flex-col">
   <!-- Title -->
-  <div class="p-6 border-b">
-    <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+  <div class="flex items-center p-6 border-b">
+    <img src="airbnb-logo.png" alt="airbnb logo" class="w-8 h-8 mr-2" />
+    <h1 class="text-lg font-medium text-gray-800">
+      <span class="text-[#ff5c61]">airbnb</span>Admin
+    </h1>
   </div>
 
   <!-- Welcome Message -->
   <div class="p-6 flex-1">
     <p class="text-lg text-gray-700">
-      Welcome, <span class="font-semibold text-indigo-600">{{ user?.firstName }}</span>
+      Welcome, <span class="font-semibold text-primary">{{ user?.firstName }}</span>
     </p>
   </div>
 
