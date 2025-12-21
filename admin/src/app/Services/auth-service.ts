@@ -56,13 +56,14 @@ export class AuthService {
   }
 
   setToken(token: string): void {
+    // Ensure this code only runs in the browser by checking the platform
     if (isPlatformBrowser(this.platformId)) {
       document.cookie = `token=${token}; path=/; SameSite=Lax`;
     }
   }
 
   getToken(): string | null {
-    // Ensure this code only runs in the browser
+    // Ensure this code only runs in the browser by checking the platform
     if (!isPlatformBrowser(this.platformId)) {
       return null;
     }
