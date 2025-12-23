@@ -12,6 +12,7 @@ import ImagesStep from "./Steps/HomeSteps/ImagesStep";
 import AmenitiesStep from "./Steps/HomeSteps/AmenitiesStep";
 import AvailabilityStep from "./Steps/HomeSteps/AvailabilityStep";
 import StepIndicator from "./StepIndicator";
+import { Loader2 } from "lucide-react";
 
 const steps = [
   "Basic Details",
@@ -147,10 +148,12 @@ const HomeListingForm = ({ onBack }) => {
             className="min-w-[120px]"
           >
             {status === "loading"
-              ? "Submitting..."
+              ? <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...
+              </>
               : currentStep === steps.length - 1
-              ? "Submit Listing"
-              : "Next"}
+                ? "Submit Listing"
+                : "Next"}
           </Button>
         </div>
       </div>

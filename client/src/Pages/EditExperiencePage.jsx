@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { getExperienceById, updateExperience } from "@/store/Slices/experienceSlice";
 import { toast } from "sonner";
-import { ArrowLeft, Compass, MapPin, DollarSign, Users, Clock, Calendar, CheckCircle, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Compass, MapPin, DollarSign, Users, Clock, Calendar, CheckCircle, Loader2, Plus, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,16 +10,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import axios from "axios";
+
+const fitnessLevels = [
+    "easy",
+    "moderate",
+    "challenging",
+    "extreme",
+];
 
 const experienceTypes = [
-    "Adventure",
-    "Art & Culture",
-    "Entertainment",
-    "Food & Drink",
-    "Nature & Outdoors",
-    "Sports",
-    "Tours",
-    "Wellness",
+    "adventure",
+    "cultural",
+    "food",
+    "wellness",
+    "workshop",
+    "entertainment",
+    "nature",
+    "sports",
+    "tours",
 ];
 
 const daysOfWeek = [
@@ -37,8 +45,11 @@ const daysOfWeek = [
 export default function EditExperiencePage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { experience, status } = useSelector((state) => state.experience);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [newImages, setNewImages] = useState([]);
+    const [removedImages, setRemovedImages] = useState([]);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -51,11 +62,15 @@ export default function EditExperiencePage() {
         pricePerPerson: 0,
         duration: "",
         groupSize: { min: 1, max: 10 },
-        schedule: [],
+        day: "",
+        startTime: "",
+        endTime: "",
         ageRequirement: "",
         fitnessLevel: "",
         requirements: [],
         inclusions: [],
+        images: [],
+        schedule: [],
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,33 +78,43 @@ export default function EditExperiencePage() {
     const [newInclusion, setNewInclusion] = useState("");
     const [newSchedule, setNewSchedule] = useState({ day: "", time: "" });
 
-    useEffect(() => {
-        if (id) {
-            dispatch(getExperienceById(id));
-        }
-    }, [dispatch, id]);
 
     useEffect(() => {
-        if (experience && experience._id === id) {
-            setFormData({
-                title: experience.title || "",
-                description: experience.description || "",
-                experienceType: experience.experienceType || "",
-                street: experience.street || "",
-                city: experience.city || "",
-                country: experience.country || "",
-                coordinates: experience.coordinates || { lat: 0, lng: 0 },
-                pricePerPerson: experience.pricePerPerson || 0,
-                duration: experience.duration || "",
-                groupSize: experience.groupSize || { min: 1, max: 10 },
-                schedule: experience.schedule || [],
-                ageRequirement: experience.ageRequirement || "",
-                fitnessLevel: experience.fitnessLevel || "",
-                requirements: experience.requirements || [],
-                inclusions: experience.inclusions || [],
-            });
-        }
-    }, [experience, id]);
+        const fetchExperience = async () => {
+            try {
+                setLoading(true);
+
+                const { data } = await axios.get(`/api/experiences/${id}`);
+                console.log("Fetched data:", data.data);
+                setFormData({
+                    title: data.data.title ?? "",
+                    description: data.data.description ?? "",
+                    experienceType: data.data.experienceType ?? "",
+                    street: data.data.location?.street ?? "",
+                    city: data.data.location?.city ?? "",
+                    country: data.data.location?.country ?? "",
+                    coordinates: data.data.location?.coordinates ?? { lat: 0, lng: 0 },
+                    pricePerPerson: data.data.pricePerPerson ?? 0,
+                    duration: data.data.duration ?? "",
+                    groupSize: data.data.groupSize ?? { min: 1, max: 10 },
+                    day: data.data.schedule.day ?? "",
+                    startTime: data.data.schedule.startTime ?? "",
+                    endTime: data.data.schedule.endTime ?? "",
+                    ageRequirement: data.data.ageRequirement ?? "",
+                    fitnessLevel: data.data.fitnessLevel ?? "",
+                    requirements: data.data.requirements ?? [],
+                    inclusions: data.data.inclusions ?? [],
+                    images: data.data.images ?? [],
+                    schedule: data.data.schedule ?? [],
+                });
+            } catch (err) {
+                setError("Failed to load listing");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchExperience();
+    }, [id]);
 
     const handleChange = (field, value) => {
         setFormData((prev) => ({
@@ -107,6 +132,17 @@ export default function EditExperiencePage() {
             },
         }));
     };
+
+    const handleCoordinatesPick = (coords) => {
+        setFormData((prev) => ({
+            ...prev,
+            coordinates: {
+                lat: coords.lat,
+                lng: coords.lng,
+            },
+        }));
+    };
+
 
     const handleGroupSizeChange = (field, value) => {
         setFormData((prev) => ({
@@ -169,22 +205,93 @@ export default function EditExperiencePage() {
         }));
     };
 
+    const handleRemoveImage = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
+        }));
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
         try {
-            await dispatch(updateExperience({ id, data: formData })).unwrap();
+            const formDataToSend = new FormData();
+
+            // Append all fields
+            formDataToSend.append("title", formData.title);
+            formDataToSend.append("description", formData.description);
+            formDataToSend.append("experienceType", formData.experienceType);
+            formDataToSend.append(
+                "location",
+                JSON.stringify({
+                    street: formData.street,
+                    city: formData.city,
+                    country: formData.country,
+                    coordinates: formData.coordinates,
+                })
+            );
+            formDataToSend.append("pricePerPerson", formData.pricePerPerson);
+            formDataToSend.append("duration", formData.duration);
+            formDataToSend.append("groupSize", JSON.stringify(formData.groupSize));
+            formDataToSend.append("schedule", JSON.stringify(formData.schedule));
+            formDataToSend.append("ageRequirement", formData.ageRequirement);
+            formDataToSend.append("fitnessLevel", formData.fitnessLevel);
+            formDataToSend.append("requirements", JSON.stringify(formData.requirements));
+            formDataToSend.append("inclusions", JSON.stringify(formData.inclusions));
+
+            // Append removed images
+            if (removedImages.length > 0) {
+                formDataToSend.append("removedImages", JSON.stringify(removedImages));
+            }
+
+            // Append new images
+            newImages.forEach((file) => {
+                formDataToSend.append("images", file);
+            });
+
+            await axios.put(`/api/experiences/${id}`, formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
             toast.success("Experience updated successfully!");
             navigate("/host/dashboard");
-        } catch (error) {
-            toast.error(error?.message || "Failed to update experience");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Update failed");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    if (status === "loading") {
+    const LocationPicker = ({ coordinates, onPick }) => {
+        useMapEvents({
+            click(e) {
+                onPick({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                });
+            },
+        });
+        if (!coordinates?.lat || !coordinates?.lng) return null;
+
+        return <Marker position={[coordinates.lat, coordinates.lng]} />;
+    }
+
+    function RecenterMap({ coordinates }) {
+        const map = useMap();
+        useEffect(() => {
+            if (coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number") {
+                map.setView([coordinates.lat, coordinates.lng], map.getZoom());
+            }
+        }, [coordinates, map]);
+        return null;
+    }
+
+    console.log("formData", formData);
+
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -325,6 +432,104 @@ export default function EditExperiencePage() {
                                 />
                             </div>
                         </div>
+                        <div className="relative z-0">
+                            <MapContainer
+                                center={formData.coordinates}
+                                zoom={17}
+                                scrollWheelZoom={true}
+                                style={{ height: "300px", width: "100%" }}
+                            >
+                                <TileLayer
+                                    attribution='&copy; OpenStreetMap contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <LocationPicker
+                                    coordinates={formData.coordinates}
+                                    onPick={handleCoordinatesPick}
+                                />
+                                <RecenterMap coordinates={formData.coordinates} />
+                            </MapContainer>
+
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Images */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Image className="h-5 w-5" />
+                            Images
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="">
+                            <div className="space-y-2">
+                                <Label htmlFor="images">Images</Label>
+                                <Input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewImages((prev) => [...prev, ...Array.from(e.target.files)])
+                                    }
+                                />
+
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                                {/* Existing images */}
+                                {formData.images.map((image, index) => (
+                                    <div
+                                        key={image._id || index}
+                                        className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+                                    >
+                                        <img
+                                            src={image.url}
+                                            alt={`Image ${index + 1}`}
+                                            className="w-full h-40 object-cover"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
+                                            onClick={() => {
+                                                setRemovedImages((prev) => [...prev, image._id]);
+                                                handleRemoveImage(index);
+                                            }}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+
+                                {/* New local images */}
+                                {newImages.map((file, index) => {
+                                    const preview = URL.createObjectURL(file);
+                                    return (
+                                        <div
+                                            key={`local-${index}`}
+                                            className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+                                        >
+                                            <img
+                                                src={preview}
+                                                alt={`Local ${index + 1}`}
+                                                className="w-full h-40 object-cover"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
+                                                onClick={() => {
+                                                    setNewImages((prev) => prev.filter((_, i) => i !== index));
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -411,11 +616,14 @@ export default function EditExperiencePage() {
                         <div className="flex flex-wrap gap-2">
                             {formData.schedule.map((slot, index) => (
                                 <Badge key={index} variant="secondary" className="gap-1">
-                                    {slot.day} at {slot.time}
-                                    <X
+                                    {slot.day} at {slot.startTime || slot.time}
+                                    <button
+                                        type="button"
                                         className="h-3 w-3 cursor-pointer"
                                         onClick={() => removeSchedule(index)}
-                                    />
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
                                 </Badge>
                             ))}
                         </div>
@@ -451,9 +659,11 @@ export default function EditExperiencePage() {
                                         <SelectValue placeholder="Select level" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Easy">Easy</SelectItem>
-                                        <SelectItem value="Moderate">Moderate</SelectItem>
-                                        <SelectItem value="Challenging">Challenging</SelectItem>
+                                        {fitnessLevels.map((level) => (
+                                            <SelectItem key={level} value={level}>
+                                                {level}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -478,10 +688,13 @@ export default function EditExperiencePage() {
                                 {formData.requirements.map((req, index) => (
                                     <Badge key={index} variant="outline" className="gap-1">
                                         {req}
-                                        <X
+                                        <button
+                                            type="button"
                                             className="h-3 w-3 cursor-pointer"
                                             onClick={() => removeRequirement(index)}
-                                        />
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
                                     </Badge>
                                 ))}
                             </div>
@@ -506,10 +719,13 @@ export default function EditExperiencePage() {
                                 {formData.inclusions.map((inc, index) => (
                                     <Badge key={index} variant="secondary" className="gap-1">
                                         {inc}
-                                        <X
+                                        <button
+                                            type="button"
                                             className="h-3 w-3 cursor-pointer"
                                             onClick={() => removeInclusion(index)}
-                                        />
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
                                     </Badge>
                                 ))}
                             </div>

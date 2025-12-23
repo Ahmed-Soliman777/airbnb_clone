@@ -125,7 +125,7 @@ const CollectionDetail = () => {
                 As you search, click the heart icon to save your favorite places
                 and Experiences to a wishlist.
               </p>
-              <Button onClick={() => navigate("/")}>Start Exploring</Button>
+              <Button onClick={() => navigate("/homes")}>Start Exploring</Button>
             </div>
           </div>
         )}

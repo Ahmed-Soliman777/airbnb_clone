@@ -81,7 +81,7 @@ const ImagesStep = ({ data, onUpdate }) => {
                     onClick={() => removeImage(index)}
                     className="absolute top-2 right-2 w-8 h-8 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 color-white text-white" />
                   </button>
                   {index === 0 && (
                     <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">

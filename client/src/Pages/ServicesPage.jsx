@@ -18,7 +18,7 @@ const ServicesPage = () => {
   const servicesByCity = useMemo(() => {
     const list = Array.isArray(services) ? services : [];
     if (list.length === 0) return {};
-    
+
     return list.reduce((acc, svc) => {
       const city = svc.city || "Other";
       if (!acc[city]) {
@@ -53,25 +53,13 @@ const ServicesPage = () => {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Hero */}
-      <section className="bg-gradient-to-b from-accent to-background py-12">
-        <div className="container max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Find Local Services
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Professional services from trusted providers. Book the help you need.
-          </p>
-        </div>
-      </section>
-
       {/* Content */}
       <main className="container max-w-7xl mx-auto px-4 py-8">
         {cities.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">No services available yet.</p>
-            <Link 
-              to="/" 
+            <Link
+              to="/services"
               className="text-primary hover:underline mt-2 inline-block"
             >
               List your first service

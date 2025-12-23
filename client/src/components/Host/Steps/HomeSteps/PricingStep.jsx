@@ -1,8 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { generatePricePerNight } from "@/utils/ai";
 import { DollarSign } from "lucide-react";
+import { useState } from "react";
 
 const PricingStep = ({ data, onUpdate }) => {
+
+  const [loading, setLoading] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -31,6 +36,29 @@ const PricingStep = ({ data, onUpdate }) => {
             }
             className="mt-1.5"
           />
+          <button
+            type="button"
+            disabled={
+              loading ||
+              data.coordinates?.lat == null ||
+              data.coordinates?.lng == null
+            }
+            onClick={async () => {
+              try {
+                setLoading(true);
+                const { lat, lng } = data.coordinates;
+                const text = await generatePricePerNight(lat, lng);
+                onUpdate({ pricePerNight: parseFloat(text) || 0 });
+              } catch (err) {
+                console.error("Price generation failed:", err);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="bg-[#ff385c] text-white px-4 py-2 rounded-md mt-2 disabled:opacity-50"
+          >
+            {loading ? "Generating..." : "Generate with AI"}
+          </button>
           <p className="text-sm text-muted-foreground mt-1.5">
             Base price for one night's stay
           </p>

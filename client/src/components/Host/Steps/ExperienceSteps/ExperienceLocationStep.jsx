@@ -1,8 +1,44 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 
 export default function ExperienceLocationStep({ data, onUpdate }) {
+
+  const handleChange = (field, value) => {
+    if (field === "lat" || field === "lng") {
+      onUpdate({
+        coordinates: {
+          ...data.coordinates,
+          [field]: parseFloat(value) || 0,
+        },
+      });
+    } else {
+      onUpdate({ [field]: value });
+    }
+  };
+
+  const LocationPicker = ({ coordinates, onPick }) => {
+    useMapEvents({
+      click(e) {
+        onPick({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+        });
+      },
+    });
+    if (!coordinates?.lat || !coordinates?.lng) return null;
+
+    return <Marker position={[coordinates.lat, coordinates.lng]} />;
+  }
+
+  const position = data.coordinates?.lat && data.coordinates?.lng
+    ? [data.coordinates.lat, data.coordinates.lng]
+    : [30.0445, 31.24];
+
+
+  console.log("BODY:", data);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -109,6 +145,22 @@ export default function ExperienceLocationStep({ data, onUpdate }) {
             )}
           </div>
         )}
+        <div className="relative z-0 overflow-hidden rounded-lg">
+          <MapContainer center={position} zoom={13} scrollWheelZoom={true} style={{ height: "300px", width: "100%" }}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <LocationPicker
+              coordinates={data.coordinates}
+              onPick={(coords) =>
+                onUpdate({
+                  coordinates: coords,
+                })
+              }
+            />
+          </MapContainer>
+        </div>
       </div>
     </div>
   );

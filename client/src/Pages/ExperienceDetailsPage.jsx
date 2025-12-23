@@ -12,32 +12,32 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import {
-    ArrowLeft,
-    Star,
-    Clock,
-    Users,
-    MapPin,
-    Share,
-    Heart,
-    Shield,
-    Check,
-    Calendar as CalendarIcon,
-    Minus,
-    Plus,
+  ArrowLeft,
+  Star,
+  Clock,
+  Users,
+  MapPin,
+  Share,
+  Heart,
+  Shield,
+  Check,
+  Calendar as CalendarIcon,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { format } from "date-fns";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 const ExperienceDetailsPage = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    // const { toast } = useToast();
-    const { experience, status } = useSelector((state) => state.experience);
-    const { user } = useSelector((state) => state.auth);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  // const { toast } = useToast();
+  const { experience, status } = useSelector((state) => state.experience);
 
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [guestCount, setGuestCount] = useState(1);
-    const [dateOpen, setDateOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [guestCount, setGuestCount] = useState(1);
+  const [dateOpen, setDateOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getExperienceById(id));
@@ -64,119 +64,119 @@ const ExperienceDetailsPage = () => {
     );
   }
 
-    const {
-        title,
-        description,
-        images,
-        city,
-        country,
-        street,
+  const {
+    title,
+    description,
+    images,
+    location,
+    pricePerPerson,
+    duration,
+    groupSize,
+    experienceType,
+    ageRequirement,
+    fitnessLevel,
+    requirements,
+    inclusions,
+    schedule,
+    rating = 4.9,
+    reviewCount = 0,
+  } = experience;
+
+
+  const handleReserve = () => {
+
+    if (!document.cookie) {
+      toast({
+        title: "Login Required",
+        description: "Please login to make a reservation.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (!selectedDate) {
+      toast({
+        title: "Select a Date",
+        description: "Please select a date for your experience.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalPrice = pricePerPerson * guestCount;
+
+    navigate("/checkout", {
+      state: {
+        type: "experience",
+        item: experience,
+        checkInDate: selectedDate,
+        checkOutDate: selectedDate,
+        guests: guestCount,
+        totalPrice,
         pricePerPerson,
-        duration,
-        groupSize,
-        experienceType,
-        ageRequirement,
-        fitnessLevel,
-        requirements,
-        inclusions,
-        schedule,
-        rating = 4.9,
-        reviewCount = 0,
-    } = experience;
+      },
+    });
+  };
 
-    const handleReserve = () => {
-        if (!user) {
-            toast({
-                title: "Login Required",
-                description: "Please login to make a reservation.",
-                variant: "destructive",
-            });
-            navigate("/login");
-            return;
-        }
+  const maxGuests = groupSize?.max || 10;
 
-        if (!selectedDate) {
-            toast({
-                title: "Select a Date",
-                description: "Please select a date for your experience.",
-                variant: "destructive",
-            });
-            return;
-        }
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 bg-background border-b">
+        <div className="container max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link
+              to="/experiences"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-medium">Back</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon">
+                <Share className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Heart className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-        const totalPrice = pricePerPerson * guestCount;
-
-        navigate("/checkout", {
-            state: {
-                type: "experience",
-                item: experience,
-                checkInDate: selectedDate,
-                checkOutDate: selectedDate,
-                guests: guestCount,
-                totalPrice,
-                pricePerPerson,
-            },
-        });
-    };
-
-    const maxGuests = groupSize?.max || 10;
-
-    return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-background border-b">
-                <div className="container max-w-6xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <Link
-                            to="/experiences"
-                            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="font-medium">Back</span>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon">
-                                <Share className="w-5 h-5" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                                <Heart className="w-5 h-5" />
-                            </Button>
-                        </div>
-                    </div>
+      {/* Image Gallery */}
+      <section className="container max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-4 gap-2 rounded-xl overflow-hidden">
+          {images && images.length > 0 ? (
+            <>
+              <div className="col-span-4 md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto">
+                <img
+                  src={(typeof images[0] === 'string' ? images[0] : images[0]?.url) || "/placeholder.svg"}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "/placeholder.svg"; }}
+                />
+              </div>
+              {images.slice(1, 5).map((img, index) => (
+                <div key={index} className="hidden md:block aspect-[4/3]">
+                  <img
+                    src={(typeof img === 'string' ? img : img?.url) || "/placeholder.svg"}
+                    alt={`${title} ${index + 2}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = "/placeholder.svg"; }}
+                  />
                 </div>
-            </header>
-
-            {/* Image Gallery */}
-            <section className="container max-w-6xl mx-auto px-4 py-6">
-                <div className="grid grid-cols-4 gap-2 rounded-xl overflow-hidden">
-                    {images && images.length > 0 ? (
-                        <>
-                            <div className="col-span-4 md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto">
-                                <img
-                                    src={(typeof images[0] === 'string' ? images[0] : images[0]?.url) || "/placeholder.svg"}
-                                    alt={title}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => { e.target.src = "/placeholder.svg"; }}
-                                />
-                            </div>
-                            {images.slice(1, 5).map((img, index) => (
-                                <div key={index} className="hidden md:block aspect-[4/3]">
-                                    <img
-                                        src={(typeof img === 'string' ? img : img?.url) || "/placeholder.svg"}
-                                        alt={`${title} ${index + 2}`}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => { e.target.src = "/placeholder.svg"; }}
-                                    />
-                                </div>
-                            ))}
-                        </>
-                    ) : (
-                        <div className="col-span-4 aspect-[16/9] bg-muted rounded-xl flex items-center justify-center">
-                            <p className="text-muted-foreground">No images available</p>
-                        </div>
-                    )}
-                </div>
-            </section>
+              ))}
+            </>
+          ) : (
+            <div className="col-span-4 aspect-[16/9] bg-muted rounded-xl flex items-center justify-center">
+              <p className="text-muted-foreground">No images available</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Content */}
       <main className="container max-w-6xl mx-auto px-4 py-6">
@@ -206,7 +206,7 @@ const ExperienceDetailsPage = () => {
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
                   <span>
-                    {[street, city, country].filter(Boolean).join(", ")}
+                    {[location?.street, location?.city, location?.country].filter(Boolean).join(", ")}
                   </span>
                 </div>
               </div>
@@ -267,51 +267,67 @@ const ExperienceDetailsPage = () => {
             {(ageRequirement ||
               fitnessLevel ||
               (requirements && requirements.length > 0)) && (
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-4">
+                    Guest requirements
+                  </h2>
+                  <div className="space-y-3">
+                    {ageRequirement && (
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-muted-foreground" />
+                        <span>Age: {ageRequirement}</span>
+                      </div>
+                    )}
+                    {fitnessLevel && (
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-muted-foreground" />
+                        <span>Fitness level: {fitnessLevel}</span>
+                      </div>
+                    )}
+                    {requirements &&
+                      requirements.map((req, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-muted-foreground" />
+                          <span>{req}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+            {/* Schedule */}
+            {schedule && schedule.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-foreground mb-4">
-                  Guest requirements
+                  Available dates
                 </h2>
-                <div className="space-y-3">
-                  {ageRequirement && (
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-muted-foreground" />
-                      <span>Age: {ageRequirement}</span>
-                    </div>
-                  )}
-                  {fitnessLevel && (
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-muted-foreground" />
-                      <span>Fitness level: {fitnessLevel}</span>
-                    </div>
-                  )}
-                  {requirements &&
-                    requirements.map((req, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-muted-foreground" />
-                        <span>{req}</span>
-                      </div>
-                    ))}
+                <div className="flex flex-wrap gap-2">
+                  {schedule.map((slot, index) => (
+                    <Badge key={index} variant="outline" className="py-2 px-3">
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      {slot.day} {`at ${slot.startTime}`} {`to ${slot.endTime}`}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}
 
-                        {/* Schedule */}
-                        {schedule && schedule.length > 0 && (
-                            <div>
-                                <h2 className="text-xl font-semibold text-foreground mb-4">
-                                    Available dates
-                                </h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {schedule.map((slot, index) => (
-                                        <Badge key={index} variant="outline" className="py-2 px-3">
-                                            <CalendarIcon className="w-4 h-4 mr-2" />
-                                            {slot.day || slot} {slot.time && `at ${slot.time}`}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+            {/* leadlet location map */}
+            <div className="relative z-0 overflow-hidden rounded-lg">
+              <MapContainer center={[location?.coordinates?.lat, location?.coordinates?.lng]} zoom={17} scrollWheelZoom={true} style={{ height: "300px", width: "100%" }}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={[location?.coordinates?.lat, location?.coordinates?.lng]}>
+                  <Popup>
+                    A pretty CSS3 popup. <br /> Easily customizable.
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </div>
+
 
           {/* Right Column - Booking Card */}
           <div className="lg:col-span-1">
@@ -321,98 +337,98 @@ const ExperienceDetailsPage = () => {
                 <span className="text-muted-foreground">/ person</span>
               </div>
 
-                            <div className="space-y-4 mb-6">
-                                {/* Date Selector */}
-                                <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                                    <PopoverTrigger asChild>
-                                        <button className="w-full border rounded-lg p-3 text-left hover:border-foreground transition-colors">
-                                            <label className="text-xs font-medium text-muted-foreground">
-                                                DATE
-                                            </label>
-                                            <p className="font-medium">
-                                                {selectedDate
-                                                    ? format(selectedDate, "MMM d, yyyy")
-                                                    : "Select a date"}
-                                            </p>
-                                        </button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={selectedDate}
-                                            onSelect={(date) => {
-                                                setSelectedDate(date);
-                                                setDateOpen(false);
-                                            }}
-                                            disabled={(date) => date < new Date()}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+              <div className="space-y-4 mb-6">
+                {/* Date Selector */}
+                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="w-full border rounded-lg p-3 text-left hover:border-foreground transition-colors">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        DATE
+                      </label>
+                      <p className="font-medium">
+                        {selectedDate
+                          ? format(selectedDate, "MMM d, yyyy")
+                          : "Select a date"}
+                      </p>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setDateOpen(false);
+                      }}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
 
-                                {/* Guest Selector */}
-                                <div className="border rounded-lg p-3">
-                                    <label className="text-xs font-medium text-muted-foreground">
-                                        GUESTS
-                                    </label>
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-medium">{guestCount} guest{guestCount > 1 ? "s" : ""}</p>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                                                disabled={guestCount <= 1}
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </Button>
-                                            <span className="w-8 text-center">{guestCount}</span>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                onClick={() => setGuestCount(Math.min(maxGuests, guestCount + 1))}
-                                                disabled={guestCount >= maxGuests}
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                {/* Guest Selector */}
+                <div className="border rounded-lg p-3">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    GUESTS
+                  </label>
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{guestCount} guest{guestCount > 1 ? "s" : ""}</p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
+                        disabled={guestCount <= 1}
+                      >
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                      <span className="w-8 text-center">{guestCount}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setGuestCount(Math.min(maxGuests, guestCount + 1))}
+                        disabled={guestCount >= maxGuests}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                            <Button
-                                className="w-full mb-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
-                                size="lg"
-                                onClick={handleReserve}
-                                disabled={!selectedDate}
-                            >
-                                {selectedDate ? "Reserve" : "Select a date"}
-                            </Button>
+              <Button
+                className="w-full mb-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
+                size="lg"
+                onClick={handleReserve}
+                disabled={!selectedDate}
+              >
+                {selectedDate ? "Reserve" : "Select a date"}
+              </Button>
 
               <p className="text-center text-sm text-muted-foreground">
                 You won't be charged yet
               </p>
 
-                            <div className="border-t mt-6 pt-6">
-                                <div className="flex justify-between mb-2">
-                                    <span className="text-muted-foreground">
-                                        ${pricePerPerson} x {guestCount} guest{guestCount > 1 ? "s" : ""}
-                                    </span>
-                                    <span>${pricePerPerson * guestCount}</span>
-                                </div>
-                                <div className="flex justify-between font-semibold pt-4 border-t">
-                                    <span>Total</span>
-                                    <span>${pricePerPerson * guestCount}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              <div className="border-t mt-6 pt-6">
+                <div className="flex justify-between mb-2">
+                  <span className="text-muted-foreground">
+                    ${pricePerPerson} x {guestCount} guest{guestCount > 1 ? "s" : ""}
+                  </span>
+                  <span>${pricePerPerson * guestCount}</span>
                 </div>
-            </main>
+                <div className="flex justify-between font-semibold pt-4 border-t">
+                  <span>Total</span>
+                  <span>${pricePerPerson * guestCount}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </main>
+    </div>
+  );
 };
 
 export default ExperienceDetailsPage;
