@@ -84,8 +84,6 @@ app.use("/api", bookingRoute);
 app.use("/api", paymentRoute);
 app.use("/api", reviewRoute);
 app.use("/api/wishlist", wishlistRoute);
-app.use("/api/experiences", experienceRoutes);
-app.use("/api/services", serviceRoutes);
 app.use("/api/recently-viewed", recentlyViewedRoute);
 app.use("/api/reports", reportRoute);
 app.use("/api/experiences", experienceRoutes);

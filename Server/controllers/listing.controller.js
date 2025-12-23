@@ -148,15 +148,15 @@ const getListingById = async (req, res) => {
       const avgRating =
         totalReviews > 0
           ? (
-              hostReviews.reduce((sum, review) => sum + review.rating, 0) /
-              totalReviews
-            ).toFixed(2)
+            hostReviews.reduce((sum, review) => sum + review.rating, 0) /
+            totalReviews
+          ).toFixed(2)
           : 0;
 
       // Calculate years hosting
       const yearsHosting = Math.floor(
         (Date.now() - new Date(listing.hostId.createdAt)) /
-          (365.25 * 24 * 60 * 60 * 1000)
+        (365.25 * 24 * 60 * 60 * 1000)
       );
 
       // Add host stats to response
@@ -185,6 +185,20 @@ const updateListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
+    // parsing string to json
+    const parseIfString = (value) => {
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }
+      return value;
+    };
+
+
+
     //check if he is the host of the listing not guest [authentication]
     if (listing.hostId.toString() !== req.user.id) {
       return res
@@ -192,17 +206,132 @@ const updateListing = async (req, res) => {
         .json({ message: "Not authorized to update this listing" });
     }
 
-    // Update the listing
-    const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
+    /* ---------- REMOVE IMAGES ---------- */
+    if (req.body.removedImages) {
+      const removedImages = Array.isArray(parseIfString(req.body.removedImages))
+        ? parseIfString(req.body.removedImages)
+        : [];
+      listing.images = listing.images.filter(
+        img => !removedImages.includes(img._id.toString())
+      );
+    }
+
+    /* ---------- ADD NEW IMAGES ---------- */
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        listing.images.push({
+          url: result.secure_url,
+          caption: "Listing photo",
+        });
+      }
+    }
+
+    /* ---------- UPDATE OTHER FIELDS ---------- */
+    [
+      "title",
+      "description",
+      "propertyType",
+    ].forEach(field => {
+      if (req.body[field] !== undefined) {
+        listing[field] = req.body[field];
+      }
     });
 
-    res.status(200).json(updatedListing);
+    const numberFields = [
+      "pricePerNight",
+      "maxGuests",
+      "bedrooms",
+      "bathrooms",
+      "cleaningFee",
+    ];
+
+    numberFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        listing[field] = Number(req.body[field]);
+      }
+    });
+
+
+    /* ---------- ADDRESS ---------- */
+    if (!listing.address) listing.address = {};
+
+    if (req.body.street !== undefined)
+      listing.address.street = req.body.street;
+
+    if (req.body.city !== undefined)
+      listing.address.city = req.body.city;
+
+    if (req.body.country !== undefined)
+      listing.address.country = req.body.country;
+
+    if (req.body.coordinates !== undefined) {
+      listing.address.coordinates = parseIfString(req.body.coordinates);
+    }
+
+
+    /* ---------- AMENITIES ---------- */
+    if (req.body.amenities) {
+      const parsedAmenities = parseIfString(req.body.amenities);
+
+      const validAmenities = await Amenities.find({
+        _id: { $in: parsedAmenities },
+      });
+
+      listing.amenities = validAmenities.map(a => a._id);
+    }
+
+
+    /* ---------- AVAILABILITY ---------- */
+    if (req.body.availability) {
+      const parsedAvailability = parseIfString(req.body.availability);
+
+      listing.availability = parsedAvailability.map(range => {
+        if (Array.isArray(range)) {
+          return {
+            startDate: new Date(range[0]),
+            endDate: new Date(range[1]),
+          };
+        }
+        const date = new Date(range);
+        return { startDate: date, endDate: date };
+      });
+    }
+
+    await listing.save();
+    res.status(200).json(listing);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
+}
+
+// const updateListing = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const listing = await Listing.findById(id);
+//     if (!listing) {
+//       return res.status(404).json({ message: "Listing not found" });
+//     }
+
+//     //check if he is the host of the listing not guest [authentication]
+//     if (listing.hostId.toString() !== req.user.id) {
+//       return res
+//         .status(403)
+//         .json({ message: "Not authorized to update this listing" });
+//     }
+
+//     // Update the listing
+//     const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
+//       new: true,
+//       runValidators: true,
+//     });
+
+//     res.status(200).json(updatedListing);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 // Delete listing
 const deleteListing = async (req, res) => {
@@ -215,7 +344,7 @@ const deleteListing = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    if (listing.host.toString() !== hostId) {
+    if (listing.hostId.toString() !== hostId) {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this listing" });
@@ -385,9 +514,9 @@ const getListingReviews = async (req, res) => {
     const avgRating =
       totalReviews > 0
         ? (
-            reviews.reduce((sum, review) => sum + review.rating, 0) /
-            totalReviews
-          ).toFixed(2)
+          reviews.reduce((sum, review) => sum + review.rating, 0) /
+          totalReviews
+        ).toFixed(2)
         : 0;
 
     res.status(200).json({

@@ -1,3 +1,4 @@
+const { uploadOnCloudinary } = require('../config/cloudinary');
 const Service = require('../models/Service.model');
 
 // @desc    Create new service listing
@@ -27,12 +28,15 @@ const createService = async (req, res) => {
     if (typeof serviceDetails === 'string') serviceDetails = JSON.parse(serviceDetails);
 
     // Handle images
-    let images = [];
+    const uploadedImages = [];
     if (req.files && req.files.length > 0) {
-      images = req.files.map(file => ({
-        url: `/uploads/${file.filename}`,
-        alt: file.originalname
-      }));
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        uploadedImages.push({
+          url: result.secure_url,
+          caption: "Service photo",
+        });
+      }
     }
 
     const service = await Service.create({
@@ -45,7 +49,7 @@ const createService = async (req, res) => {
       availability,
       requirements,
       skills,
-      images,
+      images: uploadedImages,
       serviceDetails,
       host: req.user._id
     });
@@ -130,6 +134,130 @@ const getService = async (req, res) => {
 // @desc    Update service
 // @route   PUT /api/services/:id
 // @access  Private
+// const updateService = async (req, res) => {
+//   try {
+//     let service = await Service.findById(req.params.id);
+
+//     if (!service) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Service not found'
+//       });
+//     }
+
+//     // Check ownership
+//     if (service.host.toString() !== req.user._id.toString()) {
+//       return res.status(403).json({
+//         success: false,
+//         message: 'Not authorized to update this service'
+//       });
+//     }
+
+//     const {
+//       title,
+//       description,
+//       serviceCategory,
+//       serviceArea,
+//       city,
+//       country,
+//       coordinates,
+//       hourlyRate,
+//       packages,
+//       availability,
+//       requirements,
+//       skills,
+//       images,
+//       serviceDetails,
+//       status
+//     } = req.body;
+
+//     // Handle new images if provided
+//     let uploadedImages = service.images;
+//     if (req.files && req.files.length > 0) {
+//       const newImages = req.files.map(file => ({
+//         url: `/uploads/${file.filename}`,
+//         alt: file.originalname
+//       }));
+//       uploadedImages = [...uploadedImages, ...newImages];
+//     } else if (req.body.images) {
+//     }
+
+//     // Parse nested fields if they are strings (FormData)
+//     const updateData = {};
+
+//     // Basic fields
+//     if (title !== undefined) updateData.title = title;
+//     if (description !== undefined) updateData.description = description;
+//     if (serviceCategory !== undefined) updateData.serviceCategory = serviceCategory;
+//     if (hourlyRate !== undefined) updateData.hourlyRate = hourlyRate;
+//     if (status !== undefined) updateData.status = status;
+
+//     // Location
+//     if (req.body.location) {
+//       updateData.location =
+//         typeof req.body.location === 'string'
+//           ? JSON.parse(req.body.location)
+//           : req.body.location;
+//     }
+
+//     // Arrays
+//     if (skills !== undefined) {
+//       updateData.skills =
+//         typeof skills === 'string'
+//           ? JSON.parse(skills)
+//           : skills;
+//     }
+
+//     if (requirements !== undefined) {
+//       updateData.requirements =
+//         typeof requirements === 'string'
+//           ? JSON.parse(requirements)
+//           : requirements;
+//     }
+
+//     if (packages !== undefined) {
+//       updateData.packages =
+//         typeof packages === 'string'
+//           ? JSON.parse(packages)
+//           : packages;
+//     }
+
+//     if (availability !== undefined) {
+//       updateData.availability =
+//         typeof availability === 'string'
+//           ? JSON.parse(availability)
+//           : availability;
+//     }
+
+//     // Service details
+//     if (serviceDetails !== undefined) {
+//       updateData.serviceDetails =
+//         typeof serviceDetails === 'string'
+//           ? JSON.parse(serviceDetails)
+//           : serviceDetails;
+//     }
+
+//     // Images
+//     updateData.images = uploadedImages;
+
+//     service = await Service.findByIdAndUpdate(
+//       req.params.id,
+//       { $set: updateData },
+//       { new: true, runValidators: true }
+//     );
+
+
+//     res.status(200).json({
+//       success: true,
+//       data: service
+//     });
+//   } catch (error) {
+//     res.status(400).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
 const updateService = async (req, res) => {
   try {
     let service = await Service.findById(req.params.id);
@@ -153,21 +281,16 @@ const updateService = async (req, res) => {
       title,
       description,
       serviceCategory,
-      serviceArea,
-      city,
-      country,
-      coordinates,
       hourlyRate,
       packages,
       availability,
       requirements,
       skills,
-      images,
       serviceDetails,
       status
     } = req.body;
 
-    // Handle new images if provided
+    // Handle images
     let uploadedImages = service.images;
     if (req.files && req.files.length > 0) {
       const newImages = req.files.map(file => ({
@@ -175,27 +298,97 @@ const updateService = async (req, res) => {
         alt: file.originalname
       }));
       uploadedImages = [...uploadedImages, ...newImages];
-    } else if (req.body.images) {
-      // handle case where images might be sent (e.g. deletion causing a filtered list to be sent back? or just ignore if only adding)
-      // For now, let's assume this handles additions via file upload.
-      // If we want to replace, we check if images is an array of strings/objects.
-      // But commonly with file upload, we append.
     }
 
-    // Parse nested fields if they are strings (FormData)
-    const updateData = { ...req.body };
-    if (typeof updateData.location === 'string') updateData.location = JSON.parse(updateData.location);
-    if (typeof updateData.packages === 'string') updateData.packages = JSON.parse(updateData.packages);
-    if (typeof updateData.availability === 'string') updateData.availability = JSON.parse(updateData.availability);
-    if (typeof updateData.requirements === 'string') updateData.requirements = JSON.parse(updateData.requirements);
-    if (typeof updateData.skills === 'string') updateData.skills = JSON.parse(updateData.skills);
-    if (typeof updateData.serviceDetails === 'string') updateData.serviceDetails = JSON.parse(updateData.serviceDetails);
+    const updateData = {};
 
-    updateData.images = uploadedImages;
+    // Basic fields
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (serviceCategory !== undefined) updateData.serviceCategory = serviceCategory;
+    if (hourlyRate !== undefined) updateData.hourlyRate = hourlyRate;
+    if (status !== undefined) updateData.status = status;
+
+    // Location
+    if (req.body.location !== undefined) {
+      updateData.location =
+        typeof req.body.location === 'string'
+          ? JSON.parse(req.body.location)
+          : req.body.location;
+    }
+
+    // Arrays
+    if (req.body.skills !== undefined) {
+      updateData.skills = Array.isArray(req.body.skills)
+        ? req.body.skills
+        : JSON.parse(req.body.skills);
+    }
+
+    if (req.body.requirements !== undefined) {
+      updateData.requirements = Array.isArray(req.body.requirements)
+        ? req.body.requirements
+        : JSON.parse(req.body.requirements);
+    }
+
+    if (req.body.packages !== undefined) {
+      updateData.packages = Array.isArray(req.body.packages)
+        ? req.body.packages
+        : JSON.parse(req.body.packages);
+    }
+
+    if (req.body.availability !== undefined) {
+      updateData.availability = Array.isArray(req.body.availability)
+        ? req.body.availability
+        : JSON.parse(req.body.availability);
+    }
+    // Service details
+    if (serviceDetails !== undefined) {
+      updateData.serviceDetails =
+        typeof serviceDetails === 'string'
+          ? JSON.parse(serviceDetails)
+          : serviceDetails;
+    }
+
+    // Images
+    // Remove deleted images
+    // Remove images from uploadOnCloudinary
+    // parsing string to json
+    const parseIfString = (value) => {
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }
+      return value;
+    };
+    /* ---------- REMOVE IMAGES ---------- */
+    if (req.body.removedImages) {
+      const removedImages = Array.isArray(parseIfString(req.body.removedImages))
+        ? parseIfString(req.body.removedImages)
+        : [];
+      service.images = service.images.filter(
+        img => !removedImages.includes(img._id.toString())
+      );
+    }
+
+    /* ---------- ADD NEW IMAGES ---------- */
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        service.images.push({
+          url: result.secure_url,
+          caption: "Service photo",
+        });
+      }
+    }
+
+    updateData.images = service.images;
 
     service = await Service.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
