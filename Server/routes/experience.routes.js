@@ -9,6 +9,7 @@ const {
   getHostExperiences,
 } = require("../controllers/experience.controller.js");
 const auth = require("../middleware/userMiddleware.js");
+const { default: upload } = require("../middleware/multer.js");
 
 // Public routes
 router.get('/', getExperiences);
@@ -18,8 +19,8 @@ router.get('/host/my-experiences', auth, getHostExperiences);
 router.get('/:id', getExperience);
 
 // Protected routes (require authentication)
-router.post('/', auth, createExperience);
-router.put('/:id', auth, updateExperience);
+router.post('/', auth, upload.array("images", 10), createExperience);
+router.put('/:id', auth, upload.array("images", 10), updateExperience);
 router.delete('/:id', auth, deleteExperience);
 
 
