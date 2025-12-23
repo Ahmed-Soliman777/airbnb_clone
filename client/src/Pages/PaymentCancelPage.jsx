@@ -40,7 +40,7 @@ const PaymentCancelPage = () => {
                     </Button>
 
                     <Button variant="outline" size="lg" className="w-full" asChild>
-                        <Link to="/">
+                        <Link to="/homes">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back to Home
                         </Link>

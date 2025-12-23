@@ -104,7 +104,7 @@ const ReservationsPage = () => {
                     {/* Image */}
                     <div className="md:w-48 h-40 md:h-auto">
                         <img
-                            src={item?.images?.[0] || "/placeholder.svg"}
+                            src={item?.images?.[0].url || "/placeholder.svg"}
                             alt={item?.title || "Item"}
                             className="w-full h-full object-cover"
                         />
@@ -179,7 +179,7 @@ const ReservationsPage = () => {
                                                         onClick={() => handleCancelBooking(booking._id)}
                                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                     >
-                                                        Cancel Reservation
+                                                        <span className="text-white">Cancel Reservation</span>
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
@@ -213,7 +213,7 @@ const ReservationsPage = () => {
             </p>
             {type === "upcoming" && (
                 <Button asChild>
-                    <Link to="/">Start Exploring</Link>
+                    <Link to="/homes">Start Exploring</Link>
                 </Button>
             )}
         </div>

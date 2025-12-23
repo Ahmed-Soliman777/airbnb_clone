@@ -70,7 +70,7 @@ const PaymentSuccessPage = () => {
                             </Button>
 
                             <Button variant="outline" size="lg" className="w-full" asChild>
-                                <Link to="/">Continue Exploring</Link>
+                                <Link to="/homes">Continue Exploring</Link>
                             </Button>
                         </div>
                     </>
