@@ -81,12 +81,12 @@ export const createExperience = createAsyncThunk(
       formData.append("fitnessLevel", experienceData.fitnessLevel || "");
 
       // Append location fields
-      formData.append("street", experienceData.street || "");
-      formData.append("city", experienceData.city || "");
-      formData.append("country", experienceData.country || "");
+      formData.append("street", experienceData.location?.street || "");
+      formData.append("city", experienceData.location?.city || "");
+      formData.append("country", experienceData.location?.country || "");
       formData.append(
         "coordinates",
-        JSON.stringify(experienceData.coordinates || {})
+        JSON.stringify(experienceData.location?.coordinates || {})
       );
 
       // Append complex objects as JSON strings
@@ -118,9 +118,6 @@ export const createExperience = createAsyncThunk(
 
       const response = await axios.post(API_URL, formData, {
         withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
       });
       return response.data;
     } catch (error) {
@@ -182,7 +179,6 @@ const experienceSlice = createSlice({
     searchStatus: "active",
     searchTotal: 0,
     searchTotalPages: 0,
-    searchCurrentPage: 1,
     searchCurrentPage: 1,
     status: "idle",
     error: null,
