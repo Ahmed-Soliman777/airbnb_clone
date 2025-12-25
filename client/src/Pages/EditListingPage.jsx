@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { GetListingById, updateListing } from "@/store/Slices/listingSlice";
-import { fetchAmenities } from "@/store/Slices/amenitySlice";
 import { toast } from "sonner";
-import { ArrowLeft, Home, MapPin, DollarSign, Users, Bed, Bath, Sparkles, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Home, MapPin, DollarSign, Users, Bed, Bath, Sparkles, Loader2, Check, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,24 +10,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import axios from "axios";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
 const propertyTypes = [
-    "Apartment",
-    "House",
-    "Villa",
-    "Cabin",
-    "Cottage",
-    "Loft",
-    "Studio",
-    "Townhouse",
+    "apartment", "house", "villa", "shared_room", "private_room"
 ];
 
 export default function EditListingPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { listing, status } = useSelector((state) => state.listing);
-    const { amenities: allAmenities, status: amenityStatus } = useSelector((state) => state.amenity);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [allAmenities, setAllAmenities] = useState([]);
+    const [newImages, setNewImages] = useState([]);
+    const [removedImages, setRemovedImages] = useState([]);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -46,36 +41,53 @@ export default function EditListingPage() {
         bedrooms: 1,
         bathrooms: 1,
         amenities: [],
+        images: [],
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (id) {
-            dispatch(GetListingById(id));
-        }
-        dispatch(fetchAmenities());
-    }, [dispatch, id]);
+        const fetchAmenities = async () => {
+            const { data } = await axios.get("http://localhost:3000/api/amenity");
+            // console.log("data", data.data);
+            setAllAmenities(data.data);
+        };
+
+        fetchAmenities();
+    }, []);
 
     useEffect(() => {
-        if (listing && listing._id === id) {
-            setFormData({
-                title: listing.title || "",
-                description: listing.description || "",
-                propertyType: listing.propertyType || "",
-                street: listing.street || "",
-                city: listing.city || "",
-                country: listing.country || "",
-                coordinates: listing.coordinates || { lat: 0, lng: 0 },
-                pricePerNight: listing.pricePerNight || 0,
-                cleaningFee: listing.cleaningFee || 0,
-                maxGuests: listing.maxGuests || 1,
-                bedrooms: listing.bedrooms || 1,
-                bathrooms: listing.bathrooms || 1,
-                amenities: listing.amenities || [],
-            });
-        }
-    }, [listing, id]);
+        const fetchListing = async () => {
+            try {
+                setLoading(true);
+
+                const { data } = await axios.get(`/api/listings/${id}`);
+
+                setFormData({
+                    title: data.title ?? "",
+                    description: data.description ?? "",
+                    propertyType: data.propertyType ?? "",
+                    street: data.address?.street ?? "",
+                    city: data.address?.city ?? "",
+                    country: data.address?.country ?? "",
+                    coordinates: data.address?.coordinates ?? { lat: 0, lng: 0 },
+                    pricePerNight: data.pricePerNight ?? 0,
+                    cleaningFee: data.cleaningFee ?? 0,
+                    maxGuests: data.maxGuests ?? 1,
+                    bedrooms: data.bedrooms ?? 1,
+                    bathrooms: data.bathrooms ?? 1,
+                    amenities: data.amenities.map((amenity) => amenity._id) ?? [],
+                    images: data.images ?? [],
+                });
+            } catch (err) {
+                setError("Failed to load listing");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchListing();
+    }, [id]);
 
     const handleChange = (field, value) => {
         setFormData((prev) => ({
@@ -89,7 +101,7 @@ export default function EditListingPage() {
             ...prev,
             coordinates: {
                 ...prev.coordinates,
-                [field]: parseFloat(value) || 0,
+                [field]: value === "" ? "" : parseFloat(value),
             },
         }));
     };
@@ -107,22 +119,89 @@ export default function EditListingPage() {
         });
     };
 
+    const handleRemoveImage = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
         try {
-            await dispatch(updateListing({ id, data: formData })).unwrap();
+            const formDataToSend = new FormData();
+
+            // Append all fields
+            formDataToSend.append("title", formData.title);
+            formDataToSend.append("description", formData.description);
+            formDataToSend.append("propertyType", formData.propertyType);
+            formDataToSend.append("pricePerNight", formData.pricePerNight);
+            formDataToSend.append("cleaningFee", formData.cleaningFee);
+            formDataToSend.append("maxGuests", formData.maxGuests);
+            formDataToSend.append("bedrooms", formData.bedrooms);
+            formDataToSend.append("bathrooms", formData.bathrooms);
+            formDataToSend.append("street", formData.street);
+            formDataToSend.append("city", formData.city);
+            formDataToSend.append("country", formData.country);
+            formDataToSend.append(
+                "coordinates",
+                JSON.stringify(formData.coordinates)
+            );
+            formDataToSend.append("amenities", JSON.stringify(formData.amenities));
+
+            // Append removed images
+            if (removedImages.length > 0) {
+                formDataToSend.append("removedImages", JSON.stringify(removedImages));
+            }
+
+            // Append new images
+            newImages.forEach((file) => {
+                formDataToSend.append("images", file);
+            });
+
+            await axios.put(`/api/listings/${id}`, formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
             toast.success("Listing updated successfully!");
             navigate("/host/dashboard");
-        } catch (error) {
-            toast.error(error?.message || "Failed to update listing");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Update failed");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    if (status === "loading") {
+
+    const LocationPicker = ({ coordinates, onPick }) => {
+        useMapEvents({
+            click(e) {
+                onPick({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                });
+            },
+        });
+        if (!coordinates?.lat || !coordinates?.lng) return null;
+
+        return <Marker position={[coordinates.lat, coordinates.lng]} />;
+    }
+
+
+    function RecenterMap({ coordinates }) {
+        const map = useMap();
+        useEffect(() => {
+            if (coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number") {
+                map.setView([coordinates.lat, coordinates.lng], map.getZoom());
+            }
+        }, [coordinates, map]);
+        return null;
+    }
+
+
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -248,7 +327,7 @@ export default function EditListingPage() {
                                     id="lat"
                                     type="number"
                                     step="any"
-                                    value={formData.coordinates.lat}
+                                    value={formData.coordinates.lat || ""}
                                     onChange={(e) => handleCoordinateChange("lat", e.target.value)}
                                     placeholder="Latitude"
                                 />
@@ -259,11 +338,30 @@ export default function EditListingPage() {
                                     id="lng"
                                     type="number"
                                     step="any"
-                                    value={formData.coordinates.lng}
+                                    value={formData.coordinates.lng || ""}
                                     onChange={(e) => handleCoordinateChange("lng", e.target.value)}
                                     placeholder="Longitude"
                                 />
                             </div>
+                        </div>
+                        <div className="relative z-0">
+                            <MapContainer
+                                center={formData.coordinates}
+                                zoom={17}
+                                scrollWheelZoom={true}
+                                style={{ height: "300px", width: "100%" }}
+                            >
+                                <TileLayer
+                                    attribution='&copy; OpenStreetMap contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <LocationPicker
+                                    coordinates={formData.coordinates}
+                                    onPick={(coords) => handleChange("coordinates", coords)}
+                                />
+                                <RecenterMap coordinates={formData.coordinates} />
+                            </MapContainer>
+
                         </div>
                     </CardContent>
                 </Card>
@@ -321,6 +419,59 @@ export default function EditListingPage() {
                     </CardContent>
                 </Card>
 
+                {/* Images */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Image className="h-5 w-5" />
+                            Images
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="">
+                            <div className="space-y-2">
+                                <Label htmlFor="images">Images</Label>
+                                <Input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewImages((prev) => [...prev, ...Array.from(e.target.files)])
+                                    }
+                                />
+
+                            </div>
+                            <div className="">
+
+                                <div className="grid grid-cols-4 gap-4">
+                                    {formData.images.map((image, index) => (
+                                        <div key={index} className="flex flex-col items-center">
+                                            <img
+                                                src={image.url}
+                                                alt={`Image ${index + 1}`}
+                                                className="w-full h-40 object-cover"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                onClick={() => {
+                                                    setRemovedImages((prev) => [...prev, image._id]);
+                                                    handleRemoveImage(index);
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+
                 {/* Pricing */}
                 <Card>
                     <CardHeader>
@@ -364,7 +515,7 @@ export default function EditListingPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {amenityStatus === "loading" ? (
+                        {loading ? (
                             <div className="flex items-center justify-center py-8">
                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                             </div>
@@ -375,7 +526,6 @@ export default function EditListingPage() {
                                     return (
                                         <div
                                             key={amenity._id}
-                                            onClick={() => handleAmenityToggle(amenity._id)}
                                             className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${isSelected
                                                 ? "border-primary bg-primary/5 ring-1 ring-primary"
                                                 : "border-border hover:border-muted-foreground/50"
@@ -384,15 +534,9 @@ export default function EditListingPage() {
                                             <Checkbox
                                                 checked={isSelected}
                                                 onCheckedChange={() => handleAmenityToggle(amenity._id)}
-                                                className="pointer-events-none"
                                             />
+
                                             <div className="flex items-center gap-2 flex-1">
-                                                {amenity.icon && (
-                                                    <span
-                                                        className="w-5 h-5 flex-shrink-0"
-                                                        dangerouslySetInnerHTML={{ __html: amenity.icon }}
-                                                    />
-                                                )}
                                                 <span className="text-sm font-medium">{amenity.name}</span>
                                             </div>
                                         </div>

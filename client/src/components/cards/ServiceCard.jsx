@@ -6,14 +6,14 @@ const ServiceCard = ({ service }) => {
         _id,
         title,
         images,
-        city,
+        location,
         hourlyRate,
         rating = 4.8,
         reviewCount = 0,
         serviceCategory,
     } = service;
 
-    const mainImage = images?.[0].url || "/placeholder.svg";
+    const mainImage = images[0]?.url || "/placeholder.svg";
 
     return (
         <Link to={`/services/${_id}`} className="group block">
@@ -44,7 +44,7 @@ const ServiceCard = ({ service }) => {
 
                 <div className="flex items-center gap-1 text-muted-foreground text-sm">
                     <MapPin className="w-4 h-4" />
-                    <span>{city}</span>
+                    <span>{location?.city}</span>
                 </div>
 
                 <p className="text-foreground">

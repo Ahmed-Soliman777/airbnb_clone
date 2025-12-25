@@ -20,7 +20,7 @@ const ExperiencesPage = () => {
   const experiencesByCity = useMemo(() => {
     const list = Array.isArray(experiences) ? experiences : [];
     if (list.length === 0) return {};
-    
+
     return list.reduce((acc, exp) => {
       const city = exp.city || "Other";
       if (!acc[city]) {
@@ -60,8 +60,8 @@ const ExperiencesPage = () => {
         {cities.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">No experiences available yet.</p>
-            <Link 
-              to="/" 
+            <Link
+              to="/experiences"
               className="text-primary hover:underline mt-2 inline-block"
             >
               Create your first experience

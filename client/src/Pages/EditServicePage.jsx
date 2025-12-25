@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { getServiceById, updateService } from "@/store/Slices/serviceSlice";
 import { toast } from "sonner";
-import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Package, CheckCircle, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Package, CheckCircle, Loader2, Plus, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import axios from "axios";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
 const serviceCategories = [
     "Photography",
@@ -37,8 +37,10 @@ const daysOfWeek = [
 export default function EditServicePage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { service, status } = useSelector((state) => state.service);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [newImages, setNewImages] = useState([]);
+    const [removedImages, setRemovedImages] = useState([]);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -67,34 +69,40 @@ export default function EditServicePage() {
     const [newAvailability, setNewAvailability] = useState({ day: "", startTime: "", endTime: "" });
 
     useEffect(() => {
-        if (id) {
-            dispatch(getServiceById(id));
-        }
-    }, [dispatch, id]);
+        const fetchService = async () => {
+            try {
+                setLoading(true);
 
-    useEffect(() => {
-        if (service && service._id === id) {
-            setFormData({
-                title: service.title || "",
-                description: service.description || "",
-                serviceCategory: service.serviceCategory || "",
-                serviceArea: service.serviceArea || "",
-                city: service.city || "",
-                country: service.country || "",
-                coordinates: service.coordinates || { lat: 0, lng: 0 },
-                hourlyRate: service.hourlyRate || 0,
-                packages: service.packages || [],
-                availability: service.availability || [],
-                requirements: service.requirements || [],
-                skills: service.skills || [],
-                serviceDetails: service.serviceDetails || {
-                    responseTime: "",
-                    cancellationPolicy: "",
-                    additionalInfo: "",
-                },
-            });
-        }
-    }, [service, id]);
+                const { data } = await axios.get(`/api/services/${id}`);
+                console.log(data.data);
+                setFormData({
+                    title: data.data.title ?? "",
+                    description: data.data.description ?? "",
+                    serviceCategory: data.data.serviceCategory ?? "",
+                    serviceArea: data.data.location.serviceArea ?? "",
+                    city: data.data.location.city ?? "",
+                    country: data.data.location.country ?? "",
+                    coordinates: data.data.location.coordinates ?? { lat: 0, lng: 0 },
+                    hourlyRate: data.data.hourlyRate ?? 0,
+                    packages: data.data.packages ?? [],
+                    availability: data.data.availability ?? [],
+                    requirements: data.data.requirements ?? [],
+                    skills: data.data.skills ?? [],
+                    serviceDetails: {
+                        responseTime: data.data.serviceDetails?.responseTime ?? "",
+                        cancellationPolicy: data.data.serviceDetails?.cancellationPolicy ?? "",
+                        additionalInfo: data.data.serviceDetails?.additionalInfo ?? "",
+                    },
+                    images: data.data.images ?? [],
+                });
+            } catch (err) {
+                setError("Failed to load listing");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchService();
+    }, [id]);
 
     const handleChange = (field, value) => {
         setFormData((prev) => ({
@@ -191,22 +199,88 @@ export default function EditServicePage() {
         }));
     };
 
+    const handleRemoveImage = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
         try {
-            await dispatch(updateService({ id, data: formData })).unwrap();
+            const formDataToSend = new FormData();
+
+            // Append all fields
+            formDataToSend.append("title", formData.title);
+            formDataToSend.append("description", formData.description);
+            formDataToSend.append("serviceCategory", formData.serviceCategory);
+            formDataToSend.append(
+                "location",
+                JSON.stringify({
+                    serviceArea: formData.serviceArea,
+                    city: formData.city,
+                    country: formData.country,
+                    coordinates: formData.coordinates,
+                })
+            );
+            formDataToSend.append("hourlyRate", formData.hourlyRate);
+            formDataToSend.append("packages", JSON.stringify(formData.packages));
+            formDataToSend.append("availability", JSON.stringify(formData.availability));
+            formDataToSend.append("requirements", JSON.stringify(formData.requirements));
+            formDataToSend.append("skills", JSON.stringify(formData.skills));
+            formDataToSend.append("serviceDetails", JSON.stringify(formData.serviceDetails));
+
+            // Append removed images
+            if (removedImages.length > 0) {
+                formDataToSend.append("removedImages", JSON.stringify(removedImages));
+            }
+
+            // Append new images
+            newImages.forEach((file) => {
+                formDataToSend.append("images", file);
+            });
+
+            await axios.put(`/api/services/${id}`, formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
             toast.success("Service updated successfully!");
             navigate("/host/dashboard");
-        } catch (error) {
-            toast.error(error?.message || "Failed to update service");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Update failed");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    if (status === "loading") {
+    const LocationPicker = ({ coordinates, onPick }) => {
+        useMapEvents({
+            click(e) {
+                onPick({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                });
+            },
+        });
+        if (!coordinates?.lat || !coordinates?.lng) return null;
+
+        return <Marker position={[coordinates.lat, coordinates.lng]} />;
+    }
+
+    function RecenterMap({ coordinates }) {
+        const map = useMap();
+        useEffect(() => {
+            if (coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number") {
+                map.setView([coordinates.lat, coordinates.lng], map.getZoom());
+            }
+        }, [coordinates, map]);
+        return null;
+    }
+
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -348,6 +422,25 @@ export default function EditServicePage() {
                                 />
                             </div>
                         </div>
+                        <div className="relative z-0">
+                            <MapContainer
+                                center={formData.coordinates}
+                                zoom={17}
+                                scrollWheelZoom={true}
+                                style={{ height: "300px", width: "100%" }}
+                            >
+                                <TileLayer
+                                    attribution='&copy; OpenStreetMap contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <LocationPicker
+                                    coordinates={formData.coordinates}
+                                    onPick={(coords) => handleChange("coordinates", coords)}
+                                />
+                                <RecenterMap coordinates={formData.coordinates} />
+                            </MapContainer>
+
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -366,8 +459,13 @@ export default function EditServicePage() {
                                 <Input
                                     value={newSkill}
                                     onChange={(e) => setNewSkill(e.target.value)}
-                                    placeholder="Add a skill"
-                                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            addSkill();
+                                        }
+                                    }}
                                 />
                                 <Button type="button" onClick={addSkill} size="icon">
                                     <Plus className="h-4 w-4" />
@@ -375,15 +473,19 @@ export default function EditServicePage() {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {formData.skills.map((skill, index) => (
-                                    <Badge key={index} variant="secondary" className="gap-1">
-                                        {skill}
-                                        <X
-                                            className="h-3 w-3 cursor-pointer"
+                                    <Badge key={index} variant="secondary" className="gap-1 flex items-center">
+                                        <span>{skill}</span>
+                                        <button
+                                            type="button"
+                                            className="ml-1 text-sm flex items-center justify-center"
                                             onClick={() => removeSkill(index)}
-                                        />
+                                        >
+                                            ✕
+                                        </button>
                                     </Badge>
                                 ))}
                             </div>
+
                         </div>
 
                         <Separator />
@@ -394,8 +496,13 @@ export default function EditServicePage() {
                                 <Input
                                     value={newRequirement}
                                     onChange={(e) => setNewRequirement(e.target.value)}
-                                    placeholder="Add a requirement"
-                                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addRequirement())}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            addRequirement();
+                                        }
+                                    }}
                                 />
                                 <Button type="button" onClick={addRequirement} size="icon">
                                     <Plus className="h-4 w-4" />
@@ -403,12 +510,15 @@ export default function EditServicePage() {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {formData.requirements.map((req, index) => (
-                                    <Badge key={index} variant="outline" className="gap-1">
-                                        {req}
-                                        <X
-                                            className="h-3 w-3 cursor-pointer"
+                                    <Badge key={index} variant="outline" className="gap-1 flex items-center">
+                                        <span>{req}</span>
+                                        <button
+                                            type="button"
+                                            className="ml-1 text-sm flex items-center justify-center"
                                             onClick={() => removeRequirement(index)}
-                                        />
+                                        >
+                                            ✕
+                                        </button>
                                     </Badge>
                                 ))}
                             </div>
@@ -462,12 +572,15 @@ export default function EditServicePage() {
 
                         <div className="flex flex-wrap gap-2">
                             {formData.availability.map((slot, index) => (
-                                <Badge key={index} variant="secondary" className="gap-1">
-                                    {slot.day}: {slot.startTime} - {slot.endTime}
-                                    <X
-                                        className="h-3 w-3 cursor-pointer"
+                                <Badge key={index} variant="secondary" className="gap-1 flex items-center">
+                                    <span>{slot.day}: {slot.startTime} - {slot.endTime}</span>
+                                    <button
+                                        type="button"
+                                        className="ml-1 text-sm flex items-center justify-center"
                                         onClick={() => removeAvailability(index)}
-                                    />
+                                    >
+                                        ✕
+                                    </button>
                                 </Badge>
                             ))}
                         </div>
@@ -530,6 +643,85 @@ export default function EditServicePage() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Images */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Image className="h-5 w-5" />
+                            Images
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="">
+                            <div className="space-y-2">
+                                <Label htmlFor="images">Images</Label>
+                                <Input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setNewImages((prev) => [...prev, ...Array.from(e.target.files)])
+                                    }
+                                />
+
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                                {/* Existing images */}
+                                {formData.images.map((image, index) => (
+                                    <div
+                                        key={image._id || index}
+                                        className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+                                    >
+                                        <img
+                                            src={image.url}
+                                            alt={`Image ${index + 1}`}
+                                            className="w-full h-40 object-cover"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
+                                            onClick={() => {
+                                                setRemovedImages((prev) => [...prev, image._id]);
+                                                handleRemoveImage(index);
+                                            }}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+
+                                {/* New local images */}
+                                {newImages.map((file, index) => {
+                                    const preview = URL.createObjectURL(file);
+                                    return (
+                                        <div
+                                            key={`local-${index}`}
+                                            className="relative group rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+                                        >
+                                            <img
+                                                src={preview}
+                                                alt={`Local ${index + 1}`}
+                                                className="w-full h-40 object-cover"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
+                                                onClick={() => {
+                                                    setNewImages((prev) => prev.filter((_, i) => i !== index));
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

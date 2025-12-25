@@ -7,7 +7,7 @@ import ServiceListingForm from "@/components/host/ServiceListingForm";
 import BecomeHostButton from "@/components/BecomeHostButton/BecomeHostButton";
 import { getUserProfile } from "@/utils/userApi";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard } from "lucide-react";
+import { Loader2, LayoutDashboard, Wallet, Group, Users } from "lucide-react";
 
 const Host = () => {
 
@@ -104,13 +104,31 @@ const Host = () => {
         <div className="min-h-screen bg-background">
             {/* Dashboard Link for hosts */}
             {!selectedService && (
-                <div className="container max-w-7xl mx-auto px-4 py-4">
-                    <Link to="/host/dashboard">
-                        <Button variant="outline" className="gap-2">
-                            <LayoutDashboard className="w-4 h-4" />
-                            View Dashboard
-                        </Button>
-                    </Link>
+                <div className="flex ">
+                    <div className="container max-w-7xl mx-auto px-4 py-4 text-center">
+                        <Link to="/host/dashboard">
+                            <Button variant="outline" className="gap-2">
+                                <LayoutDashboard className="w-4 h-4" />
+                                View Dashboard
+                            </Button>
+                        </Link>
+                    </div>
+                    <div className="container max-w-7xl mx-auto px-4 py-4 text-center">
+                        <Link to="/host/wallet">
+                            <Button variant="outline" className="gap-2">
+                                <Wallet className="w-4 h-4" />
+                                View Wallet
+                            </Button>
+                        </Link>
+                    </div>
+                    <div className="container max-w-7xl mx-auto px-4 py-4 text-center">
+                        <Link to="/host/guests">
+                            <Button variant="outline" className="gap-2">
+                                <Users className="w-4 h-4" />
+                                Your Guests
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             )}
 

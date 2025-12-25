@@ -6,7 +6,7 @@ const ExperienceCard = ({ experience }) => {
         _id,
         title,
         images,
-        city,
+        location,
         pricePerPerson,
         duration,
         rating = 4.9,
@@ -14,15 +14,15 @@ const ExperienceCard = ({ experience }) => {
         experienceType,
     } = experience;
 
-    const mainImage = (images?.[0] && (typeof images[0] === 'string' ? images[0] : images[0].url)) || "/placeholder.svg";
-    const altText = (images?.[0] && (typeof images[0] === 'string' ? title : images[0].alt)) || title;
+
+    console.log(images);
 
     return (
         <Link to={`/experiences/${_id}`} className="group block">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
                 <img
-                    src={mainImage}
-                    alt={altText}
+                    src={images[0]?.url}
+                    alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-3 left-3">
@@ -44,7 +44,7 @@ const ExperienceCard = ({ experience }) => {
                     </div>
                 </div>
 
-                <p className="text-muted-foreground text-sm">{city}</p>
+                <p className="text-muted-foreground text-sm">{location?.city}</p>
 
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     {duration && (

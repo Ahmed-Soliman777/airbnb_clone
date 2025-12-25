@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 export default function VerifyEmail({ isOpen = true, onClose }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error,success } = useSelector((state) => state.auth);
-const savedEmail = localStorage.getItem("registerEmail");
+  const { loading, error, success } = useSelector((state) => state.auth);
+  const savedEmail = localStorage.getItem("registerEmail");
 
 
   const {
@@ -19,7 +19,7 @@ const savedEmail = localStorage.getItem("registerEmail");
   const onSubmit = (data) => {
     dispatch(verifyEmail({ email: savedEmail, code: data.verificationCode })).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
-        navigate("/");
+        navigate("/homes");
       }
     });
   };
@@ -84,8 +84,8 @@ const savedEmail = localStorage.getItem("registerEmail");
             </p>
           )}
           {success && (
-  <p className="text-green-600 text-sm text-center">{success}</p>
-)}
+            <p className="text-green-600 text-sm text-center">{success}</p>
+          )}
 
 
           {/* Submit Button */}

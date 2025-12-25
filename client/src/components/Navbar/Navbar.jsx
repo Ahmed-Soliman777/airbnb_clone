@@ -66,14 +66,14 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
     const getUnderlinePosition = () => {
         if (direction === "rtl") {
             switch (location.pathname) {
-                case "/": return "right-0";
+                case "/homes": return "right-0";
                 case "/experiences": return "right-1/3";
                 case "/services": return "right-2/3";
                 default: return "right-0";
             }
         } else {
             switch (location.pathname) {
-                case "/": return "left-0";
+                case "/homes": return "left-0";
                 case "/experiences": return "left-1/3";
                 case "/services": return "left-2/3";
                 default: return "left-0";
@@ -181,7 +181,8 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
 
                 {/* Action buttons with slide animation */}
                 <div className={`
-                    flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 ml-auto
+                    flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 
+                    ${direction === 'ltr' ? 'ml-auto' : 'mr-auto'}
                     transition-all duration-500 ease-in-out
                     ${scrolled ? 'transform translate-x-1 scale-95' : 'transform translate-x-0 scale-100'}
                 `}>
@@ -192,7 +193,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                         ${scrolled ? 'opacity-0 scale-90 w-0 px-0' : 'opacity-100 scale-100'}
                     `}>
                         {location.pathname.startsWith('/host') ? (
-                            <Link to="/">Switch to traveling</Link>
+                            <Link to="/homes">Switch to traveling</Link>
                         ) : (
                             <Link to="/host">{t("navbar.host")}</Link>
                         )}

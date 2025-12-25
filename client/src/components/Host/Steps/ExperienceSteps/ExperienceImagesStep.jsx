@@ -53,8 +53,21 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           ctx.drawImage(img, 0, 0, width, height);
 
           // Compress to JPEG with 0.7 quality
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-          resolve(dataUrl);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const newFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(newFile);
+              } else {
+                resolve(file); // Fallback to original file
+              }
+            },
+            "image/jpeg",
+            0.7
+          );
         };
         img.src = event.target.result;
       };
@@ -124,11 +137,10 @@ export default function ExperienceImagesStep({ data, onUpdate }) {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragActive
-              ? "border-primary bg-accent"
-              : "border-border hover:border-primary/50"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
+            ? "border-primary bg-accent"
+            : "border-border hover:border-primary/50"
+            }`}
         >
           <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-foreground font-medium mb-2">

@@ -163,6 +163,9 @@ const listingSlice = createSlice({
       })
 
       // ------------- 3. Create a new listing --------------
+      .addCase(createListing.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(createListing.fulfilled, (state, action) => {
         state.listings.push(action.payload);
       })
