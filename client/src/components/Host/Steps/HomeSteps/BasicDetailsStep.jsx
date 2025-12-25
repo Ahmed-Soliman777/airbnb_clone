@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText } from "lucide-react";
+import { generateDescription } from "@/utils/ai";
+import { useState } from "react";
 
 const propertyTypes = [
     { value: "apartment", label: "Apartment" },
@@ -14,6 +16,9 @@ const propertyTypes = [
 ];
 
 export default function BasicDetailsStep({ data, onUpdate }) {
+
+    const [loading, setLoading] = useState(false);
+
     return (
         <div className="space-y-6">
             <div className="text-center mb-8">
@@ -68,6 +73,25 @@ export default function BasicDetailsStep({ data, onUpdate }) {
                         onChange={(e) => onUpdate({ description: e.target.value })}
                         className="mt-1.5 min-h-[150px]"
                     />
+                    <button
+                        type="button"
+                        disabled={loading || !data.title}
+                        onClick={async () => {
+                            try {
+                                setLoading(true);
+                                const text = await generateDescription(data.title);
+                                onUpdate({ description: text });
+                            } catch (err) {
+                                console.error(err);
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        className="bg-[#ff385c] text-white px-4 py-2 rounded-md mt-2 disabled:opacity-50"
+                    >
+                        {loading ? "Generating..." : "Generate with AI"}
+                    </button>
+
                     <p className="text-sm text-muted-foreground mt-1.5">
                         {data.description?.length || 0} characters
                     </p>

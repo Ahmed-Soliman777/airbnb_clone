@@ -2,8 +2,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin } from "lucide-react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 
 export default function ServiceLocationStep({ data, onUpdate }) {
+    const handleChange = (field, value) => {
+        if (field === "lat" || field === "lng") {
+            onUpdate({
+                coordinates: {
+                    ...data.coordinates,
+                    [field]: parseFloat(value) || 0,
+                },
+            });
+        } else {
+            onUpdate({ [field]: value });
+        }
+    };
+
+    const LocationPicker = ({ coordinates, onPick }) => {
+        useMapEvents({
+            click(e) {
+                onPick({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                });
+            },
+        });
+        if (!coordinates?.lat || !coordinates?.lng) return null;
+
+        return <Marker position={[coordinates.lat, coordinates.lng]} />;
+    }
+
+    const position = data.coordinates?.lat && data.coordinates?.lng
+        ? [data.coordinates.lat, data.coordinates.lng]
+        : [30.0445, 31.24];
     return (
         <div className="space-y-6">
             <div className="text-center mb-8">
@@ -95,7 +126,22 @@ export default function ServiceLocationStep({ data, onUpdate }) {
                         />
                     </div>
                 </div>
-
+                <div className="relative z-0">
+                    <MapContainer center={position} zoom={13} scrollWheelZoom={true} style={{ height: "300px", width: "100%" }}>
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <LocationPicker
+                            coordinates={data.coordinates}
+                            onPick={(coords) =>
+                                onUpdate({
+                                    coordinates: coords,
+                                })
+                            }
+                        />
+                    </MapContainer>
+                </div>
                 {data.serviceArea && data.city && data.country && (
                     <div className="p-4 bg-muted rounded-lg mt-6">
                         <h3 className="font-semibold text-foreground mb-2">Service Area</h3>

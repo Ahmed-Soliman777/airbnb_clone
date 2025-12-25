@@ -1,5 +1,12 @@
 import React from 'react';
 import { Search } from "lucide-react";
+import HelpSearch from '@/components/Help/HelpSearch';
+import HelpCategories from '@/components/Help/HelpCategories';
+import HelpLoginSection from '@/components/Help/HelpLoginSection';
+import HelpGuides from '@/components/Help/HelpGuides';
+import HelpExploreMore from '@/components/Help/HelpExploreMore';
+import HelpContact from '@/components/Help/HelpContact';
+import HelpArticales from '@/components/Help/HelpArticales';
 const HelpPage = () => {
 
   return (
@@ -10,16 +17,16 @@ const HelpPage = () => {
         <HelpSearch />
         {/* 
                 categories Section */}
-                <HelpCategories />
-            </section>
-            {/* Login/Signup Section */}
-            <HelpLoginSection />
-            {/* Guides 4 */}
-            <HelpGuides />
-            {/* Top Articles Section */}
-            <HelpArticales />
-            <HelpExploreMore />
-            <HelpContact />
+        <HelpCategories />
+      </section>
+      {/* Login/Signup Section */}
+      <HelpLoginSection />
+      {/* Guides 4 */}
+      <HelpGuides />
+      {/* Top Articles Section */}
+      <HelpArticales />
+      <HelpExploreMore />
+      <HelpContact />
 
 
 

@@ -28,6 +28,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 const ServiceDetailsPage = () => {
     const { id } = useParams();
@@ -35,7 +36,6 @@ const ServiceDetailsPage = () => {
     const dispatch = useDispatch();
     // const { toast } = useToast();
     const { service, status } = useSelector((state) => state.service);
-    const { user } = useSelector((state) => state.auth);
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [dateOpen, setDateOpen] = useState(false);
@@ -93,6 +93,7 @@ const ServiceDetailsPage = () => {
     const {
         title,
         description,
+        location,
         images,
         city,
         country,
@@ -108,8 +109,11 @@ const ServiceDetailsPage = () => {
         reviewCount = 0,
     } = service;
 
+    console.log(availability);
+
+
     const handleReserve = () => {
-        if (!user) {
+        if (!document.cookie) {
             toast({
                 title: "Login Required",
                 description: "Please login to make a reservation.",
@@ -141,7 +145,7 @@ const ServiceDetailsPage = () => {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-background border-b">
+            <header className="sticky top-0 bg-background border-b">
                 <div className="container max-w-6xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <Link
@@ -170,7 +174,7 @@ const ServiceDetailsPage = () => {
                         <>
                             <div className="col-span-4 md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto">
                                 <img
-                                    src={images[0]}
+                                    src={images[0].url}
                                     alt={title}
                                     className="w-full h-full object-cover"
                                 />
@@ -178,7 +182,7 @@ const ServiceDetailsPage = () => {
                             {images.slice(1, 5).map((img, index) => (
                                 <div key={index} className="hidden md:block aspect-[4/3]">
                                     <img
-                                        src={img}
+                                        src={img.url}
                                         alt={`${title} ${index + 2}`}
                                         className="w-full h-full object-cover"
                                     />
@@ -319,9 +323,9 @@ const ServiceDetailsPage = () => {
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
                                     {availability.map((slot, index) => (
-                                        <Badge key={index} variant="outline" className="py-2 px-3">
-                                            <Calendar className="w-4 h-4 mr-2" />
-                                            {slot.day || slot} {slot.time && `at ${slot.time}`}
+                                        <Badge key={index} variant="outline" className="w-50 h-10">
+                                            {/* <Calendar className="w-4 h-4 mr-2" /> */}
+                                            {slot.day || slot} {slot.startTime && `at ${slot.startTime}`}
                                         </Badge>
                                     ))}
                                 </div>
@@ -339,6 +343,22 @@ const ServiceDetailsPage = () => {
                                 </p>
                             </div>
                         )}
+
+                        {/* leadlet location map */}
+                        <div className="relative z-0 overflow-hidden rounded-lg">
+                            <MapContainer center={[location?.coordinates?.lat, location?.coordinates?.lng]} zoom={17} scrollWheelZoom={true} style={{ height: "300px", width: "100%" }}>
+                                <TileLayer
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <Marker position={[location?.coordinates?.lat, location?.coordinates?.lng]}>
+                                    <Popup>
+                                        A pretty CSS3 popup. <br /> Easily customizable.
+                                    </Popup>
+                                </Marker>
+                            </MapContainer>
+                        </div>
+
                     </div>
 
                     {/* Right Column - Booking Card */}

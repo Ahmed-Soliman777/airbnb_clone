@@ -31,21 +31,16 @@ const createExperience = async (req, res) => {
     const parsedInclusions = inclusions ? JSON.parse(inclusions) : [];
     const parsedCoordinates = coordinates ? JSON.parse(coordinates) : {};
 
-    let uploadedImages = [];
-
-    // Handle file uploads from multer
+    // Handle images
+    const uploadedImages = [];
     if (req.files && req.files.length > 0) {
-      const newUploadedImages = await Promise.all(
-        req.files.map(async (file) => {
-          try {
-            return await uploadOnCloudinary(file.path);
-          } catch (error) {
-            console.error("Error uploading image:", error.message);
-            return null;
-          }
-        })
-      );
-      uploadedImages = newUploadedImages.filter(Boolean);
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        uploadedImages.push({
+          url: result.secure_url,
+          caption: "Experience photo",
+        });
+      }
     }
 
     // Validate required location fields
@@ -188,13 +183,146 @@ const getExperience = async (req, res) => {
 // @desc    Update experience
 // @route   PUT /api/experiences/:id
 // @access  Private
+// const updateExperience = async (req, res) => {
+//   try {
+//     let experience = await Experience.findById(req.params.id);
+//     if (!experience)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Experience not found" });
+
+//     if (experience.host.toString() !== req.user._id.toString()) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Not authorized to update this experience",
+//       });
+//     }
+
+//     const {
+//       title,
+//       description,
+//       experienceType,
+//       street,
+//       city,
+//       country,
+//       coordinates,
+//       pricePerPerson,
+//       duration,
+//       groupSize,
+//       schedule,
+//       ageRequirement,
+//       fitnessLevel,
+//       requirements,
+//       inclusions,
+//       status,
+//     } = req.body;
+
+//     // Parse JSON strings if they exist
+//     const parsedGroupSize = groupSize
+//       ? JSON.parse(groupSize)
+//       : experience.groupSize;
+//     const parsedSchedule = schedule
+//       ? JSON.parse(schedule)
+//       : experience.schedule;
+//     const parsedRequirements = requirements
+//       ? JSON.parse(requirements)
+//       : experience.requirements;
+//     const parsedInclusions = inclusions
+//       ? JSON.parse(inclusions)
+//       : experience.inclusions;
+//     const parsedCoordinates = coordinates
+//       ? JSON.parse(coordinates)
+//       : experience.location?.coordinates;
+//     let location = experience.location;
+//     if (street) location.street = street;
+//     if (city) location.city = city;
+//     if (country) location.country = country;
+
+//     if (coordinates) {
+//       const parsedCoordinates = JSON.parse(coordinates);
+
+//       if (parsedCoordinates.lat !== undefined) location.coordinates.lat = parsedCoordinates.lat;
+
+//       if (parsedCoordinates.lng !== undefined) location.coordinates.lng = parsedCoordinates.lng;
+//     }
+//     let uploadedImages = experience.images;
+
+//     // Images
+//     // Remove deleted images
+//     // Remove images from uploadOnCloudinary
+//     // parsing string to json
+//     const parseIfString = (value) => {
+//       if (typeof value === "string") {
+//         try {
+//           return JSON.parse(value);
+//         } catch {
+//           return value;
+//         }
+//       }
+//       return value;
+//     };
+//     /* ---------- REMOVE IMAGES ---------- */
+//     if (req.body.removedImages) {
+//       const removedImages = Array.isArray(parseIfString(req.body.removedImages))
+//         ? parseIfString(req.body.removedImages)
+//         : [];
+//       experience.images = experience.images.filter(
+//         img => !removedImages.includes(img._id.toString())
+//       );
+//     }
+
+//     /* ---------- ADD NEW IMAGES ---------- */
+//     if (req.files && req.files.length > 0) {
+//       for (const file of req.files) {
+//         const result = await uploadOnCloudinary(file.path);
+//         experience.images.push({
+//           url: result.secure_url,
+//           caption: "Experience photo",
+//         });
+//       }
+//     }
+
+//     experience = await Experience.findByIdAndUpdate(
+//       req.params.id,
+//       {
+//         title,
+//         description,
+//         experienceType,
+//         location: {
+//           street: street || experience.location?.street,
+//           city: city || experience.location?.city,
+//           country: country || experience.location?.country,
+//           coordinates: parsedCoordinates,
+//         },
+//         pricePerPerson,
+//         duration,
+//         groupSize: parsedGroupSize,
+//         schedule: parsedSchedule,
+//         ageRequirement,
+//         fitnessLevel,
+//         requirements: parsedRequirements,
+//         images: experience.images,
+//         inclusions: parsedInclusions,
+//         status,
+//       },
+//       { new: true, runValidators: true }
+//     );
+
+//     res.status(200).json({ success: true, data: experience });
+//   } catch (error) {
+//     console.error("Error updating experience:", error);
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// };
 const updateExperience = async (req, res) => {
   try {
-    let experience = await Experience.findById(req.params.id);
-    if (!experience)
+
+    const experience = await Experience.findById(req.params.id);
+    if (!experience) {
       return res
         .status(404)
         .json({ success: false, message: "Experience not found" });
+    }
 
     if (experience.host.toString() !== req.user._id.toString()) {
       return res.status(403).json({
@@ -207,10 +335,6 @@ const updateExperience = async (req, res) => {
       title,
       description,
       experienceType,
-      street,
-      city,
-      country,
-      coordinates,
       pricePerPerson,
       duration,
       groupSize,
@@ -220,75 +344,111 @@ const updateExperience = async (req, res) => {
       requirements,
       inclusions,
       status,
+      removedImages,
     } = req.body;
 
-    // Parse JSON strings if they exist
     const parsedGroupSize = groupSize
       ? JSON.parse(groupSize)
       : experience.groupSize;
+
     const parsedSchedule = schedule
       ? JSON.parse(schedule)
       : experience.schedule;
+
     const parsedRequirements = requirements
       ? JSON.parse(requirements)
       : experience.requirements;
+
     const parsedInclusions = inclusions
       ? JSON.parse(inclusions)
       : experience.inclusions;
-    const parsedCoordinates = coordinates
-      ? JSON.parse(coordinates)
-      : experience.location?.coordinates;
 
-    let uploadedImages = experience.images;
-
-    // Handle new file uploads from multer
-    if (req.files && req.files.length > 0) {
-      const newUploadedImages = await Promise.all(
-        req.files.map(async (file) => {
-          try {
-            return await uploadOnCloudinary(file.path);
-          } catch (error) {
-            console.error("Error uploading image:", error.message);
-            return null;
-          }
-        })
-      );
-      uploadedImages = [
-        ...uploadedImages,
-        ...newUploadedImages.filter(Boolean),
-      ];
+    let parsedLocation = null;
+    if (req.body.location) {
+      parsedLocation =
+        typeof req.body.location === "string"
+          ? JSON.parse(req.body.location)
+          : req.body.location;
     }
 
-    experience = await Experience.findByIdAndUpdate(
+    // Remove images
+    if (removedImages) {
+      const removedIds =
+        typeof removedImages === "string"
+          ? JSON.parse(removedImages)
+          : removedImages;
+
+      experience.images = experience.images.filter(
+        img => !removedIds.includes(img._id.toString())
+      );
+    }
+
+    // Add new images
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const result = await uploadOnCloudinary(file.path);
+        experience.images.push({
+          url: result.secure_url,
+          caption: "Experience photo",
+        });
+      }
+    }
+
+    const updateData = {
+      title,
+      description,
+      experienceType,
+      pricePerPerson,
+      duration,
+      groupSize: parsedGroupSize,
+      schedule: parsedSchedule,
+      ageRequirement,
+      fitnessLevel,
+      requirements: parsedRequirements,
+      inclusions: parsedInclusions,
+      status,
+      images: experience.images,
+    };
+
+    if (parsedLocation) {
+      if (parsedLocation.street !== undefined)
+        updateData["location.street"] = parsedLocation.street;
+
+      if (parsedLocation.city !== undefined)
+        updateData["location.city"] = parsedLocation.city;
+
+      if (parsedLocation.country !== undefined)
+        updateData["location.country"] = parsedLocation.country;
+
+      if (parsedLocation.coordinates) {
+        if (parsedLocation.coordinates.lat !== undefined)
+          updateData["location.coordinates.lat"] = Number(
+            parsedLocation.coordinates.lat
+          );
+
+        if (parsedLocation.coordinates.lng !== undefined)
+          updateData["location.coordinates.lng"] = Number(
+            parsedLocation.coordinates.lng
+          );
+      }
+    }
+
+    const updatedExperience = await Experience.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        description,
-        experienceType,
-        location: {
-          street: street || experience.location?.street,
-          city: city || experience.location?.city,
-          country: country || experience.location?.country,
-          coordinates: parsedCoordinates,
-        },
-        pricePerPerson,
-        duration,
-        groupSize: parsedGroupSize,
-        schedule: parsedSchedule,
-        ageRequirement,
-        fitnessLevel,
-        requirements: parsedRequirements,
-        images: uploadedImages,
-        inclusions: parsedInclusions,
-        status,
-      },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
-    res.status(200).json({ success: true, data: experience });
+    res.status(200).json({
+      success: true,
+      data: updatedExperience,
+    });
   } catch (error) {
     console.error("Error updating experience:", error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

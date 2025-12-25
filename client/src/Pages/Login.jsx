@@ -17,7 +17,7 @@ export default function Login() {
   const onSubmit = (data) => {
     dispatch(loginUser(data)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
-        navigate("/"); // Redirect after successful login
+        navigate("/homes"); // Redirect after successful login
       }
     });
   };

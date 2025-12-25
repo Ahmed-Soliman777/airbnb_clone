@@ -36,7 +36,7 @@ const CheckoutPage = () => {
     useEffect(() => {
         // If no booking data, redirect back
         if (!bookingData) {
-            navigate("/");
+            navigate("/homes");
             return;
         }
 
@@ -64,12 +64,15 @@ const CheckoutPage = () => {
         cleaningFee,
     } = bookingData;
 
+
+    // console.log("item", item.images[0].url);
+
     const handleProceedToPayment = async () => {
         const paymentData = {
             listing: type === 'listing' ? item._id : undefined,
             service: type === 'service' ? item._id : undefined,
             experience: type === 'experience' ? item._id : undefined,
-            bookingType: type, // Helpful for backend
+            bookingType: type,
             checkInDate,
             checkOutDate,
             guestsCount: guests?.adults + (guests?.children || 0) || guests || 1,
@@ -94,7 +97,7 @@ const CheckoutPage = () => {
 
     const getItemImage = () => {
         if (item.images && item.images.length > 0) {
-            return item.images[0];
+            return item.images[0].url;
         }
         return "/placeholder.svg";
     };
@@ -162,7 +165,7 @@ const CheckoutPage = () => {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-background border-b">
+            <header className="sticky top-0 bg-background border-b">
                 <div className="container max-w-5xl mx-auto px-4 py-4">
                     <div className="flex items-center gap-4">
                         <button
@@ -376,6 +379,7 @@ const CheckoutPage = () => {
                                     <span className="text-lg font-semibold">${totalPrice}</span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>

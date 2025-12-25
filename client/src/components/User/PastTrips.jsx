@@ -21,8 +21,8 @@ const TripCard = ({ booking, isUpcoming = false }) => {
     const listingLocation = (listing.location && listing.location.address) || listing.location || 'Unknown Location';
 
     // Determine the main photo URL
-    const listingPhoto = (listing.photos && listing.photos.length > 0)
-        ? listing.photos[0].url || listing.photos[0]
+    const listingPhoto = (listing.images && listing.images.length > 0)
+        ? listing.images[0].url || listing.images[0]
         : '/default-house.jpg';
 
     // Calculate duration in days
@@ -90,7 +90,7 @@ const TripCard = ({ booking, isUpcoming = false }) => {
 
                     {/* Action Button */}
                     <Link
-                        to={`/listings/${listing._id}`}
+                        to={`/room/${listing._id}`}
                         className="col-span-2 mt-2 px-4 py-2 text-sm text-blue-600 font-semibold border border-blue-600 rounded-lg hover:bg-blue-50 flex items-center justify-center transition"
                     >
                         View Listing

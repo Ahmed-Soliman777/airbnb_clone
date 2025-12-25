@@ -32,6 +32,7 @@ import ReservationsPage from "./Pages/ReservationsPage";
 import MessagesPage from "./Pages/MessagesPage";
 import EditExperiencePage from "./Pages/EditExperiencePage";
 import EditServicePage from "./Pages/EditServicePage";
+import EditListingPage from "./Pages/EditListingPage";
 import LandingPage from "./Pages/AirbnbLanding";
 import HostWalletPage from "./Pages/HostWalletPage";
 import HostGuestsPage from "./Pages/HostGuestsPage";
@@ -129,6 +130,14 @@ function App() {
           element: (
             <AuthGuard requireAuth={true}>
               <HostDashboardPage />
+            </AuthGuard>
+          ),
+        },
+        {
+          path: "host/homes/edit/:id",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <EditListingPage />
             </AuthGuard>
           ),
         },
