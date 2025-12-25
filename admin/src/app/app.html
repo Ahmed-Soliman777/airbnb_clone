@@ -1,6 +1,16 @@
-<!-- <h1 class="text-3xl font-bold underline text-yellow-500">
-  Hello world!
-</h1> -->
-
 <!-- <mat-slide-toggle>Toggle me!</mat-slide-toggle> -->
+@if (showSidebar()) {
+<div class="min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside class="fixed left-0 top-0 h-screen w-64 z-10 overflow-y-auto">
+    <app-sidebar [user]="user()" (logoutClick)="logout()"></app-sidebar>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="ml-64 min-h-screen overflow-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+} @else {
 <router-outlet></router-outlet>
+}
