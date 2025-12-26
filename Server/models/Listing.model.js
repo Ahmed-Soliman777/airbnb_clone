@@ -7,26 +7,13 @@ const Review = require("./Review.model.js");
 const listingSchema = new mongoose.Schema(
   {
     title: {
-      en: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      ar: {
-        type: String,
-        required: true,
-        trim: true,
-      },
+      type: String,
+      required: true,
+      trim: true,
     },
     description: {
-      en: {
-        type: String,
-        required: true,
-      },
-      ar: {
-        type: String,
-        required: true,
-      },
+      type: String,
+      required: true,
     },
     propertyType: {
       type: String,
@@ -78,27 +65,26 @@ const listingSchema = new mongoose.Schema(
       {
         icon: {
           type: String,
-          enum: ["Info", "MapPin", "Users", "Home", "Star", "Heart", "Key", "Wifi", "Car", "Shield"],
+          enum: [
+            "Info",
+            "MapPin",
+            "Users",
+            "Home",
+            "Star",
+            "Heart",
+            "Key",
+            "Wifi",
+            "Car",
+            "Shield",
+          ],
         },
         title: {
-          en: {
-            type: String,
-            required: true,
-          },
-          ar: {
-            type: String,
-            required: true,
-          },
+          type: String,
+          required: true,
         },
         description: {
-          en: {
-            type: String,
-            required: true,
-          },
-          ar: {
-            type: String,
-            required: true,
-          },
+          type: String,
+          required: true,
         },
       },
     ],

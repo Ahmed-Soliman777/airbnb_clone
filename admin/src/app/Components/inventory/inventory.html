@@ -1,0 +1,79 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <app-inventory-header (addNew)="openAddModal()" (export)="exportData()"></app-inventory-header>
+
+  <!-- Main Content -->
+  <div class="px-8 py-6">
+    <!-- Success/Error Messages -->
+    @if(successMessage) {
+    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+      {{ successMessage }}
+    </div>
+    } @else if(errorMessage && !showAddModal && !showEditModal) {
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
+      {{ errorMessage }}
+    </div>
+    }
+
+    <!-- Stats Cards -->
+    <app-inventory-stats
+      [totalListings]="totalListingsFromDB"
+      [totalExperiences]="totalExperiencesFromDB"
+      [totalServices]="totalServicesFromDB"
+      [listingsGrowth]="listingsGrowth"
+      [experiencesGrowth]="experiencesGrowth"
+      [servicesGrowth]="servicesGrowth"
+    ></app-inventory-stats>
+
+    <!-- Search and Filters -->
+    <app-inventory-search-filters
+      [(searchQuery)]="searchQuery"
+      [(selectedPropertyType)]="selectedPropertyType"
+      [propertyTypes]="propertyTypes"
+      (applyFilters)="applyFilters()"
+    ></app-inventory-search-filters>
+
+    <!-- Listings Table -->
+    <app-inventory-table
+      [listings]="filteredListings"
+      [isLoading]="isLoading"
+      (viewListing)="openViewModal($event)"
+      (editListing)="openEditModal($event)"
+      (deleteListing)="openDeleteModal($event)"
+    ></app-inventory-table>
+
+    <!-- Pagination -->
+    @if (!isLoading && filteredListings.length > 0) {
+    <app-inventory-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [totalItems]="totalItems"
+      [itemsPerPage]="itemsPerPage"
+      (pageChange)="goToPage($event)"
+    ></app-inventory-pagination>
+    }
+  </div>
+</div>
+
+<!-- Modal Components -->
+<app-view-listing-modal
+  [listing]="selectedListing"
+  [isOpen]="showViewModal"
+  (close)="closeModals()"
+></app-view-listing-modal>
+
+<app-edit-listing-modal
+  [listing]="selectedListing"
+  [isOpen]="showAddModal || showEditModal"
+  [isEditMode]="showEditModal"
+  [errorMessage]="errorMessage"
+  (close)="closeModals()"
+  (save)="showAddModal ? createListing() : updateListing()"
+></app-edit-listing-modal>
+
+<app-delete-listing-modal
+  [listing]="selectedListing"
+  [isOpen]="showDeleteModal"
+  (close)="closeModals()"
+  (confirm)="deleteListing()"
+></app-delete-listing-modal>

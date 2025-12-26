@@ -104,14 +104,71 @@ const createListing = async (req, res) => {
 // Get all listings
 const getListings = async (req, res) => {
   try {
-    const listings = await Listing.find({})
+    // Get query parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const propertyType = req.query.propertyType || '';
+
+    // Build query
+    const query = {};
+    
+    // Add search filter
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { city: { $regex: search, $options: 'i' } },
+        { country: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Add property type filter
+    if (propertyType) {
+      query.propertyType = propertyType;
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count
+    const total = await Listing.countDocuments(query);
+
+    // Get listings with pagination
+    const listings = await Listing.find(query)
       .populate("hostId", "firstName lastName _id") // join user info
       .populate("amenities", "name") // join amenities
-      .populate("reviews", "rating comment"); // join reviews
+      .populate("reviews", "rating comment") // join reviews
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(limit);
 
-    res.status(200).json(listings);
+    // Calculate average rating and review count for each listing
+    const listingsWithStats = listings.map(listing => {
+      const listingObj = listing.toObject();
+      const reviews = listingObj.reviews || [];
+      const reviewCount = reviews.length;
+      const ratingAvg = reviewCount > 0 
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount 
+        : 0;
+      
+      return {
+        ...listingObj,
+        reviewCount,
+        ratingAvg: parseFloat(ratingAvg.toFixed(1))
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: listingsWithStats,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -545,6 +602,67 @@ const getHostListings = async (req, res) => {
   }
 };
 
+// Get listing statistics
+const getListingStats = async (req, res) => {
+  try {
+    const totalListings = await Listing.countDocuments({});
+    
+    // Calculate growth vs last month (including deletions)
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    
+    // Count items created this month
+    const currentMonthCreated = await Listing.countDocuments({
+      createdAt: { $gte: startOfCurrentMonth }
+    });
+    
+    // Count items created last month
+    const lastMonthCreated = await Listing.countDocuments({
+      createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+    });
+    
+    // Count items deleted this month (if using soft delete or tracking deletedAt)
+    const currentMonthDeleted = await Listing.countDocuments({
+      deletedAt: { $gte: startOfCurrentMonth, $exists: true }
+    });
+    
+    // Count items deleted last month
+    const lastMonthDeleted = await Listing.countDocuments({
+      deletedAt: { $gte: startOfLastMonth, $lte: endOfLastMonth, $exists: true }
+    });
+    
+    // Calculate net change (created - deleted)
+    const currentMonthNet = currentMonthCreated - currentMonthDeleted;
+    const lastMonthNet = lastMonthCreated - lastMonthDeleted;
+    
+    // Calculate total at end of last month (approximate)
+    const totalAtEndOfLastMonth = totalListings - currentMonthNet;
+    
+    // Calculate growth percentage based on net change
+    let growthPercentage = 0;
+    if (totalAtEndOfLastMonth > 0) {
+      growthPercentage = ((totalListings - totalAtEndOfLastMonth) / totalAtEndOfLastMonth * 100).toFixed(1);
+    } else if (totalListings > 0) {
+      growthPercentage = 100;
+    }
+    
+    const stats = {
+      totalListings,
+      growthPercentage: parseFloat(growthPercentage),
+      currentMonthCreated,
+      currentMonthDeleted,
+      lastMonthCreated,
+      lastMonthDeleted
+    };
+
+    res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createListing,
   getListings,
@@ -554,4 +672,5 @@ module.exports = {
   searchListings,
   getListingReviews,
   getHostListings,
+  getListingStats,
 };
