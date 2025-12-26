@@ -314,7 +314,7 @@ exports.resetPassword = async (req, res) => {
 // (admin فقط)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('name email role _id');
+    const users = await User.find().select('name firstName lastName  email role _id');
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
