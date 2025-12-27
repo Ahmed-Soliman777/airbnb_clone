@@ -31,6 +31,7 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../Services/auth-service';
+import { DeviceDetectionService } from '../Services/device-detection.service';
 import { map, catchError, of } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';

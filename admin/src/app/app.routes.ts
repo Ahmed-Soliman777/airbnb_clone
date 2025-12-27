@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Login } from './Components/login/login';
 import { Home } from './Components/home/home';
+import { Inventory } from './Components/inventory/inventory';
 import { adminGuard } from './Guard/admin-guard';
 import { AdminPaymentsComponent } from './Components/chart/chart';
 
