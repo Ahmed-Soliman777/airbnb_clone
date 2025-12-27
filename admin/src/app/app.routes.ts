@@ -9,11 +9,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'home', component: Home, canActivate: [adminGuard] },
-<<<<<<< HEAD
   { path: 'inventory', component: Inventory, canActivate: [adminGuard] },
-=======
-   { path: 'admin', component: AdminDashboardComponent,canActivate: [adminGuard] },
->>>>>>> main
+  { path: 'users', component: AdminDashboardComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '/login' },
- 
 ];
