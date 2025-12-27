@@ -1,0 +1,24 @@
+<div class="bg-white border-b border-gray-200 px-8 py-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Inventory Management</h1>
+      <p class="text-sm text-gray-500 mt-1">Listings, Experiences & Services</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <button
+        class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        (click)="onExport()"
+      >
+        <mat-icon class="align-middle mr-1 text-gray-600 text-xs"> arrow_downward </mat-icon>
+        Export
+      </button>
+      <button
+        class="px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors shadow-sm"
+        (click)="onAddNew()"
+      >
+        <mat-icon class="align-middle mr-1 text-white text-xs"> add </mat-icon>
+        Add New
+      </button>
+    </div>
+  </div>
+</div>

@@ -14,3 +14,6 @@ export async function generatePricePerNight(lat, lng) {
     const result = await model.generateContent(prompt);
     return result.response.text();
 }
+
+
+//

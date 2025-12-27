@@ -461,11 +461,73 @@ const getHostServices = async (req, res) => {
   }
 };
 
+// Get service statistics
+const getServiceStats = async (req, res) => {
+  try {
+    const totalServices = await Service.countDocuments({});
+    
+    // Calculate growth vs last month (including deletions)
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    
+    // Count items created this month
+    const currentMonthCreated = await Service.countDocuments({
+      createdAt: { $gte: startOfCurrentMonth }
+    });
+    
+    // Count items created last month
+    const lastMonthCreated = await Service.countDocuments({
+      createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+    });
+    
+    // Count items deleted this month (if using soft delete or tracking deletedAt)
+    const currentMonthDeleted = await Service.countDocuments({
+      deletedAt: { $gte: startOfCurrentMonth, $exists: true }
+    });
+    
+    // Count items deleted last month
+    const lastMonthDeleted = await Service.countDocuments({
+      deletedAt: { $gte: startOfLastMonth, $lte: endOfLastMonth, $exists: true }
+    });
+    
+    // Calculate net change (created - deleted)
+    const currentMonthNet = currentMonthCreated - currentMonthDeleted;
+    const lastMonthNet = lastMonthCreated - lastMonthDeleted;
+    
+    // Calculate total at end of last month (approximate)
+    const totalAtEndOfLastMonth = totalServices - currentMonthNet;
+    
+    // Calculate growth percentage based on net change
+    let growthPercentage = 0;
+    if (totalAtEndOfLastMonth > 0) {
+      growthPercentage = ((totalServices - totalAtEndOfLastMonth) / totalAtEndOfLastMonth * 100).toFixed(1);
+    } else if (totalServices > 0) {
+      growthPercentage = 100;
+    }
+    
+    const stats = {
+      totalServices,
+      growthPercentage: parseFloat(growthPercentage),
+      currentMonthCreated,
+      currentMonthDeleted,
+      lastMonthCreated,
+      lastMonthDeleted
+    };
+
+    res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createService,
   getServices,
   getService,
   updateService,
   deleteService,
-  getHostServices
+  getHostServices,
+  getServiceStats
 };

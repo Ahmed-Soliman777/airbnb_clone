@@ -9,6 +9,7 @@ const {
   searchListings,
   getListingReviews,
   getHostListings,
+  getListingStats,
 } = require("../controllers/listing.controller.js");
 
 const protect = require("../middleware/userMiddleware.js");
@@ -64,6 +65,7 @@ const { default: upload } = require("../middleware/multer.js");
  *                     items:
  *                       type: string
  */
+router.get("/listings/stats", getListingStats);
 router.get("/listings", getListings);
 
 /**

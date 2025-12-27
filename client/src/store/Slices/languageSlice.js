@@ -17,10 +17,17 @@ const translations = {
   },
 };
 
+// Load language from localStorage or use default
+const savedLanguage = localStorage.getItem("language") || "en";
+const savedDirection = savedLanguage === "ar" ? "rtl" : "ltr";
+
+// Set initial direction on HTML element
+document.documentElement.dir = savedDirection;
+
 const initialState = {
-  default_language: "en",
-  direction: "ltr",
-  t: translations.en,
+  default_language: savedLanguage,
+  direction: savedDirection,
+  t: translations[savedLanguage],
 };
 
 export const languageSlice = createSlice({
@@ -31,11 +38,16 @@ export const languageSlice = createSlice({
       state.default_language = "en";
       state.direction = "ltr";
       state.t = translations.en;
+      localStorage.setItem("language", "en");
+      document.documentElement.dir = "ltr";
     },
     arabicLanguage: (state) => {
       state.default_language = "ar";
       state.direction = "rtl";
       state.t = translations.ar;
+      //
+      localStorage.setItem("language", "ar");
+      document.documentElement.dir = "rtl";
     },
   },
 });
