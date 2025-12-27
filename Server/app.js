@@ -35,6 +35,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:4200",
+      "http://localhost:4000",
     ], // frontend origin
     credentials: true, // allow cookies
   })
