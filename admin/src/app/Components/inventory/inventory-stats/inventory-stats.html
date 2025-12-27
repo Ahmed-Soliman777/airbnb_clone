@@ -1,0 +1,119 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <!-- Active Listings -->
+  <div
+    class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-start justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-2">Active Listings</p>
+        <h3 class="text-3xl font-bold text-gray-900">{{ totalListings }}</h3>
+        <p
+          class="text-xs mt-2 flex items-center"
+          [ngClass]="
+            listingsGrowth > 0
+              ? 'text-green-700'
+              : listingsGrowth < 0
+              ? 'text-red-600'
+              : 'text-gray-500'
+          "
+        >
+          <mat-icon class="w-3 h-3 mr-1">{{
+            listingsGrowth > 0 ? 'trending_up' : listingsGrowth < 0 ? 'trending_down' : 'remove'
+          }}</mat-icon>
+          {{
+            listingsGrowth === 0
+              ? 'No change'
+              : (listingsGrowth >= 0 ? '+' : '') +
+                (listingsGrowth | number : '1.0-1') +
+                '% last month'
+          }}
+        </p>
+      </div>
+      <div class="bg-red-50 p-3 rounded-lg">
+        <div class="w-6 h-6 text-red-500">
+          <mat-icon>home</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booked Experiences -->
+  <div
+    class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-start justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-2">Booked Experiences</p>
+        <h3 class="text-3xl font-bold text-gray-900">{{ totalExperiences }}</h3>
+        <p
+          class="text-xs mt-2 flex items-center"
+          [ngClass]="
+            experiencesGrowth > 0
+              ? 'text-green-700'
+              : experiencesGrowth < 0
+              ? 'text-red-600'
+              : 'text-gray-500'
+          "
+        >
+          <mat-icon class="w-3 h-3 mr-1">{{
+            experiencesGrowth > 0
+              ? 'trending_up'
+              : experiencesGrowth < 0
+              ? 'trending_down'
+              : 'remove'
+          }}</mat-icon>
+          {{
+            experiencesGrowth === 0
+              ? 'No change'
+              : (experiencesGrowth >= 0 ? '+' : '') +
+                (experiencesGrowth | number : '1.0-1') +
+                '% last month'
+          }}
+        </p>
+      </div>
+      <div class="bg-red-50 p-3 rounded-lg">
+        <div class="w-6 h-6 text-red-500">
+          <mat-icon>tour</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Services -->
+  <div
+    class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-start justify-between">
+      <div>
+        <p class="text-sm text-gray-500 mb-2">Pending Services</p>
+        <h3 class="text-3xl font-bold text-gray-900">{{ totalServices }}</h3>
+        <p
+          class="text-xs mt-2 flex items-center"
+          [ngClass]="
+            servicesGrowth > 0
+              ? 'text-green-700'
+              : servicesGrowth < 0
+              ? 'text-red-600'
+              : 'text-gray-500'
+          "
+        >
+          <mat-icon class="w-3 h-3 mr-1">{{
+            servicesGrowth > 0 ? 'trending_up' : servicesGrowth < 0 ? 'trending_down' : 'remove'
+          }}</mat-icon>
+          {{
+            servicesGrowth === 0
+              ? 'No change'
+              : (servicesGrowth >= 0 ? '+' : '') +
+                (servicesGrowth | number : '1.0-1') +
+                '% last month'
+          }}
+        </p>
+      </div>
+      <div class="bg-red-50 p-3 rounded-lg">
+        <div class="w-6 h-6 text-red-500">
+          <mat-icon>build</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

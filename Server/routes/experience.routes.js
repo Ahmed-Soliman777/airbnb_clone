@@ -7,11 +7,13 @@ const {
   updateExperience,
   deleteExperience,
   getHostExperiences,
+  getExperienceStats,
 } = require("../controllers/experience.controller.js");
 const auth = require("../middleware/userMiddleware.js");
 const { default: upload } = require("../middleware/multer.js");
 
 // Public routes
+router.get('/stats', getExperienceStats);
 router.get('/', getExperiences);
 
 // Protected routes (require authentication)

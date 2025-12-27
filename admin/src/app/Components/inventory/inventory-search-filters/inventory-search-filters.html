@@ -1,0 +1,36 @@
+<div class="flex items-center gap-4 bg-white rounded-4xl shadow-sm border border-gray-100 mb-6 p-3">
+  <!-- Search Input -->
+  <div
+    class="flex items-center justify-center flex-1 px-4 text-gray-500 border-r-2 border-gray-200 w-11/12"
+  >
+    <mat-icon class="text-gray-400 pointer-events-none"> search </mat-icon>
+    <input
+      type="text"
+      [ngModel]="searchQuery"
+      (ngModelChange)="onSearchQueryChange($event)"
+      placeholder="Search by title, host, or ID..."
+      class="w-full px-2 py-2.5 rounded-xlg outline-none transition-all"
+    />
+  </div>
+  <!-- Filter Tabs -->
+  <div class="flex gap-2">
+    <button class="px-4 text-sm font-medium text-white bg-red-500 rounded-full transition-colors">
+      All Items
+    </button>
+    <button
+      class="px-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+    >
+      Listings
+    </button>
+    <button
+      class="px-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+    >
+      Experiences
+    </button>
+    <button
+      class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+    >
+      Services
+    </button>
+  </div>
+</div>

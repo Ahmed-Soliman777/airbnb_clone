@@ -1,4 +1,4 @@
-<aside class="w-64 h-screen bg-white shadow-lg flex flex-col">
+<aside class="w-64 h-screen bg-white shadow-lg flex flex-col fixed top-0 left-0">
   <!-- Title -->
   <div class="flex items-center p-6">
     <div class="bg-[#ffdedf] rounded-full p-1 mr-2 flex items-center justify-center">
@@ -13,53 +13,58 @@
   <div class="px-3 space-y-4 flex-1">
     <!-- Dashboard -->
     <div
-  routerLink="/admin"
-  routerLinkActive="bg-[#ff5c61] text-white" 
-  class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
->
-  <mat-icon class="text-primary">dashboard</mat-icon>
-  <a>Dashboard</a>
-</div>
+      routerLink="/dashboard"
+      class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
+    >
+      <mat-icon class="text-primary">dashboard</mat-icon>
+      <span>Dashboard</span>
+    </div>
+
     <!-- Users -->
     <div
+      routerLink="/users"
       class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
     >
       <mat-icon class="text-primary">group</mat-icon>
-      <a>Users</a>
+      <span>Users</span>
     </div>
 
     <!-- Listings -->
     <div
+      routerLink="/inventory"
       class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
     >
       <mat-icon class="text-primary">home</mat-icon>
-      <a>Listings</a>
+      <span>Inventory</span>
     </div>
 
     <!-- Bookings -->
     <div
+      routerLink="/bookings"
       class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
     >
       <mat-icon class="text-primary">calendar_month</mat-icon>
-      <a>Bookings</a>
+      <span>Bookings</span>
     </div>
 
     <!-- transactions -->
     <div
+      routerLink="/transactions"
       class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
     >
       <mat-icon class="text-primary">payments</mat-icon>
-      <a>Transactions</a>
+      <span>Transactions</span>
     </div>
   </div>
 
   <!-- settings -->
   <div class="px-3 mb-4">
     <div
+      routerLink="/settings"
       class="flex items-center text-gray-500 gap-2 p-3 rounded-4xl cursor-pointer hover:bg-[#ff5c61] hover:text-white transition"
     >
       <mat-icon class="text-primary">settings</mat-icon>
-      <a>Settings</a>
+      <span>Settings</span>
     </div>
   </div>
 
@@ -78,7 +83,10 @@
         </div>
       </div>
       <!-- logout icon -->
-      <button (click)="onLogout()" class="rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition">
+      <button
+        (click)="onLogout()"
+        class="rounded-full p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition"
+      >
         <mat-icon>logout</mat-icon>
       </button>
     </div>
