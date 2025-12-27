@@ -35,7 +35,7 @@ import { useTranslation } from "react-i18next";
 const ListingDetails = () => {
   // Translation hook
   const { t } = useTranslation();
-  
+
   // Get listing ID from URL params
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -51,10 +51,12 @@ const ListingDetails = () => {
     const savedDate = document.cookie
       .split("; ")
       .find((row) => row.startsWith("listingDate="));
-    
+
     if (savedDate) {
       try {
-        const dateValue = JSON.parse(decodeURIComponent(savedDate.split("=")[1]));
+        const dateValue = JSON.parse(
+          decodeURIComponent(savedDate.split("=")[1])
+        );
         return {
           from: dateValue.from ? new Date(dateValue.from) : undefined,
           to: dateValue.to ? new Date(dateValue.to) : undefined,
@@ -103,9 +105,9 @@ const ListingDetails = () => {
       setDate(range);
       // Save to cookie (expires in 1 day)
       document.cookie = `listingDate=${encodeURIComponent(
-        JSON.stringify({ 
-          from: range.from.toISOString(), 
-          to: range.to.toISOString() 
+        JSON.stringify({
+          from: range.from.toISOString(),
+          to: range.to.toISOString(),
         })
       )}; path=/; max-age=86400`;
     }
@@ -215,8 +217,8 @@ const ListingDetails = () => {
   // Show loading state
   if (status === "loading") {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <p className="text-xl text-gray-600">{t("listingDetails.loadingListingDetails")}</p>
+      <div className="flex justify-center items-center h-96">
+        <div className="loader"></div>
       </div>
     );
   }
@@ -225,7 +227,9 @@ const ListingDetails = () => {
   if (!listingData) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <p className="text-xl text-gray-600">{t("listingDetails.listingNotFound")}</p>
+        <p className="text-xl text-gray-600">
+          {t("listingDetails.listingNotFound")}
+        </p>
       </div>
     );
   }
@@ -267,7 +271,8 @@ const ListingDetails = () => {
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 {[
-                  listingData.maxGuests && `${listingData.maxGuests} ${t("listingDetails.guests")}`,
+                  listingData.maxGuests &&
+                    `${listingData.maxGuests} ${t("listingDetails.guests")}`,
                   listingData.bedroomsCount &&
                     `${listingData.bedroomsCount} ${
                       listingData.bedroomsCount > 1
@@ -292,8 +297,12 @@ const ListingDetails = () => {
                 <div className="flex items-center justify-center gap-3 sm:gap-5">
                   <GuestFavouriteIcon side="left" />
                   <div className="text-center font-semibold text-gray-800 w-12 sm:w-16 text-base sm:text-lg flex flex-col items-center">
-                    <span className="m-0">{t("listingDetails.guestFavourite").split(" ")[0]}</span>
-                    <span className="m-0">{t("listingDetails.guestFavourite").split(" ")[1]}</span>
+                    <span className="m-0">
+                      {t("listingDetails.guestFavourite").split(" ")[0]}
+                    </span>
+                    <span className="m-0">
+                      {t("listingDetails.guestFavourite").split(" ")[1]}
+                    </span>
                   </div>
                   <GuestFavouriteIcon side="right" />
                 </div>
@@ -329,9 +338,13 @@ const ListingDetails = () => {
               />
               <div>
                 <p className="text-sm sm:text-base font-semibold">
-                  {t("listingDetails.hostedBy", { hostName: listingData.hostName })}
+                  {t("listingDetails.hostedBy", {
+                    hostName: listingData.hostName,
+                  })}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500">{t("listingDetails.superhost")}</p>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  {t("listingDetails.superhost")}
+                </p>
               </div>
             </div>
 
@@ -462,7 +475,9 @@ const ListingDetails = () => {
             </>
           ) : (
             <div className="py-8">
-              <h2 className="text-2xl font-semibold mb-4">{t("listingDetails.noReviewsYet")}</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                {t("listingDetails.noReviewsYet")}
+              </h2>
               <p className="text-gray-600">
                 {t("listingDetails.noReviewsDesc")}
               </p>

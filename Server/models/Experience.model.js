@@ -2,32 +2,16 @@ const mongoose = require('mongoose');
 
 const experienceSchema = new mongoose.Schema({
     title: {
-        en: {
-            type: String,
-            required: [true, 'Title is required'],
-            trim: true,
-            maxlength: [200, 'Title cannot exceed 200 characters']
-        },
-        ar: {
-            type: String,
-            required: [true, 'Title is required'],
-            trim: true,
-            maxlength: [200, 'Title cannot exceed 200 characters']
-        },
+        type: String,
+        required: [true, 'Title is required'],
+        trim: true,
+        maxlength: [200, 'Title cannot exceed 200 characters']
     },
     description: {
-        en: {
-            type: String,
-            required: [true, 'Description is required'],
-            trim: true,
-            maxlength: [5000, 'Description cannot exceed 5000 characters']
-        },
-        ar: {
-            type: String,
-            required: [true, 'Description is required'],
-            trim: true,
-            maxlength: [5000, 'Description cannot exceed 5000 characters']
-        },
+        type: String,
+        required: [true, 'Description is required'],
+        trim: true,
+        maxlength: [5000, 'Description cannot exceed 5000 characters']
     },
     experienceType: {
         type: String,
