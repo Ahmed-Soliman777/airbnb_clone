@@ -143,7 +143,7 @@ const listingSlice = createSlice({
       })
       .addCase(GetAllListings.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.listings = action.payload;
+        state.listings = action.payload.data || action.payload;
       })
       .addCase(GetAllListings.rejected, (state, action) => {
         state.status = "failed";

@@ -120,7 +120,7 @@ router.post('/login', userController.login);
  *       403:
  *         description: Access denied
  */
-router.get('/', auth, role(['admin']), userController.getAllUsers);
+router.get('/allUsers', auth, role(['admin']), userController.getAllUsers);
 router.get('/users', userController.getAllUsers);
 
 /**
@@ -194,7 +194,7 @@ router.put('/users/:id', async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.delete('/:id', auth, userController.deleteUser);
+router.delete('/deleteUser/:id', auth, userController.deleteUser);
 /**
  * @swagger
  * /users/become-host:
