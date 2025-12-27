@@ -45,6 +45,7 @@ export const languageSlice = createSlice({
       state.default_language = "ar";
       state.direction = "rtl";
       state.t = translations.ar;
+      //
       localStorage.setItem("language", "ar");
       document.documentElement.dir = "rtl";
     },

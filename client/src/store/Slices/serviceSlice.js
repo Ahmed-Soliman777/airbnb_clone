@@ -18,18 +18,31 @@ export const getAllServices = createAsyncThunk(
 
 export const searchServices = createAsyncThunk(
   "service/searchServices",
-  async ({ city, date, guests, page = 1, limit = 10, priceRange, categories, minRating }, { rejectWithValue }) => {
+  async (
+    {
+      city,
+      date,
+      guests,
+      page = 1,
+      limit = 10,
+      priceRange,
+      categories,
+      minRating,
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const params = new URLSearchParams();
-      if (city) params.append('city', city);
-      if (date) params.append('date', date);
-      if (guests) params.append('guests', guests);
-      params.append('page', page);
-      params.append('limit', limit);
+      if (city) params.append("city", city);
+      if (date) params.append("date", date);
+      if (guests) params.append("guests", guests);
+      params.append("page", page);
+      params.append("limit", limit);
 
-      if (priceRange) params.append('priceRange', JSON.stringify(priceRange));
-      if (categories && categories.length > 0) params.append('categories', JSON.stringify(categories));
-      if (minRating) params.append('minRating', minRating);
+      if (priceRange) params.append("priceRange", JSON.stringify(priceRange));
+      if (categories && categories.length > 0)
+        params.append("categories", JSON.stringify(categories));
+      if (minRating) params.append("minRating", minRating);
 
       const response = await axios.get(`${API_URL}?${params.toString()}`);
       return { ...response.data, page };
@@ -158,7 +171,8 @@ const serviceSlice = createSlice({
       })
       .addCase(searchServices.fulfilled, (state, action) => {
         state.searchStatus = "succeeded";
-        const { data, total, totalPages, currentPage, page } = action.payload.data;
+        const { data, total, totalPages, currentPage, page } =
+          action.payload.data;
 
         // If it's page 1, replace results. Otherwise, append.
         if (page === 1) {
@@ -226,5 +240,6 @@ const serviceSlice = createSlice({
   },
 });
 
-export const { clearServiceError, clearCurrentService, clearSearchResults } = serviceSlice.actions;
+export const { clearServiceError, clearCurrentService, clearSearchResults } =
+  serviceSlice.actions;
 export default serviceSlice.reducer;

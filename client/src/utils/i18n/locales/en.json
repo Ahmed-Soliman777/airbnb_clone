@@ -4,7 +4,8 @@
     "experiences": "Experiences",
     "services": "Services",
     "host": "Become a host",
-    "new": "New"
+    "new": "New",
+    "startSearch": "Start your search"
   },
   "searchBar": {
     "where": "Where",
@@ -56,57 +57,63 @@
     "recentlyViewed": "Recently Viewed",
     "popularHomes": "Popular homes in Cairo",
     "loadingListings": "Loading listings...",
-    "error": "Error"
+    "error": "Error",
+    "serverError": "Something went wrong",
+    "serverErrorMessage": "We're having trouble connecting to our servers. Please check your connection and try again.",
+    "tryAgain": "Try Again",
+    "noListingsTitle": "No homes available yet",
+    "noListingsMessage": "There are no listings available at the moment. Check back soon for amazing places to stay!",
+    "exploreExperiences": "Explore Experiences"
   },
-  "help":{
-  "Hi, how can we help?": " Hi, how can we help ?",
-  "Search": "Search",
+  "help": {
+    "Hi, how can we help?": " Hi, how can we help ?",
+    "Search": "Search",
     "search how-tows and more": "search how-tows and more",
 
-  "Guest": "Guest",
-  "Home host": "Home host",
-  "Experience host": " Experience host ",
-  "Service host": "Service host ",
+    "Guest": "Guest",
+    "Home host": "Home host",
+    "Experience host": " Experience host ",
+    "Service host": "Service host ",
 
-  "Travel admin": "Travel admin ",
-  "We're here for you": "We're here for you",
-  "Log in to get help with your reservations, account, and more.": "Log in to get help with your reservations, account, and more.",
-  "Log in or signup": "Log in or signup",
-  "Guides for getting started": "Guides for getting started ",
-  "Browse all topics": "Browse all topics  ",
-   "Managing your reservation: payments, changes, and cancellations": "Managing your reservation: payments, changes, and cancellations",  "AirCover for guests": "AirCover for guests",
-  
-  "Essential resources for new hosts": "Essential resources for new hosts",
-  "Getting started as a guest on Airbnb": "Getting started as a guest on Airbnb",
+    "Travel admin": "Travel admin ",
+    "We're here for you": "We're here for you",
+    "Log in to get help with your reservations, account, and more.": "Log in to get help with your reservations, account, and more.",
+    "Log in or signup": "Log in or signup",
+    "Guides for getting started": "Guides for getting started ",
+    "Browse all topics": "Browse all topics  ",
+    "Managing your reservation: payments, changes, and cancellations": "Managing your reservation: payments, changes, and cancellations",
+    "AirCover for guests": "AirCover for guests",
 
-  "Top articles": "top articles",
-  "Cancel your home reservation as a guest": "Cancel your home reservation as a guest",
-  "Your plans have changed and now you need to cancel your home reservation. No problem": "Your plans have changed and now you need to cancel your home reservation. No problem",
-  "Change the date or time of your service or experience reservation": "Change the date or time of your service or experience reservation",
-  "If you booked a service or experience, but the date or time no longer works for you, don’t ": "If you booked a service or experience, but the date or time no longer works for you, don’t...",
-  "If your host cancels your home reservation": "If your host cancels your home reservation",
-  "While it’s rare, sometimes a host may need to cancel a reservation. We understand this can...": "While it’s rare, sometimes a host may need to cancel a reservation. We understand this can......",
-  "Payment methods accepted": "Payment methods accepted",
-  "Airbnb accepts a variety of payment methods. However, your available options will vary by region. Depending on the country your guest": "Airbnb accepts a variety of payment methods. However, your available options will vary by region. Depending on the country your guest          ....",
-  "Add or remove a payment methodle": "Add or remove a payment methodle ",
-  "if an existing payment method on your account is incorrect (ex: an expired credit card), you can update it or add a new pay": "if an existing payment method on your account is incorrect (ex:an expired credit card), you can update it or add a new pay ....",
-  "When you’ll pay for your reservation": "When you’ll pay for your reservation   ",
-  "Want to know when you’ll be charged for a reservation? It all depends on the type of": "Want to know when you’ll be charged for a reservation? It all depends on the type of ",
-  
-  "explore more": "explore more",
-  "Our community policies": "Our community policies ",
-  "How we build a foundation of trust": " How we build a foundation of trust     ",
-  "Safety tips and guidelines": "Safety tips and guidelines  ",
-  "Resources to help travelers stay safe": "Resources to help travelers stay safe",
-  "contact": "contact",
-  "Need to get in touch?": "Need to get in touch?",
-  "We’ll start with some questions and get you to the right place.": "We’ll start with some questions and get you to the right place.",
-  "Contact us": "Contact us ",
-  "give us feedback.": "give us feedback."
+    "Essential resources for new hosts": "Essential resources for new hosts",
+    "Getting started as a guest on Airbnb": "Getting started as a guest on Airbnb",
 
-},
+    "Top articles": "top articles",
+    "Cancel your home reservation as a guest": "Cancel your home reservation as a guest",
+    "Your plans have changed and now you need to cancel your home reservation. No problem": "Your plans have changed and now you need to cancel your home reservation. No problem",
+    "Change the date or time of your service or experience reservation": "Change the date or time of your service or experience reservation",
+    "If you booked a service or experience, but the date or time no longer works for you, don’t ": "If you booked a service or experience, but the date or time no longer works for you, don’t...",
+    "If your host cancels your home reservation": "If your host cancels your home reservation",
+    "While it’s rare, sometimes a host may need to cancel a reservation. We understand this can...": "While it’s rare, sometimes a host may need to cancel a reservation. We understand this can......",
+    "Payment methods accepted": "Payment methods accepted",
+    "Airbnb accepts a variety of payment methods. However, your available options will vary by region. Depending on the country your guest": "Airbnb accepts a variety of payment methods. However, your available options will vary by region. Depending on the country your guest          ....",
+    "Add or remove a payment methodle": "Add or remove a payment methodle ",
+    "if an existing payment method on your account is incorrect (ex: an expired credit card), you can update it or add a new pay": "if an existing payment method on your account is incorrect (ex:an expired credit card), you can update it or add a new pay ....",
+    "When you’ll pay for your reservation": "When you’ll pay for your reservation   ",
+    "Want to know when you’ll be charged for a reservation? It all depends on the type of": "Want to know when you’ll be charged for a reservation? It all depends on the type of ",
 
-   "landing": {
+    "explore more": "explore more",
+    "Our community policies": "Our community policies ",
+    "How we build a foundation of trust": " How we build a foundation of trust     ",
+    "Safety tips and guidelines": "Safety tips and guidelines  ",
+    "Resources to help travelers stay safe": "Resources to help travelers stay safe",
+    "contact": "contact",
+    "Need to get in touch?": "Need to get in touch?",
+    "We’ll start with some questions and get you to the right place.": "We’ll start with some questions and get you to the right place.",
+    "Contact us": "Contact us ",
+    "give us feedback.": "give us feedback."
+  },
+
+  "landing": {
     "Explore the": "Explore the",
     "World": "World",
     "Find amazing places to stay around the globe": "Find amazing places to stay around the globe",
@@ -139,5 +146,4 @@
     "whereYoullSleep": "Where you'll sleep",
     "bedroomInfo": "Bedroom information not provided."
   }
-
 }
