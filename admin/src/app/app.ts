@@ -24,6 +24,7 @@ export class App {
   });
 
   constructor(private authService: AuthService, private router: Router) {
+    //prevent user navigation to login page if already logged in
     this.authService.initAuth();
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
