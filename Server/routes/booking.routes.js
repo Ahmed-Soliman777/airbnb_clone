@@ -9,6 +9,8 @@ const {
   updateBookingStatus,
   deleteBooking,
   getAllBookingsForHost,
+  getDailyPaymentStats,
+  getAllBookingsForAdmin,
 } = require("../controllers/booking.controller.js");
 
 const authMiddleware = require("../middleware/userMiddleware");
@@ -97,11 +99,7 @@ router.post(
  *       403:
  *         description: Forbidden
  */
-router.get(
-  "/booking/user",
-  authMiddleware,
-  getBookingsForUser
-);
+router.get("/booking/user", authMiddleware, getBookingsForUser);
 
 /**
  * @swagger
@@ -232,12 +230,56 @@ router.patch(
  *       404:
  *         description: Booking not found
  */
-router.delete(
-  "/booking/:id",
-  authMiddleware,
-  deleteBooking
-);
+router.delete("/booking/:id", authMiddleware, deleteBooking);
 
 router.get("/bookings/host", authMiddleware, getAllBookingsForHost);
+
+/////me
+
+/**
+ * @swagger
+ * /booking/admin/stats:
+ *   get:
+ *     summary: Get daily payment statistics grouped by date and status (Admin only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Daily payment statistics
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin only
+ */
+router.get(
+  "/booking/admin/stats",
+  authMiddleware,
+  authorization("admin"),
+  getDailyPaymentStats
+);
+
+/**
+ * @swagger
+ * /booking/admin/all:
+ *   get:
+ *     summary: Get all bookings with populated user and listing (Admin only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all bookings
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin only
+ */
+router.get(
+  "/booking/admin/all",
+  authMiddleware,
+  authorization("admin"),
+  getAllBookingsForAdmin
+);
 
 module.exports = router;

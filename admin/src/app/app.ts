@@ -11,9 +11,9 @@ import { Sidebar } from './Components/sidebar/sidebar';
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule, Sidebar, /*MatSlideToggleModule*/],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('admin');
   user = signal<User | null>(null);
   currentRoute = signal<string>('');
