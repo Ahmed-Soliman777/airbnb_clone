@@ -120,6 +120,8 @@ router.post('/login', userController.login);
  *       403:
  *         description: Access denied
  */
+router.get('/', auth, role(['admin']), userController.getAllUsers);
+router.get('/users', userController.getAllUsers);
 router.get('/allUsers', auth, role(['admin']), userController.getAllUsers);
 
 /**
@@ -157,6 +159,20 @@ router.get('/allUsers', auth, role(['admin']), userController.getAllUsers);
  *         description: User not found
  */
 router.put('/:id', auth, userController.updateUser);
+router.put('/users/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        user.role = req.body.role;
+        user.isVerified = true;
+        await user.save();
+        res.status(200).json({ message: 'User updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}); // not best practice
 
 /**
  * @swagger
