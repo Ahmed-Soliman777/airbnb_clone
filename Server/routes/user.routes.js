@@ -120,9 +120,8 @@ router.post('/login', userController.login);
  *       403:
  *         description: Access denied
  */
-router.get('/', auth, role(['admin']), userController.getAllUsers);
-router.get('/users', userController.getAllUsers);
 router.get('/allUsers', auth, role(['admin']), userController.getAllUsers);
+router.get('/users', userController.getAllUsers);
 
 /**
  * @swagger
