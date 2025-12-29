@@ -1,8 +1,8 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { User, LoginRequest, LoginResponse } from '../Models/user';
 
 @Injectable({
@@ -13,8 +13,23 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private platformId = inject(PLATFORM_ID);
+  private initialized = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  initAuth(): void {
+    if (!isPlatformBrowser(this.platformId) || this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
+    const token = this.getToken();
+    if (token) {
+      this.getProfile().subscribe({
+        error: () => this.removeToken(),
+      });
+    }
+  }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
@@ -35,7 +50,15 @@ export class AuthService {
       .get<User>(`${this.apiUrl}/profile`, {
         withCredentials: true,
       })
-      .pipe(tap((user) => this.currentUserSubject.next(user)));
+      .pipe(
+        tap((user) => {
+          this.currentUserSubject.next(user);
+        }),
+        catchError((error) => {
+          this.currentUserSubject.next(null);
+          throw error;
+        })
+      );
   }
 
   logout(): Observable<any> {
@@ -56,14 +79,12 @@ export class AuthService {
   }
 
   setToken(token: string): void {
-    // Ensure this code only runs in the browser by checking the platform
     if (isPlatformBrowser(this.platformId)) {
-      document.cookie = `token=${token}; path=/; SameSite=Lax`;
+      document.cookie = `token=${token}; path=/; SameSite=Lax; max-age=86400`;
     }
   }
 
   getToken(): string | null {
-    // Ensure this code only runs in the browser by checking the platform
     if (!isPlatformBrowser(this.platformId)) {
       return null;
     }
@@ -82,6 +103,7 @@ export class AuthService {
   removeToken(): void {
     if (isPlatformBrowser(this.platformId)) {
       document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      this.currentUserSubject.next(null);
     }
   }
 
