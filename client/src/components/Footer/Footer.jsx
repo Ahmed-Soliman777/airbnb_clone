@@ -18,7 +18,7 @@ export default function Footer() {
           {t("footer.Support")}
         </h3>
 
-        <div className="hidden lg:flex justify-between text-sm max-w-[900px] text-[#222222]">
+        {/* <div className="hidden lg:flex justify-between text-sm max-w-[900px] text-[#222222]">
           <div className="cursor-pointer hover:underline ">{t("footer.Popular")}</div>
           <div className="cursor-pointer hover:underline">{t("footer.Arts & culture")}</div>
           <div className="cursor-pointer hover:underline">{t("footer.Beach")}</div>
@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="cursor-pointer hover:underline">{t("footer.Things to do")}</div>
           <div className="cursor-pointer hover:underline">Travel tips & inspiration</div>
           <div className="cursor-pointer hover:underline">Airbnb-friendly apartments</div>
-        </div>
+        </div> */}
       </div>
 
       <hr />

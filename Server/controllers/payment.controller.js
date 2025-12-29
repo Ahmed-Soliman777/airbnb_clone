@@ -98,7 +98,7 @@ async function handlePayment(req, res) {
       checkOutDate,
       guestsCount,
       totalPrice,
-      status: "confirmed",
+      status: "pending",
       stripeSessionId: session.id,
     });
 
@@ -150,12 +150,12 @@ async function verifyPayment(req, res) {
 
     // Update booking status based on payment status
     if (session.payment_status === "paid") {
-      booking.status = "confirmed";
+      booking.status = "pending";
       await booking.save();
 
       return res.status(200).json({
         success: true,
-        status: "confirmed",
+        status: "pending",
         booking: booking,
         message: "Payment verified successfully",
       });
