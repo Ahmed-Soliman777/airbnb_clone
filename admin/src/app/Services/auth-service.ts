@@ -17,6 +17,7 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
+  // add initAuth method
   initAuth(): void {
     if (!isPlatformBrowser(this.platformId) || this.initialized) {
       return;
