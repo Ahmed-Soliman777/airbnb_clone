@@ -28,6 +28,7 @@ const MessagesPage = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const selectedConversationRef = useRef(null);
 
     // Redux state
     const {
@@ -38,9 +39,13 @@ const MessagesPage = () => {
         messagesLoading
     } = useSelector((state) => state.messages);
 
+    useEffect(() => {
+        selectedConversationRef.current = selectedConversation?._id;
+    }, [selectedConversation]);
+
     // Initialize socket connection
     useEffect(() => {
-        const token = getCookie('token');
+        const token = getCookie("token");
         if (!token) return;
 
         const newSocket = io("http://localhost:3000", {
@@ -52,14 +57,14 @@ const MessagesPage = () => {
         });
 
         newSocket.on("message:new", (data) => {
-            if (selectedConversation?._id === data.conversationId) {
-                dispatch(addMessage(data));
-            }
-            // Update conversation list
             dispatch(updateConversationLastMessage({
                 conversationId: data.conversationId,
                 message: data
             }));
+
+            if (selectedConversationRef.current === data.conversationId) {
+                dispatch(addMessage(data));
+            }
         });
 
         newSocket.on("typing:start", ({ userId }) => {
@@ -75,7 +80,8 @@ const MessagesPage = () => {
         return () => {
             newSocket.disconnect();
         };
-    }, [selectedConversation, dispatch]);
+    }, [dispatch]);
+
 
     // Fetch conversations on mount
     useEffect(() => {
@@ -173,7 +179,9 @@ const MessagesPage = () => {
     };
 
     const formatTime = (date) => {
-        return new Date(date).toLocaleTimeString([], {
+        const d = new Date(date);
+        if (isNaN(d)) return "";
+        return d.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit"
         });
@@ -182,7 +190,7 @@ const MessagesPage = () => {
     if (loading) {
         return (
             <div className="container mx-auto p-4 max-w-6xl">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 h-[700px] bg-card rounded-lg border overflow-hidden shadow-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 h-[700px] bg-card rounded-lg border overflow-y-scroll shadow-lg">
                     <div className="space-y-2 p-4">
                         {[...Array(5)].map((_, i) => (
                             <Skeleton key={i} className="h-16 w-full" />
@@ -195,10 +203,10 @@ const MessagesPage = () => {
 
     return (
         <div className="container mx-auto p-4 max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 h-[700px] bg-card rounded-lg border overflow-hidden shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 h-[700px] bg-card rounded-lg border overflow-y-scroll shadow-lg">
                 {/* Conversations List */}
                 <div
-                    className={`border-r ${selectedConversation ? "hidden md:block" : ""
+                    className={`border-r ${selectedConversation ? "md:block" : ""
                         }`}
                 >
                     <div className="p-3 border-b bg-muted/20">
@@ -250,8 +258,7 @@ const MessagesPage = () => {
 
                 {/* Messages Area */}
                 <div
-                    className={`col-span-2 flex flex-col ${!selectedConversation ? "hidden md:flex" : ""
-                        }`}
+                    className={`col-span-2 flex flex-col`}
                 >
                     {selectedConversation ? (
                         <>
@@ -296,32 +303,34 @@ const MessagesPage = () => {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {messages.map((message) => {
-                                            const isOwn = message.sender._id === currentUserId;
+                                        {messages.map((item, id) => {
+                                            const message = item.message || item;
+                                            const isOwn = message?.sender?._id === currentUserId;
                                             return (
                                                 <div
-                                                    key={message._id}
+                                                    key={id}
                                                     className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
                                                 >
                                                     <div
                                                         className={`max-w-[70%] rounded-lg px-4 py-2 ${isOwn
-                                                            ? "bg-primary text-primary-foreground"
+                                                            ? "bg-[#f1f1f1] text-black"
                                                             : "bg-muted"
                                                             }`}
                                                     >
                                                         <p>{message.content}</p>
                                                         <p
                                                             className={`text-xs mt-1 ${isOwn
-                                                                ? "text-primary-foreground/70"
+                                                                ? "text-black/70"
                                                                 : "text-muted-foreground"
                                                                 }`}
                                                         >
-                                                            {formatTime(message.createdAt)}
+                                                            {message.createdAt ? formatTime(message.createdAt) : ""}
                                                         </p>
                                                     </div>
                                                 </div>
                                             );
                                         })}
+
                                         <div ref={messagesEndRef} />
                                     </div>
                                 )}
@@ -344,7 +353,7 @@ const MessagesPage = () => {
                                         type="submit"
                                         disabled={!newMessage.trim()}
                                         size="lg"
-                                        className="h-11 px-6"
+                                        className="h-11 px-6 bg-[#ff385c]"
                                     >
                                         <Send className="w-5 h-5 mr-2" />
                                         Send

@@ -15,5 +15,12 @@ export async function generatePricePerNight(lat, lng) {
     return result.response.text();
 }
 
-
-//
+export async function getAIRecommendation(prompt) {
+    try {
+        const response = await model.generateContent(prompt)
+        return response.response.text()
+    } catch (error) {
+        console.error(error);
+        return null
+    }
+}

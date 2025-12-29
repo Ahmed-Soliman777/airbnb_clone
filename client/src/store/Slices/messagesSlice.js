@@ -152,7 +152,7 @@ const messagesSlice = createSlice({
             })
             .addCase(sendMessage.fulfilled, (state, action) => {
                 state.sendingMessage = false;
-                state.messages.push(action.payload);
+                state.messages.push(action.payload.message);
             })
             .addCase(sendMessage.rejected, (state, action) => {
                 state.sendingMessage = false;

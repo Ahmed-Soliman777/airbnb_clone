@@ -18,7 +18,7 @@ const TripCard = ({ booking, isUpcoming = false }) => {
     // Extract listing details
     const listingTitle = listing.title || 'Unknown Listing';
     // Access location property correctly (if it's an object/string)
-    const listingLocation = (listing.location && listing.location.address) || listing.location || 'Unknown Location';
+    const listingLocation = (listing.address && listing.address.city) || listing.address || 'Unknown Location';
 
     // Determine the main photo URL
     const listingPhoto = (listing.images && listing.images.length > 0)
