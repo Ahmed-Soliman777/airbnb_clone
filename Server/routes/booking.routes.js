@@ -11,6 +11,7 @@ const {
   getAllBookingsForHost,
   getDailyPaymentStats,
   getAllBookingsForAdmin,
+  getBookedDatesForListing,
 } = require("../controllers/booking.controller.js");
 
 const authMiddleware = require("../middleware/userMiddleware");
@@ -157,9 +158,30 @@ router.get(
 router.get(
   "/booking/listing/:listingId",
   authMiddleware,
-  authorization("host", "admin"),
+  // authorization("host", "admin"),
   getBookingsForListing
 );
+
+/**
+ * @swagger
+ * /booking/dates/{listingId}:
+ *   get:
+ *     summary: Get booked dates for a specific listing
+ *     tags: [Bookings]
+ *     parameters:
+ *       - in: path
+ *         name: listingId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Listing ID
+ *     responses:
+ *       200:
+ *         description: List of booked dates
+ *       404:
+ *         description: Listing not found
+ */
+router.get("/booking/dates/:listingId", getBookedDatesForListing);
 
 /**
  * @swagger

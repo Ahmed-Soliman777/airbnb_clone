@@ -93,11 +93,24 @@ export const fetchHostBookings = createAsyncThunk(
     }
 );
 
+export const fetchListingBookedDates = createAsyncThunk(
+    "booking/fetchListingBookedDates",
+    async (listingId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/booking/dates/${listingId}`);
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message);
+        }
+    }
+);
+
 const bookingSlice = createSlice({
     name: "booking",
     initialState: {
         bookings: [],
         hostBookings: [],
+        listingBookedDates: [],
         currentBooking: null,
         status: "idle",
         error: null,
@@ -124,6 +137,10 @@ const bookingSlice = createSlice({
             .addCase(fetchUserBookings.rejected, (state, action) => {
                 state.status = "failed";
                 state.error = action.payload;
+            })
+            // Fetch Listing Booked Dates
+            .addCase(fetchListingBookedDates.fulfilled, (state, action) => {
+                state.listingBookedDates = action.payload;
             })
             // Fetch single booking
             .addCase(fetchBookingById.pending, (state) => {

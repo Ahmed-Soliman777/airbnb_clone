@@ -9,6 +9,7 @@ export default function GlobalModal({ isOpen, closeModal }) {
 
   const [visible, setVisible] = useState(false); // for fade in/out
   const [render, setRender] = useState(isOpen);  // controls mounting
+  const [currentLang, setCurrentLang] = useState('en');
 
   // Handle mounting/unmounting with smooth transition
   useEffect(() => {
@@ -36,6 +37,15 @@ export default function GlobalModal({ isOpen, closeModal }) {
       document.body.style.overflow = "auto";
     };
   }, [isOpen, closeModal]);
+
+  const changeLanguage = (lang) => {
+    setCurrentLang(lang);
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      combo.value = lang;
+      combo.dispatchEvent(new Event('change'));
+    }
+  };
 
   if (!render) return null;
 
@@ -70,7 +80,7 @@ export default function GlobalModal({ isOpen, closeModal }) {
         <div className="grid grid-cols-2 gap-3">
           {/* English */}
           <div
-            onClick={() => { dispatch(englishLanguage()); closeModal(); }}
+            onClick={() => { closeModal(); changeLanguage('en') }}
             className="border rounded-lg p-3 cursor-pointer flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 transition"
           >
             <div className="leading-tight">
@@ -81,7 +91,7 @@ export default function GlobalModal({ isOpen, closeModal }) {
 
           {/* Arabic */}
           <div
-            onClick={() => { dispatch(arabicLanguage()); closeModal(); }}
+            onClick={() => { closeModal(); changeLanguage('ar') }}
             className="border rounded-lg p-3 cursor-pointer flex items-center gap-2 justify-end bg-neutral-100 hover:bg-neutral-200 transition text-end"
           >
             <div className="leading-tight">

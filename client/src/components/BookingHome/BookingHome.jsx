@@ -11,7 +11,7 @@ import DateSelector from "./DateSelector";
 import GuestSelector from "./GuestSelector";
 import { useSelector } from "react-redux";
 
-function BookingHome({ listing, date, setDate }) {
+function BookingHome({ listing, date, setDate, bookedDates }) {
   const { loading, error } = useSelector((state) => state.payment);
 
   const [openGuests, setOpenGuests] = useState(false);
@@ -70,7 +70,7 @@ function BookingHome({ listing, date, setDate }) {
         <h3 className="font-semibold text-lg">Add dates for prices</h3>
       ) : (
         <h3 className="font-semibold text-lg">
-          ${pricePerNight} for {nights} night{nights > 1 ? "s" : ""}
+          ${pricePerNight * nights} for {nights} night{nights > 1 ? "s" : ""}
         </h3>
       )}
 
@@ -82,6 +82,7 @@ function BookingHome({ listing, date, setDate }) {
             date={date}
             handleSelect={handleSelect}
             setDate={setDate}
+            bookedDates={bookedDates}
           />
         </div>
 
@@ -110,8 +111,8 @@ function BookingHome({ listing, date, setDate }) {
         {loading
           ? "Processing..."
           : date?.from && date?.to
-          ? `Reserve • $${totalPrice}`
-          : "Check availability"}
+            ? `Reserve • $${totalPrice}`
+            : "Check availability"}
       </button>
 
       {error && (

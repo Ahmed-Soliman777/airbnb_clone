@@ -137,7 +137,7 @@ const AIRecommendation = () => {
                         <h2 className="text-3xl font-semibold text-gray-900 mb-3">
                             {t('aiRecommendation.going')}
                         </h2>
-                        <p className="text-base text-gray-600 mb-8">{t('aiRecommendation.goingDesc')}</p>
+                        <p className="text-base text-gray-600 mb-8">Search for your destination</p>
                         <input
                             type="text"
                             className="w-full max-w-lg mx-auto px-6 py-4 text-base border-2 border-gray-200 rounded-xl outline-none transition-all duration-300 focus:border-[#FF385C] focus:shadow-[0_0_0_3px_rgba(255,56,92,0.1)] placeholder-gray-500"
