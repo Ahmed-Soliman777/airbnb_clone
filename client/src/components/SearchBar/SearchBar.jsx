@@ -5,7 +5,7 @@ import i18n from '../../utils/i18n'
 import { useTranslation } from "react-i18next";
 import './SearchBar.css'
 import GuestCount from '../GuestCount/GuestCount'
-import SearchCity from '../SearchCity/SearchCity'
+// import SearchCity from '../SearchCity/SearchCity'
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router';
 
@@ -216,8 +216,8 @@ export default function SearchBar() {
 
     // Get labels based on search type
     const getDateLabel = () => {
-        if (searchType === 'experience') return t("searchBar.date") || "Date";
-        if (searchType === 'service') return t("searchBar.date") || "Date";
+        if (searchType === 'experience') return "Date";
+        if (searchType === 'service') return "Date";
         return t("searchBar.checkin");
     };
 
@@ -261,7 +261,7 @@ export default function SearchBar() {
                         />
                     </div>
 
-                    {isCityOpen && (
+                    {/* {isCityOpen && (
                         <div className="absolute top-full mt-2 z-50 w-full">
                             <SearchCity
                                 whereInput={whereInput}
@@ -271,7 +271,7 @@ export default function SearchBar() {
                                 }}
                             />
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Date inputs - conditional based on search type */}

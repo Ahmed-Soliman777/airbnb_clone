@@ -72,13 +72,36 @@ const createService = async (req, res) => {
 // @access  Public
 const getServices = async (req, res) => {
   try {
-    const { city, country, serviceCategory, page = 1, limit = 10 } = req.query;
+    const { city, country, serviceCategory, priceRange, categories, page = 1, limit = 10 } = req.query;
 
     const query = { status: 'active' };
 
     if (city) query['location.city'] = new RegExp(city, 'i');
     if (country) query['location.country'] = new RegExp(country, 'i');
-    if (serviceCategory) query.serviceCategory = serviceCategory;
+
+    // Handle Price Range
+    if (priceRange) {
+      try {
+        const [min, max] = JSON.parse(priceRange);
+        query.hourlyRate = { $gte: Number(min), $lte: Number(max) };
+      } catch (error) {
+        console.error('Error parsing priceRange:', error);
+      }
+    }
+
+    // Handle Categories
+    if (categories) {
+      try {
+        const cats = JSON.parse(categories);
+        if (cats.length > 0) {
+          query.serviceCategory = { $in: cats };
+        }
+      } catch (error) {
+        console.error('Error parsing categories:', error);
+      }
+    } else if (serviceCategory) {
+      query.serviceCategory = serviceCategory;
+    }
 
     const services = await Service.find(query)
       .populate('host', 'name email')
@@ -341,40 +364,40 @@ const getHostServices = async (req, res) => {
 const getServiceStats = async (req, res) => {
   try {
     const totalServices = await Service.countDocuments({});
-    
+
     // Calculate growth vs last month (including deletions)
     const now = new Date();
     const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-    
+
     // Count items created this month
     const currentMonthCreated = await Service.countDocuments({
       createdAt: { $gte: startOfCurrentMonth }
     });
-    
+
     // Count items created last month
     const lastMonthCreated = await Service.countDocuments({
       createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
     });
-    
+
     // Count items deleted this month (if using soft delete or tracking deletedAt)
     const currentMonthDeleted = await Service.countDocuments({
       deletedAt: { $gte: startOfCurrentMonth, $exists: true }
     });
-    
+
     // Count items deleted last month
     const lastMonthDeleted = await Service.countDocuments({
       deletedAt: { $gte: startOfLastMonth, $lte: endOfLastMonth, $exists: true }
     });
-    
+
     // Calculate net change (created - deleted)
     const currentMonthNet = currentMonthCreated - currentMonthDeleted;
     const lastMonthNet = lastMonthCreated - lastMonthDeleted;
-    
+
     // Calculate total at end of last month (approximate)
     const totalAtEndOfLastMonth = totalServices - currentMonthNet;
-    
+
     // Calculate growth percentage based on net change
     let growthPercentage = 0;
     if (totalAtEndOfLastMonth > 0) {
@@ -382,7 +405,7 @@ const getServiceStats = async (req, res) => {
     } else if (totalServices > 0) {
       growthPercentage = 100;
     }
-    
+
     const stats = {
       totalServices,
       growthPercentage: parseFloat(growthPercentage),
