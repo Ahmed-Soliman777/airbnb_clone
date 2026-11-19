@@ -13,7 +13,7 @@ import { Sidebar } from './Components/sidebar/sidebar';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App implements OnInit {
+export class App {
   protected readonly title = signal('admin');
   user = signal<User | null>(null);
   currentRoute = signal<string>('');
