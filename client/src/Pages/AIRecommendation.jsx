@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getAIRecommendation } from '@/utils/ai';
 
 const AIRecommendation = () => {
     const { t } = useTranslation();
@@ -299,7 +298,7 @@ const AIRecommendation = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-5">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-white py-10 px-5">
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8 md:p-12 animate-[fadeInUp_0.6s_ease-out]">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-semibold text-gray-900 mb-3">
@@ -325,14 +324,14 @@ const AIRecommendation = () => {
                     )}
                     {currentStep < 5 ? (
                         <button
-                            className="px-8 py-3.5 text-base font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 min-w-[140px] ml-auto bg-gradient-to-br from-[#FF385C] to-[#E31C5F] text-white hover:from-[#E31C5F] hover:to-[#FF385C] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+                            className="px-8 py-3.5 text-base font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 min-w-[140px] ml-auto bg-linear-to-br from-[#FF385C] to-[#E31C5F] text-white hover:from-[#E31C5F] hover:to-[#FF385C] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
                             onClick={handleNext}
                         >
                             {t('aiRecommendation.next')}→
                         </button>
                     ) : (
                         <button
-                            className="px-8 py-3.5 text-base font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 min-w-[140px] ml-auto bg-gradient-to-br from-[#FF385C] to-[#E31C5F] text-white hover:from-[#E31C5F] hover:to-[#FF385C] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+                            className="px-8 py-3.5 text-base font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 min-w-[140px] ml-auto bg-linear-to-br from-[#FF385C] to-[#E31C5F] text-white hover:from-[#E31C5F] hover:to-[#FF385C] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
                             onClick={handleSubmit}
                         >
                             {t('aiRecommendation.getRecommendations')}
