@@ -111,7 +111,22 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private initialized = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  // add initAuth method
+  initAuth(): void {
+    if (!isPlatformBrowser(this.platformId) || this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
+    const token = this.getToken();
+    if (token) {
+      this.getProfile().subscribe({
+        error: () => this.removeToken(),
+      });
+    }
+  }
 
   // Call this method to initialize auth state
   initAuth(): void {

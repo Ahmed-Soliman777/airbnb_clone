@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 
 //  Register
 export const registerUser = createAsyncThunk(
@@ -331,6 +330,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
     successMessage: null,
@@ -373,6 +373,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.isAuthenticated = true;
         state.user = action.payload.user;
         state.successMessage = "Login successful!";
       })
@@ -389,7 +390,6 @@ const authSlice = createSlice({
       .addCase(verifyEmail.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-
         state.successMessage = "Email verified successfully!";
       })
       .addCase(verifyEmail.rejected, (state, action) => {
@@ -504,10 +504,12 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.isAuthenticated = false;
       })
 
       // Logout
@@ -518,6 +520,7 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
         state.user = null;
+        state.isAuthenticated = false;
         state.successMessage = "Logged out successfully!";
       })
       .addCase(logoutUser.rejected, (state, action) => {

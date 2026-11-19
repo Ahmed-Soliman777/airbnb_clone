@@ -139,5 +139,24 @@
     "noReviewsDesc": "لا تحتوي هذه القائمة على أي تقييمات حتى الآن. كن أول من يترك تقييمًا!",
     "whereYoullSleep": "أين ستنام",
     "bedroomInfo": "معلومات غرفة النوم غير متوفرة."
+  },
+  "aiRecommendation": {
+    "going": "أين ستنام؟",
+    "goingDesc": "أدخل وجهتك",
+    "type": "ما نوع السكن؟",
+    "choose": "اختر نوع السكن الذي تفضله",
+    "purpose": "ما الغرض من السفر؟",
+    "purposeDesc": "اختر الغرض من السفر",
+    "amenities": "ما المميزات التي تريدها؟",
+    "amenitiesDesc": "اختر جميع المميزات التي تريدها",
+    "budget": "ما ميزانيتك؟",
+    "budgetDesc": "حدد ميزانيتك",
+    "budgetMin": "الحد الأدنى",
+    "budgetMax": "الحد الأقصى",
+    "findYourPerfectStay": "أبحث عن مكان مثالي",
+    "findYourPerfectStayDesc": "دع الذكاء الاصطناعي يساعدك في العثور على المكان المثالي",
+    "previous": "السابق",
+    "next": "التالي",
+    "getRecommendations": "احصل على اقتراحات"
   }
 }

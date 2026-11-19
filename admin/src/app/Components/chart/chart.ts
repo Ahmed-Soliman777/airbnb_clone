@@ -1,15 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-chart',
-//   imports: [],
-//   templateUrl: './chart.html',
-//   styleUrl: './chart.css',
-// })
-// export class Chart {
-
-// }
-
 import {
   Component,
   OnInit,
@@ -36,6 +24,7 @@ interface DisplayBooking extends Booking {
   displayName: string;
   displayEmail: string;
   listingTitle: string;
+  previousStatus: 'pending' | 'confirmed' | 'cancelled';
   statusClass: string;
 }
 
@@ -174,6 +163,7 @@ export class AdminPaymentsComponent implements OnInit {
       displayName: this.getDisplayName(booking),
       displayEmail: booking.user?.email || 'No email',
       listingTitle: this.getListingTitle(booking),
+      previousStatus: booking.status,
       statusClass: this.getStatusClass(booking.status),
     };
   }
@@ -273,12 +263,19 @@ export class AdminPaymentsComponent implements OnInit {
     };
   }
 
+  // Store the previous status before change
+  onStatusFocus(booking: DisplayBooking): void {
+    booking.previousStatus = booking.status;
+  }
+
   onStatusChange(booking: DisplayBooking, newStatus: 'pending' | 'confirmed' | 'cancelled'): void {
-    if (booking.status === newStatus) {
+    const previousStatus = booking.previousStatus;
+
+    // If same status, do nothing
+    if (previousStatus === newStatus) {
       return;
     }
 
-    const previousStatus = booking.status;
     this.isUpdating = booking._id;
     this.cdr.markForCheck();
 
@@ -288,6 +285,7 @@ export class AdminPaymentsComponent implements OnInit {
       next: (response) => {
         console.log('Update successful:', response);
         booking.status = response.data.status;
+        booking.previousStatus = response.data.status;
         booking.statusClass = this.getStatusClass(response.data.status);
         this.isUpdating = null;
         this.cdr.markForCheck();
@@ -306,6 +304,7 @@ export class AdminPaymentsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error updating status:', error);
+        // Rollback to previous status
         booking.status = previousStatus;
         this.isUpdating = null;
         this.errorMessage = `Failed to update booking status: ${
@@ -314,5 +313,18 @@ export class AdminPaymentsComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   }
 }

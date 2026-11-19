@@ -1,9 +1,8 @@
-import { MenuIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { Button } from "@/components/ui/button"
-import { isAuthenticated } from '../../utils/cookies';
+import { MenuIcon } from 'lucide-react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button } from "@/components/ui/button";
 import { logoutUser } from '@/store/slices/authSlice';
 
 import {
@@ -14,21 +13,19 @@ import {
     DropdownMenuSeparator,
     DropdownMenuShortcut,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 export default function MenuList() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    useEffect(() => {
-        setIsLoggedIn(isAuthenticated());
-    }, []);
+    const isLoggedIn = useSelector(
+        (state) => state.auth.isAuthenticated
+    );
 
     const handleLogout = async () => {
         try {
             await dispatch(logoutUser()).unwrap();
-            setIsLoggedIn(false);
             navigate('/');
         } catch (error) {
             console.error('Logout failed:', error);
@@ -38,58 +35,62 @@ export default function MenuList() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className={''}><MenuIcon /></Button>
+                <Button variant="outline">
+                    <MenuIcon />
+                </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent className="w-56" align="start">
                 <DropdownMenuGroup>
-                    {
-                        isLoggedIn ? (
-                            <Link to='/profile'>
-                                <DropdownMenuItem>
-                                    Profile
-                                    <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                                </DropdownMenuItem>
-                            </Link>
-                        ) : (
-                            <Link to='/login'>
-                                <DropdownMenuItem>
-                                    Login
-                                    <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                                </DropdownMenuItem>
-                            </Link>
-                        )
-                    }
+                    {isLoggedIn ? (
+                        <Link to="/profile">
+                            <DropdownMenuItem>
+                                Profile
+                                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                        </Link>
+                    ) : (
+                        <Link to="/login">
+                            <DropdownMenuItem>
+                                Login
+                                <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                        </Link>
+                    )}
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                {isLoggedIn && (
-                    <DropdownMenuGroup>
-                        <Link to='/messages'>
-                            <DropdownMenuItem>Messages</DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuSeparator />
-                    </DropdownMenuGroup>
-                )}
-                {isLoggedIn && (
-                    <DropdownMenuGroup>
-                        <Link to='/wishlists'>
-                            <DropdownMenuItem>Wishlist</DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuSeparator />
-                    </DropdownMenuGroup>
-                )}
-                <Link to='/help'>
-                    <DropdownMenuItem>Support</DropdownMenuItem>
-                </Link>
+
                 {isLoggedIn && (
                     <>
+                        <DropdownMenuGroup>
+                            <Link to="/messages">
+                                <DropdownMenuItem>Messages</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuSeparator />
+                            <Link to="/wishlists">
+                                <DropdownMenuItem>Wishlist</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuSeparator />
+                            <Link to="/ai-recommendation">
+                                <DropdownMenuItem>AI Recommendation</DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuGroup>
+
                         <DropdownMenuSeparator />
+
                         <DropdownMenuItem onClick={handleLogout}>
                             Log out
                             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                         </DropdownMenuItem>
                     </>
                 )}
+
+                <DropdownMenuSeparator />
+
+                <Link to="/help">
+                    <DropdownMenuItem>Support</DropdownMenuItem>
+                </Link>
             </DropdownMenuContent>
         </DropdownMenu>
-    )
+    );
 }

@@ -145,5 +145,23 @@
     "noReviewsDesc": "This listing doesn't have any reviews yet. Be the first to leave a review!",
     "whereYoullSleep": "Where you'll sleep",
     "bedroomInfo": "Bedroom information not provided."
+  },
+  "aiRecommendation": {
+    "going": "Where are you going?",
+    "type": "What type of place are you looking for?",
+    "choose": "Choose the type of place you want",
+    "purpose": "What is the purpose of your trip?",
+    "purposeDesc": "Choose the purpose of your trip",
+    "amenities": "What amenities do you want?",
+    "amenitiesDesc": "Choose all amenities you want",
+    "budget": "What is your budget?",
+    "budgetDesc": "Choose your budget",
+    "budgetMin": "Minimum budget",
+    "budgetMax": "Maximum budget",
+    "findYourPerfectStay": "Find your perfect stay",
+    "findYourPerfectStayDesc": "Let AI help you discover the ideal accommodation",
+    "previous": "Previous",
+    "next": "Next",
+    "getRecommendations": "Get Recommendations"
   }
 }

@@ -172,7 +172,7 @@ const serviceSlice = createSlice({
       .addCase(searchServices.fulfilled, (state, action) => {
         state.searchStatus = "succeeded";
         const { data, total, totalPages, currentPage, page } =
-          action.payload.data;
+          action.payload;
 
         // If it's page 1, replace results. Otherwise, append.
         if (page === 1) {

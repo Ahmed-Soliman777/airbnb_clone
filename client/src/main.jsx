@@ -8,10 +8,8 @@ import "leaflet/dist/leaflet.css";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-      <Toaster richColors />
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <App />
+    <Toaster richColors />
+  </Provider>
 );

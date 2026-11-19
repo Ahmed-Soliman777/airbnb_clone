@@ -134,14 +134,6 @@ const ExperienceDetailsPage = () => {
               <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Back</span>
             </Link>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
-                <Share className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Heart className="w-5 h-5" />
-              </Button>
-            </div>
           </div>
         </div>
       </header>

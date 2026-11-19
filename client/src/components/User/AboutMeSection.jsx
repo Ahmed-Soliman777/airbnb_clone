@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'; 
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateProfile, fetchUserProfile, uploadProfilePhoto } from '../../store/Slices/authslice'; 
-import { FaSuitcase, FaGlobeAmericas, FaStar, FaEdit, FaSchool } from 'react-icons/fa'; 
+import { updateProfile, fetchUserProfile, uploadProfilePhoto } from '../../store/Slices/authslice';
+import { FaSuitcase, FaGlobeAmericas, FaStar, FaEdit, FaSchool } from 'react-icons/fa';
 import axios from 'axios';
 
 const transformDataForDispatch = (data) => {
@@ -15,7 +15,7 @@ const transformDataForDispatch = (data) => {
 };
 
 //key convert location to string
-const REVERSE_GEOCODE_API_KEY ='c6ee548b2760410bb47cf5d2730601ad';
+const REVERSE_GEOCODE_API_KEY = 'c6ee548b2760410bb47cf5d2730601ad';
 
 const CITIES_OPTIONS = ['Alexandria', 'Dubai', 'Paris', 'London', 'Tokyo'];
 const INTERESTS_OPTIONS = ['Photography', 'Hiking', 'Reading', 'Cooking', 'Gaming'];
@@ -48,16 +48,16 @@ const CheckboxGroup = ({ label, name, options, selectedValues, onChange }) => (
 //main function
 const AboutMeSection = () => {
     const dispatch = useDispatch();
-    
+
     // Selectors
     const profile = useSelector((state) => state.auth.user);
     const loading = useSelector((state) => state.auth.loading);
     const error = useSelector((state) => state.auth.error);
     const updateStatus = useSelector((state) => state.auth.updateStatus);
-    const updateError = useSelector((state) => state.auth.error); 
-    const photoUploadStatus = useSelector(state => state.auth.photoUploadStatus); 
-    
-    const fileInputRef = useRef(null); 
+    const updateError = useSelector((state) => state.auth.error);
+    const photoUploadStatus = useSelector(state => state.auth.photoUploadStatus);
+
+    const fileInputRef = useRef(null);
 
     // State
     const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +68,7 @@ const AboutMeSection = () => {
         if (!profile && !loading) {
             dispatch(fetchUserProfile());
         }
-    }, [dispatch, profile, loading]); 
+    }, [dispatch, profile, loading]);
 
     useEffect(() => {
         if (profile) {
@@ -78,11 +78,11 @@ const AboutMeSection = () => {
                 school: profile.school || '',
                 aboutMe: profile.aboutMe || '',
                 // Checkbox fields: ensure they are arrays for CheckboxGroup component
-                travelCities: Array.isArray(profile.travelCities) ? profile.travelCities : [], 
-                interests: Array.isArray(profile.interests) ? profile.interests : [], 
+                travelCities: Array.isArray(profile.travelCities) ? profile.travelCities : [],
+                interests: Array.isArray(profile.interests) ? profile.interests : [],
                 preferredLanguages: Array.isArray(profile.preferredLanguages) ? profile.preferredLanguages : [],
                 // Location Fields initialization
-                location: profile.location && profile.location.address ? profile.location.address : '', 
+                location: profile.location && profile.location.address ? profile.location.address : '',
                 latitude: profile.location && profile.location.latitude ? profile.location.latitude : null,
                 longitude: profile.location && profile.location.longitude ? profile.location.longitude : null,
             });
@@ -99,7 +99,7 @@ const AboutMeSection = () => {
         const { name, value, checked } = e.target;
         setEditableData(prev => {
             const currentArray = prev[name] || [];
-            
+
             if (checked) {
                 return { ...prev, [name]: [...currentArray, value] };
             } else {
@@ -108,64 +108,64 @@ const AboutMeSection = () => {
         });
     };
 
-    
+
     const handleGetLocation = () => {
-    setLocationError(''); 
-    
-    if (navigator.geolocation) {
-        //  Get current position from the browser
-        navigator.geolocation.getCurrentPosition(
-            async (position) => { 
-                const { latitude, longitude } = position.coords;
+        setLocationError('');
 
-                // handle error
-                let cityAddress = `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`; 
+        if (navigator.geolocation) {
+            //  Get current position from the browser
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
 
-                try {
-                    // 2. Perform Reverse Geocoding via API  التحويل
-                    const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${REVERSE_GEOCODE_API_KEY}&language=en`;
-                    
-                    const response = await axios.get(apiUrl);
+                    // handle error
+                    let cityAddress = `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
-                    if (response.data.results && response.data.results.length > 0) {
-                        const result = response.data.results[0].components;
-                        
-                        // 3. Extract the most relevant readable address component
-                        cityAddress = result.city || result.town || result.village || result.state || result.country;
-                        
-                        // Fallback to the full formatted address if major components are missing
-                        if (!cityAddress) {
-                            cityAddress = response.data.results[0].formatted;
+                    try {
+                        // 2. Perform Reverse Geocoding via API  التحويل
+                        const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${REVERSE_GEOCODE_API_KEY}&language=en`;
+
+                        const response = await axios.get(apiUrl);
+
+                        if (response.data.results && response.data.results.length > 0) {
+                            const result = response.data.results[0].components;
+
+                            // 3. Extract the most relevant readable address component
+                            cityAddress = result.city || result.town || result.village || result.state || result.country;
+
+                            // Fallback to the full formatted address if major components are missing
+                            if (!cityAddress) {
+                                cityAddress = response.data.results[0].formatted;
+                            }
+                        } else {
+                            // API returned results but couldn't find a match (e.g., location is in the ocean)
+                            setLocationError('API found coordinates but no recognizable address.');
                         }
-                    } else {
-                         // API returned results but couldn't find a match (e.g., location is in the ocean)
-                         setLocationError('API found coordinates but no recognizable address.');
+
+                    } catch (apiError) {
+                        console.error('Reverse Geocoding Failed:', apiError);
+                        setLocationError('Could not retrieve city name via API. Coordinates saved instead.');
                     }
 
-                } catch (apiError) {
-                    console.error('Reverse Geocoding Failed:', apiError);
-                    setLocationError('Could not retrieve city name via API. Coordinates saved instead.');
-                }
-                
-                // 4. Update the state
-                setEditableData(prev => ({
-                    ...prev,
-                    latitude: latitude,
-                    longitude: longitude,
-                    location: cityAddress //  هنا يتم استخدام اسم المدينة/
-                }));
-            },
-            (error) => {
-                // Handle Geolocation API errors (e.g., user denied access)
-                setLocationError('Unable to retrieve location. Please check browser permissions.');
-                console.error('Geolocation Error:', error);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
-    } else {
-        setLocationError('Geolocation is not supported by your browser.');
-    }
-};
+                    // 4. Update the state
+                    setEditableData(prev => ({
+                        ...prev,
+                        latitude: latitude,
+                        longitude: longitude,
+                        location: cityAddress //  هنا يتم استخدام اسم المدينة/
+                    }));
+                },
+                (error) => {
+                    // Handle Geolocation API errors (e.g., user denied access)
+                    setLocationError('Unable to retrieve location. Please check browser permissions.');
+                    console.error('Geolocation Error:', error);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            setLocationError('Geolocation is not supported by your browser.');
+        }
+    };
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
@@ -176,8 +176,8 @@ const AboutMeSection = () => {
         if (action.meta.requestStatus === 'rejected') {
             console.error("Photo Upload Failed:", action.payload);
         }
-        
-        e.target.value = null; 
+
+        e.target.value = null;
     };
 
     const handleSave = (e) => {
@@ -195,29 +195,29 @@ const AboutMeSection = () => {
             ...editableData,
             location: locationData,
         };
-        
+
         // Remove temporary fields (latitude, longitude, photo) from the root object before dispatch
         delete dataToSave.latitude;
         delete dataToSave.longitude;
-        delete dataToSave.profilePhoto; 
-        
+        delete dataToSave.profilePhoto;
+
         // Transform the checkbox array fields into comma-separated strings for dispatch
         dataToSave = transformDataForDispatch(dataToSave);
 
 
         dispatch(updateProfile(dataToSave)).then((action) => {
             if (action.meta.requestStatus === 'fulfilled') {
-                setIsEditing(false); 
+                setIsEditing(false);
             }
         });
     };
-    
+
     if (loading) return <div className="text-center p-8 text-blue-600 font-semibold">Loading profile data...</div>;
     if (error) return <div className="text-center p-8 text-red-600 font-semibold">Error fetching profile: {error}.</div>;
     if (!profile) return <div className="text-center p-8 text-gray-500">No profile data available.</div>;
 
-    
-    
+
+
     if (isEditing) {
         return (
             <div>
@@ -225,10 +225,10 @@ const AboutMeSection = () => {
                     <h1 className="text-3xl font-bold text-gray-800">Edit Profile</h1>
                 </div>
                 {updateStatus === 'failed' && <p className="text-red-500 mb-4 font-medium">{updateError}</p>}
-                
+
                 <form onSubmit={handleSave} className="space-y-6">
-                    
-                    <div className="flex items-center space-x-4">
+
+                    {/* <div className="flex items-center space-x-4">
                         <img 
                             src={profile.profilePhoto || '/default-avatar.png'} 
                             alt="Profile Avatar" 
@@ -252,13 +252,13 @@ const AboutMeSection = () => {
                             {photoUploadStatus === 'loading' ? 'Uploading...' : 'Change Photo'}
                         </button>
                         {photoUploadStatus === 'failed' && <p className="text-red-500 text-sm mt-1">Image upload failed.</p>}
-                    </div>
+                    </div> */}
 
-                    
-                    <div className="border p-3 rounded-lg bg-gray-50 text-gray-600">
+
+                    {/* <div className="border p-3 rounded-lg bg-gray-50 text-gray-600">
                         <p className="font-medium">First Name: <span className="text-gray-900">{profile.firstName}</span></p>
                         <p className="text-sm">Role: <span className="text-gray-900">{profile.role}</span></p>
-                    </div>
+                    </div> */}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Job Title</label>
@@ -270,7 +270,7 @@ const AboutMeSection = () => {
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">School</label>
                         <input
@@ -281,7 +281,7 @@ const AboutMeSection = () => {
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                         />
                     </div>
-                    
+
                     {/*  Location  with Geolocation Button */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Location / City Name</label>
@@ -328,7 +328,7 @@ const AboutMeSection = () => {
                         selectedValues={editableData.interests}
                         onChange={handleCheckboxChange}
                     />
-                    
+
                     {/* Preferred Languages (Checkbox Group) */}
                     <CheckboxGroup
                         label="Preferred Languages"
@@ -348,17 +348,17 @@ const AboutMeSection = () => {
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                         />
                     </div>
-                    
+
                     <div className="flex space-x-4">
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             disabled={updateStatus === 'loading' || photoUploadStatus === 'loading'}
                             className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition duration-150"
                         >
                             {updateStatus === 'loading' ? 'Saving...' : 'Save Changes'}
                         </button>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             onClick={() => setIsEditing(false)}
                             className="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-150"
                         >
@@ -369,14 +369,14 @@ const AboutMeSection = () => {
             </div>
         );
     }
-    
-    
+
+
     return (
         <div>
-            
+
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">About me</h1>
-                <button 
+                <button
                     onClick={() => setIsEditing(true)}
                     className="flex items-center text-sm text-gray-600 hover:text-blue-600 font-medium transition duration-150"
                 >
@@ -394,13 +394,13 @@ const AboutMeSection = () => {
                         profile.firstName ? profile.firstName.charAt(0).toUpperCase() : 'A'
                     )}
                 </div>
-                
+
                 <h3 className="text-xl font-semibold text-gray-900">{profile.firstName || 'User'}</h3>
-                <p className="text-sm text-gray-500">{profile.role}</p> 
+                <p className="text-sm text-gray-500">{profile.role}</p>
             </div>
 
             <div className="space-y-6">
-                
+
                 {/* Job Title */}
                 <div className="flex items-start">
                     <FaSuitcase className="w-5 h-5 text-gray-500 mr-4 mt-1" />
@@ -416,7 +416,7 @@ const AboutMeSection = () => {
                     <div>
                         <p className="text-sm text-gray-700">Travel Cities:</p>
                         <p className="font-semibold">
-                            {profile.travelCities && profile.travelCities.length > 0 
+                            {profile.travelCities && profile.travelCities.length > 0
                                 ? profile.travelCities.join(', ')
                                 : 'None specified'}
                         </p>
@@ -431,7 +431,7 @@ const AboutMeSection = () => {
                         <p className="font-semibold">{profile.school || 'Not specified'}</p>
                     </div>
                 </div>
-                
+
                 {/* Location */}
                 <div className="flex items-start">
                     <FaGlobeAmericas className="w-5 h-5 text-gray-500 mr-4 mt-1" />
@@ -442,7 +442,7 @@ const AboutMeSection = () => {
                         </p>
                     </div>
                 </div>
-                
+
                 {/* Interests */}
                 <div className="flex items-start">
                     <FaStar className="w-5 h-5 text-gray-500 mr-4 mt-1" />
@@ -475,12 +475,12 @@ const AboutMeSection = () => {
                 </div>
 
                 {/* Reviews */}
-                <div className="pt-4 border-t border-gray-100">
+                {/* <div className="pt-4 border-t border-gray-100">
                     <div className="flex items-center text-gray-700">
                         <FaStar className="w-5 h-5 mr-3" />
                         <span className="font-medium">Reviews I've written ({profile.reviews ? profile.reviews.length : 0})</span>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

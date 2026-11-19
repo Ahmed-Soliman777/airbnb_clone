@@ -351,6 +351,27 @@ const getAllBookingsForAdmin = async (req, res) => {
   }
 };
 
+// get booked dates for a listing (Public)
+const getBookedDatesForListing = async (req, res) => {
+  try {
+    const { listingId } = req.params;
+
+    const bookings = await Booking.find({
+      listing: listingId,
+      status: { $in: ["pending", "confirmed"] },
+    }).select("checkInDate checkOutDate");
+
+    const bookedDates = bookings.map((booking) => ({
+      from: booking.checkInDate,
+      to: booking.checkOutDate,
+    }));
+
+    res.json({ success: true, data: bookedDates });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   getBookingById,
@@ -361,4 +382,5 @@ module.exports = {
   getAllBookingsForHost,
   getDailyPaymentStats,
   getAllBookingsForAdmin,
+  getBookedDatesForListing,
 };

@@ -19,7 +19,7 @@ import { BookingsResponse, UpdateBookingResponse } from '../Models/booking';
 export class AdminPaymentsService {
   private apiUrl = 'http://localhost:3000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getDailyPaymentStats(): Observable<PaymentStatsResponse> {
     return this.http.get<PaymentStatsResponse>(`${this.apiUrl}/booking/admin/stats`, {

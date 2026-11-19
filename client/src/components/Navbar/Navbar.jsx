@@ -76,30 +76,25 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
   }, [lastScrollY]);
 
   const getUnderlinePosition = () => {
+    const path = location.pathname;
+
+    const isHomes = path.startsWith("/homes");
+    const isExperiences = path.startsWith("/experiences");
+    const isServices = path.startsWith("/services");
+
     if (direction === "rtl") {
-      switch (location.pathname) {
-        case "/homes":
-          return "right-0";
-        case "/experiences":
-          return "right-1/3";
-        case "/services":
-          return "right-2/3";
-        default:
-          return "right-0";
-      }
+      if (isHomes) return "right-0";
+      if (isExperiences) return "right-1/3";
+      if (isServices) return "right-2/3";
+      return "right-0";
     } else {
-      switch (location.pathname) {
-        case "/homes":
-          return "left-0";
-        case "/experiences":
-          return "left-1/3";
-        case "/services":
-          return "left-2/3";
-        default:
-          return "left-0";
-      }
+      if (isHomes) return "left-0";
+      if (isExperiences) return "left-1/3";
+      if (isServices) return "left-2/3";
+      return "left-0";
     }
   };
+
 
   return (
     <>
@@ -108,16 +103,14 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             bg-white px-4 sm:px-6 md:px-8 lg:px-12 
             ${isSticky ? "sticky top-0" : "relative"} z-40
             transition-all duration-500 ease-in-out
-            ${
-              scrolled
-                ? "py-1 shadow-lg backdrop-blur-sm bg-opacity-95"
-                : "py-2 md:py-3"
-            }
-            ${
-              scrollDirection === "down" && scrolled
-                ? "transform -translate-y-2"
-                : "transform translate-y-0"
-            }
+            ${scrolled
+            ? "py-1 shadow-lg backdrop-blur-sm bg-opacity-95"
+            : "py-2 md:py-3"
+          }
+            ${scrollDirection === "down" && scrolled
+            ? "transform -translate-y-2"
+            : "transform translate-y-0"
+          }
         `}
       >
         {/* Mobile Search Bar - Click to open full screen */}
@@ -148,11 +141,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             className={`
                         hidden md:flex w-20 sm:w-24 md:w-28 lg:w-30 shrink-0
                         transition-all duration-500 ease-in-out
-                        ${
-                          scrolled
-                            ? "opacity-80 scale-90"
-                            : "opacity-100 scale-100"
-                        }
+                        ${scrolled
+                ? "opacity-80 scale-90"
+                : "opacity-100 scale-100"
+              }
                     `}
           >
             <img src={Logo} alt="airbnb_logo" className="w-full" />
@@ -163,11 +155,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             <div
               className={`flex justify-around relative flex-1 max-w-2xl xl:ms-58 lg:ms-30 md:ms-32 mx-4 mt-6
                         transition-all duration-500 ease-in-out
-                        ${
-                          scrolled
-                            ? "opacity-90 scale-95"
-                            : "opacity-100 scale-100"
-                        }
+                        ${scrolled
+                  ? "opacity-90 scale-95"
+                  : "opacity-100 scale-100"
+                }
                     `}
             >
               {/* Animated underline */}
@@ -185,11 +176,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 to="/homes"
                 className={({ isActive }) => `
                                 flex items-center gap-1 
-                                ${
-                                  isActive
-                                    ? "text-black font-semibold"
-                                    : "text-(--color-dark-gray)"
-                                } 
+                                ${isActive
+                    ? "text-black font-semibold"
+                    : "text-(--color-dark-gray)"
+                  } 
                                 hover:scale-105 hover:text-black 
                                 transition-all duration-300 ease-in-out
                                 ${scrolled ? "transform -translate-y-0.5" : ""}
@@ -197,18 +187,16 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 style={{ transitionDelay: scrolled ? "0ms" : "100ms" }}
               >
                 <div
-                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${
-                    scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
-                  }`}
+                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
+                    }`}
                 >
                   <img src={HomesIcon} alt="homes_icon" className="w-full" />
                 </div>
                 <span
-                  className={`relative text-sm lg:text-base transition-all duration-300 ${
-                    scrolled
-                      ? "md:-start-2 lg:-start-4 -start-0"
-                      : "-start-2 lg:-start-4"
-                  }`}
+                  className={`relative text-sm lg:text-base transition-all duration-300 ${scrolled
+                    ? "md:-start-2 lg:-start-4 -start-0"
+                    : "-start-2 lg:-start-4"
+                    }`}
                 >
                   {t("navbar.homes")}
                 </span>
@@ -219,11 +207,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 to="/experiences"
                 className={({ isActive }) => `
                                 flex items-center gap-1 
-                                ${
-                                  isActive
-                                    ? "text-black font-semibold"
-                                    : "text-(--color-dark-gray)"
-                                } 
+                                ${isActive
+                    ? "text-black font-semibold"
+                    : "text-(--color-dark-gray)"
+                  } 
                                 hover:scale-105 hover:text-black 
                                 transition-all duration-300 ease-in-out
                                 ${scrolled ? "transform -translate-y-0.5" : ""}
@@ -231,16 +218,14 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 style={{ transitionDelay: scrolled ? "50ms" : "150ms" }}
               >
                 <div
-                  className={`relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white transition-all duration-300 ${
-                    scrolled ? "md:opacity-100 opacity-0" : "opacity-100"
-                  }`}
+                  className={`relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white transition-all duration-300 ${scrolled ? "md:opacity-100 opacity-0" : "opacity-100"
+                    }`}
                 >
                   {t("navbar.new")}
                 </div>
                 <div
-                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${
-                    scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
-                  }`}
+                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
+                    }`}
                 >
                   <img
                     src={ExperiencesIcon}
@@ -249,11 +234,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                   />
                 </div>
                 <span
-                  className={`relative text-sm lg:text-base transition-all duration-300 ${
-                    scrolled
-                      ? "md:-start-2 lg:-start-4 start-0"
-                      : "-start-2 lg:-start-4"
-                  }`}
+                  className={`relative text-sm lg:text-base transition-all duration-300 ${scrolled
+                    ? "md:-start-2 lg:-start-4 start-0"
+                    : "-start-2 lg:-start-4"
+                    }`}
                 >
                   {t("navbar.experiences")}
                 </span>
@@ -264,11 +248,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 to="/services"
                 className={({ isActive }) => `
                                 flex items-center gap-1 
-                                ${
-                                  isActive
-                                    ? "text-black font-semibold"
-                                    : "text-(--color-dark-gray)"
-                                } 
+                                ${isActive
+                    ? "text-black font-semibold"
+                    : "text-(--color-dark-gray)"
+                  } 
                                 hover:scale-105 hover:text-black 
                                 transition-all duration-300 ease-in-out
                                 ${scrolled ? "transform -translate-y-0.5" : ""}
@@ -276,16 +259,14 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                 style={{ transitionDelay: scrolled ? "100ms" : "200ms" }}
               >
                 <div
-                  className={`relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white transition-all duration-300 ${
-                    scrolled ? "md:opacity-100 opacity-0" : "opacity-100"
-                  }`}
+                  className={`relative text-[10px] font-bold start-16 md:start-20 lg:start-22 -top-5 new_tag_style text-white transition-all duration-300 ${scrolled ? "md:opacity-100 opacity-0" : "opacity-100"
+                    }`}
                 >
                   {t("navbar.new")}
                 </div>
                 <div
-                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${
-                    scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
-                  }`}
+                  className={`w-12 md:w-16 lg:w-18 transition-all duration-300 ${scrolled ? "md:w-16 lg:w-18 w-0 opacity-0" : "opacity-100"
+                    }`}
                 >
                   <img
                     src={ServicesIcon}
@@ -294,11 +275,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                   />
                 </div>
                 <span
-                  className={`relative text-sm lg:text-base transition-all duration-300 ${
-                    scrolled
-                      ? "md:-start-2 lg:-start-4 -start-0"
-                      : "-start-2 lg:-start-4"
-                  }`}
+                  className={`relative text-sm lg:text-base transition-all duration-300 ${scrolled
+                    ? "md:-start-2 lg:-start-4 -start-0"
+                    : "-start-2 lg:-start-4"
+                    }`}
                 >
                   {t("navbar.services")}
                 </span>
@@ -312,11 +292,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                     hidden md:flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 
                     ${direction === "ltr" ? "ml-auto" : "mr-auto"}
                     transition-all duration-500 ease-in-out
-                    ${
-                      scrolled
-                        ? "transform translate-x-1 scale-95"
-                        : "transform translate-x-0 scale-100"
-                    }
+                    ${scrolled
+                ? "transform translate-x-1 scale-95"
+                : "transform translate-x-0 scale-100"
+              }
                 `}
           >
             <span
@@ -324,11 +303,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                         hidden md:inline-block cursor_pointer font-semibold 
                         hover:bg-[#d4d4d4c1] rounded-lg py-1 px-2 cursor-pointer text-sm lg:text-base
                         transition-all duration-300 ease-in-out
-                        ${
-                          scrolled
-                            ? "opacity-0 scale-90 w-0 px-0"
-                            : "opacity-100 scale-100"
-                        }
+                        ${scrolled
+                  ? "opacity-0 scale-90 w-0 px-0"
+                  : "opacity-100 scale-100"
+                }
                     `}
             >
               {location.pathname.startsWith("/host") ? (
@@ -343,11 +321,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
                             cursor_pointer bg-[#d4d4d490] rounded-full p-1.5 sm:p-2 cursor-pointer 
                             hover:bg-[#d4d4d4d2] hover:scale-110
                             transition-all duration-300 ease-in-out
-                            ${
-                              scrolled
-                                ? "transform rotate-180"
-                                : "transform rotate-0"
-                            }
+                            ${scrolled
+                  ? "transform rotate-180"
+                  : "transform rotate-0"
+                }
                         `}
               onClick={toggleTranslateModal}
             >
@@ -378,11 +355,10 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             className={`
                     hidden lg:block mt-2 sm:mt-3 md:mt-4 
                     transition-all duration-500 ease-in-out
-                    ${
-                      scrolled
-                        ? "max-h-0 opacity-0 mt-0 transform -translate-y-4"
-                        : "max-h-96 opacity-100 transform translate-y-0"
-                    }
+                    ${scrolled
+                ? "max-h-0 opacity-0 mt-0 transform -translate-y-4"
+                : "max-h-96 opacity-100 transform translate-y-0"
+              }
                 `}
           >
             <SearchBar />
@@ -397,8 +373,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
           <NavLink
             to="/homes"
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 transition-colors ${
-                isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
+              `flex flex-col items-center gap-1 transition-colors ${isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
               }`
             }
           >
@@ -410,8 +385,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
           <NavLink
             to="/wishlists"
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 transition-colors ${
-                isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
+              `flex flex-col items-center gap-1 transition-colors ${isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
               }`
             }
           >
@@ -426,10 +400,9 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
               <NavLink
                 to="/trips"
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-1 transition-colors ${
-                    isActive
-                      ? "text-[#FF385C]"
-                      : "text-gray-600 hover:text-black"
+                  `flex flex-col items-center gap-1 transition-colors ${isActive
+                    ? "text-[#FF385C]"
+                    : "text-gray-600 hover:text-black"
                   }`
                 }
               >
@@ -440,10 +413,9 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
               <NavLink
                 to="/messages"
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-1 transition-colors ${
-                    isActive
-                      ? "text-[#FF385C]"
-                      : "text-gray-600 hover:text-black"
+                  `flex flex-col items-center gap-1 transition-colors ${isActive
+                    ? "text-[#FF385C]"
+                    : "text-gray-600 hover:text-black"
                   }`
                 }
               >
@@ -458,8 +430,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             <NavLink
               to="/profile"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 transition-colors ${
-                  isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
+                `flex flex-col items-center gap-1 transition-colors ${isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
                 }`
               }
             >
@@ -470,8 +441,7 @@ export default function Navbar({ toggleTranslateModal, isSticky = true }) {
             <NavLink
               to="/login"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 transition-colors ${
-                  isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
+                `flex flex-col items-center gap-1 transition-colors ${isActive ? "text-[#FF385C]" : "text-gray-600 hover:text-black"
                 }`
               }
             >

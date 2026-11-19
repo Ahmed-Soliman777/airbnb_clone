@@ -1,10 +1,13 @@
 import { Award, Star } from "lucide-react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function HostSection({ listing }) {
   // Extract host data with fallbacks
   const host = listing?.hostId || {};
   const hostStats = listing?.hostStats || {};
+
+  const navigate = useNavigate();
 
   const hostName = host.firstName || "Host";
   const hostPhoto = host.profilePhoto;
@@ -94,7 +97,7 @@ export default function HostSection({ listing }) {
           </div>
 
           {/* Message button */}
-          <button className="mt-8 bg-gray-900 text-white px-5 py-3 rounded-xl hover:bg-black transition">
+          <button className="mt-8 bg-gray-900 text-white px-5 py-3 rounded-xl hover:bg-black transition" onClick={() => navigate(`/messages?recipientId=${host._id}`)}>
             Message host
           </button>
 

@@ -1,4 +1,5 @@
 import BookingHome from "@/components/BookingHome/BookingHome";
+import { fetchListingBookedDates } from "@/store/Slices/bookingSlice";
 import Amenity from "@/components/Listing/Amenity";
 import AverageRating from "@/components/Listing/AverageRating";
 import GuestFavouriteIcon from "@/components/Listing/GuestFavouriteIcon";
@@ -12,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { GetListingById } from "@/store/Slices/listingSlice";
 import { getReviewsByListing } from "@/store/Slices/reviewSlice";
 import { addRecentlyViewed } from "@/store/Slices/recentlyViewedSlice";
-import { addDays, differenceInDays, isBefore, isSameDay } from "date-fns";
+import { addDays, differenceInDays, isBefore, isSameDay, isWithinInterval, subDays } from "date-fns";
 import { FlagOff, Info, MapPin, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,6 +44,7 @@ const ListingDetails = () => {
   // Get listing and reviews state from Redux store
   const { listing, status } = useSelector((state) => state.listing);
   const { reviews, statistics } = useSelector((state) => state.review);
+  const { listingBookedDates } = useSelector((state) => state.booking);
   const user = useSelector((state) => state.auth.user);
 
   // Shared date state for calendar and booking component
@@ -96,6 +98,8 @@ const ListingDetails = () => {
       isBefore(range.to, range.from)
     ) {
       const newDate = { from: range.from, to: undefined };
+      // Check if the selected date is valid (not booked)
+      // This check is implicitly handled by disabled prop but good to have safety
       setDate(newDate);
       // Save to cookie
       document.cookie = `listingDate=${encodeURIComponent(
@@ -124,6 +128,7 @@ const ListingDetails = () => {
     if (!id) return;
     dispatch(GetListingById(id));
     dispatch(getReviewsByListing(id));
+    dispatch(fetchListingBookedDates(id));
   }, [id, dispatch]);
 
   // Track recently viewed listings (only for logged-in users)
@@ -261,30 +266,28 @@ const ListingDetails = () => {
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 {listingData.city && listingData.country
                   ? t("listingDetails.entirePlace", {
-                      propertyType: listingData.propertyType,
-                      city: listingData.city,
-                      country: listingData.country,
-                    })
+                    propertyType: listingData.propertyType,
+                    city: listingData.city,
+                    country: listingData.country,
+                  })
                   : t("listingDetails.entirePlaceOnly", {
-                      propertyType: listingData.propertyType,
-                    })}
+                    propertyType: listingData.propertyType,
+                  })}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 {[
                   listingData.maxGuests &&
-                    `${listingData.maxGuests} ${t("listingDetails.guests")}`,
+                  `${listingData.maxGuests} ${t("listingDetails.guests")}`,
                   listingData.bedroomsCount &&
-                    `${listingData.bedroomsCount} ${
-                      listingData.bedroomsCount > 1
-                        ? t("listingDetails.bedrooms")
-                        : t("listingDetails.bedroom")
-                    }`,
+                  `${listingData.bedroomsCount} ${listingData.bedroomsCount > 1
+                    ? t("listingDetails.bedrooms")
+                    : t("listingDetails.bedroom")
+                  }`,
                   listingData.bathroomsCount &&
-                    `${listingData.bathroomsCount} ${
-                      listingData.bathroomsCount > 1
-                        ? t("listingDetails.bathrooms")
-                        : t("listingDetails.bathroom")
-                    }`,
+                  `${listingData.bathroomsCount} ${listingData.bathroomsCount > 1
+                    ? t("listingDetails.bathrooms")
+                    : t("listingDetails.bathroom")
+                  }`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -425,12 +428,27 @@ const ListingDetails = () => {
                   numberOfMonths={2}
                   selected={date}
                   onSelect={handleSelect}
-                  disabled={(day) =>
-                    date?.from
+                  disabled={(day) => {
+                    // Disable past dates
+                    if (isBefore(day, addDays(new Date(), -1))) return true;
+
+                    // Disable booked dates
+                    if (listingBookedDates && listingBookedDates.length > 0) {
+                      const isBooked = listingBookedDates.some((booking) =>
+                        isWithinInterval(day, {
+                          start: new Date(booking.from),
+                          end: subDays(new Date(booking.to), 1),
+                        })
+                      );
+                      if (isBooked) return true;
+                    }
+
+                    // Original logic for date selection constraints
+                    return date?.from
                       ? isBefore(day, date.from) ||
-                        isSameDay(day, addDays(date.from, 1))
-                      : false
-                  }
+                      isSameDay(day, addDays(date.from, 1))
+                      : false;
+                  }}
                   className="rounded-lg w-[80%]"
                 />
 
@@ -451,7 +469,12 @@ const ListingDetails = () => {
           {/*============= Right Side for Booking ================== */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-10 flex flex-col gap-4 items-center">
-              <BookingHome listing={listing} date={date} setDate={setDate} />
+              <BookingHome
+                listing={listing}
+                date={date}
+                setDate={setDate}
+                bookedDates={listingBookedDates}
+              />
               <div
                 className="text-gray-500 flex items-center gap-2 sm:gap-3 mt-4 cursor-pointer justify-center hover:text-gray-700 transition-colors"
                 onClick={() => setShowReportDialog(true)}

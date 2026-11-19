@@ -109,8 +109,6 @@ const ServiceDetailsPage = () => {
         reviewCount = 0,
     } = service;
 
-    console.log(availability);
-
 
     const handleReserve = () => {
         if (!document.cookie) {
@@ -155,14 +153,6 @@ const ServiceDetailsPage = () => {
                             <ArrowLeft className="w-5 h-5" />
                             <span className="font-medium">Back</span>
                         </Link>
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon">
-                                <Share className="w-5 h-5" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                                <Heart className="w-5 h-5" />
-                            </Button>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -437,15 +427,6 @@ const ServiceDetailsPage = () => {
                                         : "Request Booking"
                                 }
                             </Button>
-
-                            <Button variant="outline" className="w-full" size="lg">
-                                <MessageCircle className="w-4 h-4 mr-2" />
-                                Contact Provider
-                            </Button>
-
-                            <p className="text-center text-sm text-muted-foreground mt-4">
-                                Free cancellation available
-                            </p>
 
                             <div className="border-t mt-6 pt-6">
                                 <div className="flex justify-between mb-2">

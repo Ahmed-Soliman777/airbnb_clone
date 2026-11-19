@@ -38,8 +38,22 @@ import HostWalletPage from "./Pages/HostWalletPage";
 import HostGuestsPage from "./Pages/HostGuestsPage";
 import WishlistPage from "./Pages/Wishlists";
 import CollectionDetail from "./Pages/CollectionDetail";
+import AIRecommendation from "./Pages/AIRecommendation";
+import RecommendedHomes from "./Pages/RecommendedHomes";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    document.body.appendChild(script)
+    window.googleTranslateElementInit = () => {
+      new google.translate.TranslateElement({
+        pageLanguage: "en",
+        includedLanguages: 'en,ar,es'
+      }, 'google_translate_element')
+    }
+  }, []);
   const routes = createBrowserRouter([
     {
       path: "/",
@@ -110,7 +124,7 @@ function App() {
           ),
         },
         {
-          path: "wishlists/:id",
+          path: "wishlists/:collectionId",
           element: (
             <AuthGuard requireAuth={true} redirectTo="/login">
               <CollectionDetail />
@@ -197,6 +211,22 @@ function App() {
             </AuthGuard>
           ),
         },
+        {
+          path: "ai-recommendation",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <AIRecommendation />
+            </AuthGuard>
+          ),
+        },
+        {
+          path: "recommended-homes",
+          element: (
+            <AuthGuard requireAuth={true}>
+              <RecommendedHomes />
+            </AuthGuard>
+          ),
+        },
         { path: "payment/success", element: <PaymentSuccessPage /> },
         { path: "payment/cancel", element: <PaymentCancelPage /> },
         { path: "experiences", element: <ExperiencesPage /> },
@@ -214,6 +244,7 @@ function App() {
   return (
     <>
       <Provider store={store}>
+        <div id="google_translate_element" style={{ display: "none" }}></div>
         <RouterProvider router={routes} />
       </Provider>
     </>

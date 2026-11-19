@@ -1,10 +1,10 @@
 import React from "react";
-import { format, isBefore, isSameDay, addDays } from "date-fns";
+import { format, isBefore, addDays, isWithinInterval, subDays } from "date-fns";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { Button } from "../ui/button";
 
-function DateSelector({ open, onOpenChange, date, handleSelect, setDate }) {
+function DateSelector({ open, onOpenChange, date, handleSelect, setDate, bookedDates }) {
   return (
     <>
       <Popover open={open} onOpenChange={onOpenChange}>
@@ -48,9 +48,8 @@ function DateSelector({ open, onOpenChange, date, handleSelect, setDate }) {
                 readOnly
                 placeholder="Check-out"
                 value={date?.to ? format(date.to, "MMM dd, yyyy") : ""}
-                className={`w-1/2 px-3 py-1 border-none outline-none cursor-pointer ${
-                  !date?.from ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
+                className={`w-1/2 px-3 py-1 border-none outline-none cursor-pointer ${!date?.from ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
                 disabled={!date?.from}
               />
             </div>
@@ -61,12 +60,26 @@ function DateSelector({ open, onOpenChange, date, handleSelect, setDate }) {
             selected={date}
             onSelect={handleSelect}
             numberOfMonths={2}
-            disabled={(day) =>
-              date?.from
-                ? isBefore(day, date.from) ||
-                  isSameDay(day, addDays(date.from, 1))
-                : isBefore(day, addDays(new Date(), -1))
-            }
+            disabled={(day) => {
+              // Disable past dates
+              if (isBefore(day, addDays(new Date(), -1))) return true;
+
+              // Disable booked dates
+              if (bookedDates && bookedDates.length > 0) {
+                const isBooked = bookedDates.some((booking) =>
+                  isWithinInterval(day, {
+                    start: new Date(booking.from),
+                    end: subDays(new Date(booking.to), 1),
+                  })
+                );
+                if (isBooked) return true;
+              }
+
+              return date?.from
+                ? isBefore(day, date.from)
+                // isSameDay(day, addDays(date.from, 1))
+                : false;
+            }}
           />
 
           <div className="flex justify-end mt-4 space-x-2">
