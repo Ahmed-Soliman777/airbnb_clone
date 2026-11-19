@@ -13,25 +13,25 @@ import { Sidebar } from './Components/sidebar/sidebar';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('admin');
   user = signal<User | null>(null);
   currentRoute = signal<string>('');
-
+  
   showSidebar = computed(() => {
     const route = this.currentRoute();
     return route !== '/login' && route !== '/';
   });
 
   constructor(private authService: AuthService, private router: Router) {
-    //prevent user navigation to login page if already logged in
-    this.authService.initAuth();
+    // Track route changes
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.currentRoute.set(event.url);
       });
 
+    // Subscribe to user changes
     this.authService.currentUser$.subscribe(user => {
       this.user.set(user);
     });

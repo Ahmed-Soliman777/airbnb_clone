@@ -14,4 +14,5 @@ export const routes: Routes = [
   { path: 'inventory', component: Inventory, canActivate: [adminGuard] },
   { path: 'users', component: AdminDashboardComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '/home' },
+  { path: 'payments', component: AdminPaymentsComponent, canActivate: [adminGuard] }
 ];

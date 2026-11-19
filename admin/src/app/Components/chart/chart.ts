@@ -25,6 +25,7 @@ interface DisplayBooking extends Booking {
   displayEmail: string;
   listingTitle: string;
   previousStatus: 'pending' | 'confirmed' | 'cancelled';
+  statusClass: string;
 }
 
 @Component({
@@ -163,6 +164,7 @@ export class AdminPaymentsComponent implements OnInit {
       displayEmail: booking.user?.email || 'No email',
       listingTitle: this.getListingTitle(booking),
       previousStatus: booking.status,
+      statusClass: this.getStatusClass(booking.status),
     };
   }
 
@@ -187,6 +189,19 @@ export class AdminPaymentsComponent implements OnInit {
       return `[Experience] ${booking.experience.title || 'Untitled'}`;
     }
     return 'N/A';
+  }
+
+  private getStatusClass(status: string): string {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   }
 
   processChartData(stats: DailyPaymentStat[]): void {
@@ -271,6 +286,7 @@ export class AdminPaymentsComponent implements OnInit {
         console.log('Update successful:', response);
         booking.status = response.data.status;
         booking.previousStatus = response.data.status;
+        booking.statusClass = this.getStatusClass(response.data.status);
         this.isUpdating = null;
         this.cdr.markForCheck();
 
