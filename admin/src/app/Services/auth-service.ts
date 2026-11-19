@@ -128,21 +128,6 @@ export class AuthService {
     }
   }
 
-  // Call this method to initialize auth state
-  initAuth(): void {
-    if (!isPlatformBrowser(this.platformId) || this.initialized) {
-      return;
-    }
-    this.initialized = true;
-
-    const token = this.getToken();
-    if (token) {
-      this.getProfile().subscribe({
-        error: () => this.removeToken(),
-      });
-    }
-  }
-
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/login`, credentials, {
